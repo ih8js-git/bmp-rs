@@ -52,10 +52,12 @@ pub fn create_deck() -> Vec<Card> {
 pub fn parse_card_to_text(card: &Card) -> String {
     let rank = card.meta >> 12;
     let suit = (card.meta & 0b11_000_0000_000) >> 10;
+    let enhancement = (card.meta & 0b111_0000_000) >> 7;
     return format!(
-        "{} of {}",
+        "{} of {} {}",
         parse_card_rank_to_text(rank as u8),
-        parse_suit_to_text(suit as u8)
+        parse_card_suit_to_text(suit as u8),
+        parse_card_enhancement_to_text(enhancement as u8),
     );
 }
 
@@ -78,7 +80,7 @@ pub fn parse_card_rank_to_text(rank: u8) -> String {
     }
 }
 
-pub fn parse_suit_to_text(suit: u8) -> String {
+pub fn parse_card_suit_to_text(suit: u8) -> String {
     match suit {
         0 => "Spades".to_string(),
         1 => "Hearts".to_string(),
@@ -88,4 +90,17 @@ pub fn parse_suit_to_text(suit: u8) -> String {
     }
 }
 
-pub fn parse_enhancement_to_text(enhancement: u8) -> String {}
+pub fn parse_card_enhancement_to_text(enhancement: u8) -> String {
+    match enhancement {
+        0 => "None".to_string(),
+        1 => "Bonus".to_string(),
+        2 => "Mult".to_string(),
+        3 => "Wild".to_string(),
+        4 => "Glass".to_string(),
+        5 => "Steel".to_string(),
+        6 => "Stone".to_string(),
+        7 => "Gold".to_string(),
+        8 => "Lucky".to_string(),
+        _ => "Error".to_string(),
+    }
+}
