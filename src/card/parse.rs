@@ -7,12 +7,12 @@ pub fn parse_card_to_text(card: &Card) -> String {
     let enhancement = (card.meta & 0b1111_000) >> 3;
     let seal = card.meta & 0b111;
     return format!(
-        "{} of {} {} {} {}",
-        parse_card_rank_to_text(rank as u8),
-        parse_card_suit_to_text(suit as u8),
+        "{} {} {} {} of {}",
+        parse_card_seal_to_text(seal as u8),
         parse_card_edition_to_text(edition as u8),
         parse_card_enhancement_to_text(enhancement as u8),
-        parse_card_seal_to_text(seal as u8),
+        parse_card_rank_to_text(rank as u8),
+        parse_card_suit_to_text(suit as u8),
     );
 }
 
