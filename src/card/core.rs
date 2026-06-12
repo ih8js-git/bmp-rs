@@ -1,15 +1,19 @@
+use strum::IntoEnumIterator;
+use strum_macros::EnumIter;
+
 /*
  * |Rank|Suit|Edition|Enhancement|Seal|
  * |----|----|-------|-----------|----|
  * |4b  |2b  |3b     |4b         |3b  |
  */
+
 #[derive(Debug)]
 pub struct Card {
     pub meta: u16,
-    pub chips: u16
+    pub chips: u16,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, EnumIter)]
 pub enum Rank {
     Two,
     Three,
@@ -23,10 +27,10 @@ pub enum Rank {
     Jack,
     Queen,
     King,
-    Ace
+    Ace,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, EnumIter)]
 pub enum Suit {
     Spades,
     Hearts,
@@ -67,37 +71,36 @@ pub enum Seal {
 
 pub fn create_deck() -> Vec<Card> {
     let mut cards: Vec<Card> = Vec::with_capacity(52);
-    for suit in 0..4 {
-        for rank in 0..13 {
+    for suit in Suit::iter() {
+        for rank in Rank::iter() {
             let current_rank = rank;
             let current_suit = suit;
-            let edition = 0;
-            let enhancement = 0;
-            let seal = 0;
-            let meta =
-                current_rank << 12 | current_suit << 10 | edition << 7 | enhancement << 3 | seal;
+            let edition = Edition::None;
+            let enhancement = Enhancement::None;
+            let seal = Seal::None;
+            let meta = (current_rank as u16) << 12
+                | (current_suit as u16) << 10
+                | (edition as u16) << 7
+                | (enhancement as u16) << 3
+                | (seal as u16);
 
-            let chips: u16 = match rank {
-                0 => 2u16,
-                1 => 3u16,
-                2 => 4u16,
-                3 => 5u16,
-                4 => 6u16,
-                5 => 7u16,
-                6 => 8u16,
-                7 => 9u16,
-                8 => 10u16,
-                9 => 10u16,
-                10 => 10u16,
-                11 => 10u16,
-                12 => 11u16,
-                _ => unreachable!(),
+            let chips: u16 = match current_rank {
+                Rank::Two => 2u16,
+                Rank::Three => 3u16,
+                Rank::Four => 4u16,
+                Rank::Five => 5u16,
+                Rank::Six => 6u16,
+                Rank::Seven => 7u16,
+                Rank::Eight => 8u16,
+                Rank::Nine => 9u16,
+                Rank::Ten => 10u16,
+                Rank::Jack => 10u16,
+                Rank::Queen => 10u16,
+                Rank::King => 10u16,
+                Rank::Ace => 11u16,
             };
 
-            cards.push(Card {
-                meta,
-                chips,
-            });
+            cards.push(Card { meta, chips });
         }
     }
     return cards;

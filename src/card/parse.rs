@@ -47,7 +47,7 @@ pub fn parse_card_suit_to_text(suit: u8) -> String {
 
 pub fn parse_card_edition_to_text(edition: u8) -> String {
     match edition {
-        0 => "Base".to_string(),
+        0 => "None".to_string(),
         1 => "Foil".to_string(),
         2 => "Holographic".to_string(),
         3 => "Polychrome".to_string(),
