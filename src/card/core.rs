@@ -6,8 +6,7 @@
 #[derive(Debug)]
 pub struct Card {
     pub meta: u16,
-    pub chips: u16,
-    pub id: u16,
+    pub chips: u16
 }
 
 pub fn create_deck() -> Vec<Card> {
@@ -42,7 +41,6 @@ pub fn create_deck() -> Vec<Card> {
             cards.push(Card {
                 meta: meta,
                 chips: chips,
-                id: (suit * 13 + rank) as u16,
             });
         }
     }
