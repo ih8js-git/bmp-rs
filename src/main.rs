@@ -1,6 +1,5 @@
 mod card;
-use card::create_deck;
-use card::parse_card_to_text;
+use card::*;
 
 fn main() {
     let cards = create_deck();
