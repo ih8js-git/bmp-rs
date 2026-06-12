@@ -48,3 +48,44 @@ pub fn create_deck() -> Vec<Card> {
     }
     return cards;
 }
+
+pub fn parse_card_to_text(card: &Card) -> String {
+    let rank = card.meta >> 12;
+    let suit = (card.meta & 0b11_000_0000_000) >> 10;
+    return format!(
+        "{} of {}",
+        parse_card_rank_to_text(rank as u8),
+        parse_suit_to_text(suit as u8)
+    );
+}
+
+pub fn parse_card_rank_to_text(rank: u8) -> String {
+    match rank {
+        0 => "2".to_string(),
+        1 => "3".to_string(),
+        2 => "4".to_string(),
+        3 => "5".to_string(),
+        4 => "6".to_string(),
+        5 => "7".to_string(),
+        6 => "8".to_string(),
+        7 => "9".to_string(),
+        8 => "10".to_string(),
+        9 => "J".to_string(),
+        10 => "Q".to_string(),
+        11 => "K".to_string(),
+        12 => "A".to_string(),
+        _ => "Error".to_string(),
+    }
+}
+
+pub fn parse_suit_to_text(suit: u8) -> String {
+    match suit {
+        0 => "Spades".to_string(),
+        1 => "Hearts".to_string(),
+        2 => "Clubs".to_string(),
+        3 => "Diamonds".to_string(),
+        _ => "Error".to_string(),
+    }
+}
+
+pub fn parse_enhancement_to_text(enhancement: u8) -> String {}

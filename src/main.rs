@@ -1,9 +1,11 @@
 mod card;
-use card::Card;
 use card::create_deck;
+use card::parse_card_to_text;
 
 fn main() {
-    let cards: Vec<Card> = create_deck();
+    let cards = create_deck();
 
     println!("{:?}", cards);
+
+    println!("{}", parse_card_to_text(&cards[34]));
 }
