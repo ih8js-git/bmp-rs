@@ -1,63 +1,18 @@
-/*
- * |Rank|Suit|Edition|Enhancement|Seal|
- * |----|----|-------|-----------|----|
- * |4b  |2b  |3b     |4b         |3b  |
- */
-#[derive(Debug)]
-pub struct Card {
-    meta: u16,
-    chips: u16,
-    id: u16,
-}
-
-pub fn create_deck() -> Vec<Card> {
-    let mut cards: Vec<Card> = Vec::with_capacity(52);
-    for suit in 0..4 {
-        for rank in 0..13 {
-            let current_rank = rank;
-            let current_suit = suit;
-            let edition = 0;
-            let enhancement = 0;
-            let seal = 0;
-            let meta =
-                current_rank << 12 | current_suit << 10 | edition << 7 | enhancement << 3 | seal;
-
-            let chips: u16 = match rank {
-                0 => 2 as u16,
-                1 => 3 as u16,
-                2 => 4 as u16,
-                3 => 5 as u16,
-                4 => 6 as u16,
-                5 => 7 as u16,
-                6 => 8 as u16,
-                7 => 9 as u16,
-                8 => 10 as u16,
-                9 => 10 as u16,
-                10 => 10 as u16,
-                11 => 10 as u16,
-                12 => 11 as u16,
-                _ => unreachable!(),
-            };
-
-            cards.push(Card {
-                meta: meta,
-                chips: chips,
-                id: (suit * 13 + rank) as u16,
-            });
-        }
-    }
-    return cards;
-}
+use crate::card::Card;
 
 pub fn parse_card_to_text(card: &Card) -> String {
     let rank = card.meta >> 12;
     let suit = (card.meta & 0b11_000_0000_000) >> 10;
     let edition = (card.meta & 0b111_000_000) >> 7;
+    let enhancement = (card.meta & 0b1111_000) >> 3;
+    let seal = card.meta & 0b111;
     return format!(
-        "{} of {} {}",
+        "{} of {} {} {} {}",
         parse_card_rank_to_text(rank as u8),
         parse_card_suit_to_text(suit as u8),
         parse_card_edition_to_text(edition as u8),
+        parse_card_enhancement_to_text(enhancement as u8),
+        parse_card_seal_to_text(seal as u8),
     );
 }
 
@@ -92,6 +47,17 @@ pub fn parse_card_suit_to_text(suit: u8) -> String {
 
 pub fn parse_card_edition_to_text(edition: u8) -> String {
     match edition {
+        0 => "Base".to_string(),
+        1 => "Foil".to_string(),
+        2 => "Holographic".to_string(),
+        3 => "Polychrome".to_string(),
+        4 => "Negative".to_string(),
+        _ => "Error".to_string(),
+    }
+}
+
+pub fn parse_card_enhancement_to_text(enhancement: u8) -> String {
+    match enhancement {
         0 => "None".to_string(),
         1 => "Bonus".to_string(),
         2 => "Mult".to_string(),
@@ -101,6 +67,17 @@ pub fn parse_card_edition_to_text(edition: u8) -> String {
         6 => "Stone".to_string(),
         7 => "Gold".to_string(),
         8 => "Lucky".to_string(),
+        _ => "Error".to_string(),
+    }
+}
+
+pub fn parse_card_seal_to_text(seal: u8) -> String {
+    match seal {
+        0 => "None".to_string(),
+        1 => "Red Seal".to_string(),
+        2 => "Blue Seal".to_string(),
+        3 => "Gold Seal".to_string(),
+        4 => "Purple Seal".to_string(),
         _ => "Error".to_string(),
     }
 }
