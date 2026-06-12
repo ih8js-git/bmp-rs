@@ -1,6 +1,6 @@
 mod core;
-pub mod parse;
 pub mod operations;
+pub mod parse;
 
-pub use core::*;
 pub use self::parse::*;
+pub use core::*;
