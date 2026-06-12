@@ -9,6 +9,62 @@ pub struct Card {
     pub chips: u16
 }
 
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum Rank {
+    Two,
+    Three,
+    Four,
+    Five,
+    Six,
+    Seven,
+    Eight,
+    Nine,
+    Ten,
+    Jack,
+    Queen,
+    King,
+    Ace
+}
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum Suit {
+    Spades,
+    Hearts,
+    Clubs,
+    Diamonds,
+}
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum Edition {
+    None,
+    Foil,
+    Holographic,
+    Polychrome,
+    Negative,
+}
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum Enhancement {
+    None,
+    Bonus,
+    Mult,
+    Wild,
+    Glass,
+    Steel,
+    Stone,
+    Gold,
+    Lucky,
+}
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum Seal {
+    None,
+    Gold,
+    Red,
+    Blue,
+    Purple,
+}
+
 pub fn create_deck() -> Vec<Card> {
     let mut cards: Vec<Card> = Vec::with_capacity(52);
     for suit in 0..4 {
@@ -22,25 +78,25 @@ pub fn create_deck() -> Vec<Card> {
                 current_rank << 12 | current_suit << 10 | edition << 7 | enhancement << 3 | seal;
 
             let chips: u16 = match rank {
-                0 => 2 as u16,
-                1 => 3 as u16,
-                2 => 4 as u16,
-                3 => 5 as u16,
-                4 => 6 as u16,
-                5 => 7 as u16,
-                6 => 8 as u16,
-                7 => 9 as u16,
-                8 => 10 as u16,
-                9 => 10 as u16,
-                10 => 10 as u16,
-                11 => 10 as u16,
-                12 => 11 as u16,
+                0 => 2u16,
+                1 => 3u16,
+                2 => 4u16,
+                3 => 5u16,
+                4 => 6u16,
+                5 => 7u16,
+                6 => 8u16,
+                7 => 9u16,
+                8 => 10u16,
+                9 => 10u16,
+                10 => 10u16,
+                11 => 10u16,
+                12 => 11u16,
                 _ => unreachable!(),
             };
 
             cards.push(Card {
-                meta: meta,
-                chips: chips,
+                meta,
+                chips,
             });
         }
     }
