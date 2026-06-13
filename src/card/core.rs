@@ -85,19 +85,19 @@ pub fn create_deck() -> Vec<Card> {
                 | (seal as u16);
 
             let chips: u16 = match current_rank {
-                Rank::Two => 2u16,
-                Rank::Three => 3u16,
-                Rank::Four => 4u16,
-                Rank::Five => 5u16,
-                Rank::Six => 6u16,
-                Rank::Seven => 7u16,
-                Rank::Eight => 8u16,
-                Rank::Nine => 9u16,
-                Rank::Ten => 10u16,
-                Rank::Jack => 10u16,
-                Rank::Queen => 10u16,
-                Rank::King => 10u16,
-                Rank::Ace => 11u16,
+                Rank::Two => 2,
+                Rank::Three => 3,
+                Rank::Four => 4,
+                Rank::Five => 5,
+                Rank::Six => 6,
+                Rank::Seven => 7,
+                Rank::Eight => 8,
+                Rank::Nine => 9,
+                Rank::Ten => 10,
+                Rank::Jack => 10,
+                Rank::Queen => 10,
+                Rank::King => 10,
+                Rank::Ace => 11,
             };
 
             cards.push(Card { meta, chips });
