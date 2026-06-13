@@ -6,9 +6,9 @@ use card::*;
 use consumables::tarots::*;
 
 fn main() {
-    let mut cards = create_deck();
+    let cards = create_deck();
 
-    println!("{:?}", cards);
+    let parsed_cards: Vec<String> = cards.iter().map(parse_card_to_text).collect();
 
-    println!("{}", parse_card_to_text(&cards[34]));
+    println!("{:?}", parsed_cards);
 }
