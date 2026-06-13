@@ -1,7 +1,6 @@
-use crate::card::Card;
-use crate::card::Rank;
+use crate::card::{Card, Enhancement, Rank, Suit};
 
-pub fn parse_card_rank(card: &Card) -> Rank {
+pub fn get_card_rank(card: &Card) -> Rank {
     match card.meta >> 12 {
         0 => Rank::Two,
         1 => Rank::Three,
@@ -17,6 +16,33 @@ pub fn parse_card_rank(card: &Card) -> Rank {
         11 => Rank::King,
         12 => Rank::Ace,
         _ => panic!("Invalid rank"),
+    }
+}
+
+pub fn get_card_suit(card: &Card) -> Suit {
+    let suit = (card.meta & 0b11_000_0000_000) >> 10;
+    match suit {
+        0 => Suit::Spades,
+        1 => Suit::Hearts,
+        2 => Suit::Clubs,
+        3 => Suit::Diamonds,
+        _ => panic!("Invalid suit"),
+    }
+}
+
+pub fn get_card_enhancement(card: &Card) -> Enhancement {
+    let enhancement = (card.meta & 0b1111_000) >> 3;
+    match enhancement {
+        0 => Enhancement::None,
+        1 => Enhancement::Bonus,
+        2 => Enhancement::Mult,
+        3 => Enhancement::Wild,
+        4 => Enhancement::Glass,
+        5 => Enhancement::Steel,
+        6 => Enhancement::Stone,
+        7 => Enhancement::Gold,
+        8 => Enhancement::Lucky,
+        _ => panic!("Invalid enhancement"),
     }
 }
 

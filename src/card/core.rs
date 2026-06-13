@@ -105,3 +105,12 @@ pub fn create_deck() -> Vec<Card> {
     }
     return cards;
 }
+
+pub fn create_test_card(rank: Rank, suit: Suit) -> Card {
+    let meta = (rank as u16) << 12
+        | (suit as u16) << 10
+        | (Edition::None as u16) << 7
+        | (Enhancement::None as u16) << 3
+        | (Seal::None as u16);
+    Card { meta, chips: 0 }
+}

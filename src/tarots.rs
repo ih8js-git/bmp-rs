@@ -1,5 +1,5 @@
 use crate::card::operations::{set_card_enhancement, set_card_rank, set_card_suit};
-use crate::card::parse::parse_card_rank;
+use crate::card::parse::get_card_rank;
 use crate::card::{Card, Enhancement, Rank, Suit};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -114,7 +114,7 @@ pub fn use_strength(cards: &mut Vec<Card>) -> Result<&mut Vec<Card>, String> {
     }
 
     for card in cards.iter_mut() {
-        let rank = parse_card_rank(card);
+        let rank = get_card_rank(card);
         let next_rank = Rank::from_repr(rank as usize + 1).unwrap_or(Rank::Ace);
         set_card_rank(card, next_rank);
     }
@@ -151,43 +151,8 @@ pub fn use_judgement(cards: &mut Vec<Card>) -> Result<&mut Vec<Card>, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::card::{Edition, Enhancement, Rank, Seal, Suit};
-
-    fn create_test_card(rank: Rank, suit: Suit) -> Card {
-        let meta = (rank as u16) << 12
-            | (suit as u16) << 10
-            | (Edition::None as u16) << 7
-            | (Enhancement::None as u16) << 3
-            | (Seal::None as u16);
-        Card { meta, chips: 0 }
-    }
-
-    fn get_card_enhancement(card: &Card) -> Enhancement {
-        let enhancement = (card.meta & 0b1111_000) >> 3;
-        match enhancement {
-            0 => Enhancement::None,
-            1 => Enhancement::Bonus,
-            2 => Enhancement::Mult,
-            3 => Enhancement::Wild,
-            4 => Enhancement::Glass,
-            5 => Enhancement::Steel,
-            6 => Enhancement::Stone,
-            7 => Enhancement::Gold,
-            8 => Enhancement::Lucky,
-            _ => panic!("Invalid enhancement"),
-        }
-    }
-
-    fn get_card_suit(card: &Card) -> Suit {
-        let suit = (card.meta & 0b11_000_0000_000) >> 10;
-        match suit {
-            0 => Suit::Spades,
-            1 => Suit::Hearts,
-            2 => Suit::Clubs,
-            3 => Suit::Diamonds,
-            _ => panic!("Invalid suit"),
-        }
-    }
+    use crate::card::core::create_test_card;
+    use crate::card::parse::{get_card_rank, get_card_suit};
 
     #[test]
     fn test_tarot_strength() {
@@ -199,8 +164,8 @@ mod tests {
         let result = use_strength(&mut cards);
         assert!(result.is_ok());
 
-        assert_eq!(parse_card_rank(&cards[0]), Rank::Three);
-        assert_eq!(parse_card_rank(&cards[1]), Rank::Ace);
+        assert_eq!(get_card_rank(&cards[0]), Rank::Three);
+        assert_eq!(get_card_rank(&cards[1]), Rank::Ace);
     }
 
     #[test]
@@ -208,7 +173,7 @@ mod tests {
         let mut cards = vec![create_test_card(Rank::Ace, Suit::Spades)];
         let result = use_strength(&mut cards);
         assert!(result.is_ok());
-        assert_eq!(parse_card_rank(&cards[0]), Rank::Ace);
+        assert_eq!(get_card_rank(&cards[0]), Rank::Ace);
     }
 
     #[test]
@@ -221,9 +186,9 @@ mod tests {
         let result = use_death(&mut cards);
         assert!(result.is_ok());
 
-        assert_eq!(parse_card_rank(&cards[0]), Rank::Two);
+        assert_eq!(get_card_rank(&cards[0]), Rank::Two);
         assert_eq!(get_card_suit(&cards[0]), Suit::Spades);
-        assert_eq!(parse_card_rank(&cards[1]), Rank::Two);
+        assert_eq!(get_card_rank(&cards[1]), Rank::Two);
         assert_eq!(get_card_suit(&cards[1]), Suit::Spades);
     }
 
