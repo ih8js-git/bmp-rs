@@ -50,6 +50,9 @@ pub enum Edition {
     Negative,
 }
 
+
+/// Represents an enhancement on a card. Importantly The order of the enums is the same as
+/// the order of the tarots applying this enhancement, allowing for optimization.
 #[derive(Debug, Copy, Clone, PartialEq)]
 #[repr(u8)]
 pub enum Enhancement {
