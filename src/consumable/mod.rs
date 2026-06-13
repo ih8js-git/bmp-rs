@@ -11,4 +11,5 @@ pub use self::tarots::*;
 pub enum Consumable {
     Tarot(Tarot),
     Planet(Planet),
+    Spectral(Spectral),
 }

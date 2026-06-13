@@ -231,6 +231,12 @@ mod tests {
             tarots_used: 0,
             hand: deck.clone(),
             deck,
+            hand_size: 8,
+            jokers: vec![],
+            joker_slots: 5,
+            consumables: vec![],
+            consumable_slots: 2,
+            balance: 4,
         }
     }
 

@@ -1,25 +1,33 @@
 //mod blinds;
 mod card;
 mod consumable;
+mod joker;
 mod levels;
 
 use card::*;
 use consumable::*;
+use joker::*;
 
 pub struct GameState {
     last_used: Consumable,
     tarots_used: u16,
     deck: Vec<Card>,
-    hand: Vec<Card>, // starting_deck_size: u8,
-                     // skips_taken: u16,
-                     // hand_size: u8,
-                     // ecto_hand_size_reduction: u8, // starts at 1
-                     // hands_played,
-                     // unused_discards,
-                     // base_reroll_cost,
-                     // current_round,
-                     // how many each planet has been used
-                     // how many each hand has been played
+    hand: Vec<Card>,
+    hand_size: u8,
+    jokers: Vec<Joker>,
+    joker_slots: u8,
+    consumables: Vec<Consumable>,
+    consumable_slots: u8,
+    balance: u32,
+    // starting_deck_size: u8,
+    // skips_taken: u16,
+    // ecto_hand_size_reduction: u8, // starts at 1
+    // hands_played,
+    // unused_discards,
+    // base_reroll_cost,
+    // current_round,
+    // how many each planet has been used
+    // how many each hand has been played
 }
 
 fn main() {
@@ -28,9 +36,15 @@ fn main() {
         tarots_used: 0,
         deck: create_deck(),
         hand: Vec::with_capacity(8),
+        hand_size: 8,
+        jokers: vec![],
+        joker_slots: 5,
+        consumables: vec![],
+        consumable_slots: 2,
+        balance: 4,
     };
 
-    for _ in 0..8 {
+    for _ in 0..game_state.hand_size {
         let card = game_state.deck.pop().unwrap();
         game_state.hand.push(card);
     }
