@@ -36,7 +36,7 @@ pub enum Tarot {
 }
 
 pub fn enhance_cards(
-    deck: &mut [Card],
+    hand: &mut [Card],
     indices: &[usize],
     num_of_allowed_cards: u8,
     enhancement: Enhancement,
@@ -50,13 +50,13 @@ pub fn enhance_cards(
     }
 
     for &idx in indices {
-        set_card_enhancement(&mut deck[idx], enhancement);
+        set_card_enhancement(&mut hand[idx], enhancement);
     }
 
     Ok(())
 }
 
-pub fn change_cards_suit(deck: &mut [Card], indices: &[usize], suit: Suit) -> Result<(), String> {
+pub fn change_cards_suit(hand: &mut [Card], indices: &[usize], suit: Suit) -> Result<(), String> {
     if indices.is_empty() {
         return Err("No cards selected".to_string());
     }
@@ -66,7 +66,7 @@ pub fn change_cards_suit(deck: &mut [Card], indices: &[usize], suit: Suit) -> Re
     }
 
     for &idx in indices {
-        set_card_suit(&mut deck[idx], suit);
+        set_card_suit(&mut hand[idx], suit);
     }
 
     Ok(())
@@ -83,55 +83,55 @@ pub fn use_tarot(
     match tarot {
         Tarot::Fool => use_fool(game_state),
         Tarot::Magician => enhance_cards(
-            &mut game_state.deck,
+            &mut game_state.hand,
             selected_indices,
             2,
             Enhancement::Lucky,
         ),
-        Tarot::HighPriestess => use_high_priestess(&mut game_state.deck, selected_indices),
+        Tarot::HighPriestess => use_high_priestess(&mut game_state.hand, selected_indices),
         Tarot::Empress => {
-            enhance_cards(&mut game_state.deck, selected_indices, 2, Enhancement::Mult)
+            enhance_cards(&mut game_state.hand, selected_indices, 2, Enhancement::Mult)
         }
-        Tarot::Emperor => use_emperor(&mut game_state.deck, selected_indices),
+        Tarot::Emperor => use_emperor(&mut game_state.hand, selected_indices),
         Tarot::Hierophant => enhance_cards(
-            &mut game_state.deck,
+            &mut game_state.hand,
             selected_indices,
             2,
             Enhancement::Bonus,
         ),
         Tarot::Lovers => {
-            enhance_cards(&mut game_state.deck, selected_indices, 1, Enhancement::Wild)
+            enhance_cards(&mut game_state.hand, selected_indices, 1, Enhancement::Wild)
         }
         Tarot::Chariot => enhance_cards(
-            &mut game_state.deck,
+            &mut game_state.hand,
             selected_indices,
             1,
             Enhancement::Stone,
         ),
         Tarot::Justice => enhance_cards(
-            &mut game_state.deck,
+            &mut game_state.hand,
             selected_indices,
             1,
             Enhancement::Glass,
         ),
-        Tarot::Hermit => use_hermit(&mut game_state.deck, selected_indices),
-        Tarot::WheelOfFortune => use_wheel_of_fortune(&mut game_state.deck, selected_indices),
-        Tarot::Strength => use_strength(&mut game_state.deck, selected_indices),
-        Tarot::HangedMan => use_hanged_man(&mut game_state.deck, selected_indices),
-        Tarot::Death => use_death(&mut game_state.deck, selected_indices),
-        Tarot::Temperance => use_temperance(&mut game_state.deck, selected_indices),
-        Tarot::Devil => enhance_cards(&mut game_state.deck, selected_indices, 1, Enhancement::Gold),
+        Tarot::Hermit => use_hermit(&mut game_state.hand, selected_indices),
+        Tarot::WheelOfFortune => use_wheel_of_fortune(&mut game_state.hand, selected_indices),
+        Tarot::Strength => use_strength(&mut game_state.hand, selected_indices),
+        Tarot::HangedMan => use_hanged_man(&mut game_state.hand, selected_indices),
+        Tarot::Death => use_death(&mut game_state.hand, selected_indices),
+        Tarot::Temperance => use_temperance(&mut game_state.hand, selected_indices),
+        Tarot::Devil => enhance_cards(&mut game_state.hand, selected_indices, 1, Enhancement::Gold),
         Tarot::Tower => enhance_cards(
-            &mut game_state.deck,
+            &mut game_state.hand,
             selected_indices,
             1,
             Enhancement::Stone,
         ),
-        Tarot::Star => change_cards_suit(&mut game_state.deck, selected_indices, Suit::Diamonds),
-        Tarot::Moon => change_cards_suit(&mut game_state.deck, selected_indices, Suit::Clubs),
-        Tarot::Sun => change_cards_suit(&mut game_state.deck, selected_indices, Suit::Hearts),
-        Tarot::Judgement => use_judgement(&mut game_state.deck, selected_indices),
-        Tarot::World => change_cards_suit(&mut game_state.deck, selected_indices, Suit::Spades),
+        Tarot::Star => change_cards_suit(&mut game_state.hand, selected_indices, Suit::Diamonds),
+        Tarot::Moon => change_cards_suit(&mut game_state.hand, selected_indices, Suit::Clubs),
+        Tarot::Sun => change_cards_suit(&mut game_state.hand, selected_indices, Suit::Hearts),
+        Tarot::Judgement => use_judgement(&mut game_state.hand, selected_indices),
+        Tarot::World => change_cards_suit(&mut game_state.hand, selected_indices, Suit::Spades),
     }
 }
 
@@ -139,23 +139,23 @@ pub fn use_fool(game_state: &mut GameState) -> Result<(), String> {
     return Err("Not coded yet".to_string());
 }
 
-pub fn use_high_priestess(deck: &mut [Card], indices: &[usize]) -> Result<(), String> {
+pub fn use_high_priestess(hand: &mut [Card], indices: &[usize]) -> Result<(), String> {
     return Err("Not coded yet".to_string());
 }
 
-pub fn use_emperor(deck: &mut [Card], indices: &[usize]) -> Result<(), String> {
+pub fn use_emperor(hand: &mut [Card], indices: &[usize]) -> Result<(), String> {
     return Err("Not coded yet".to_string());
 }
 
-pub fn use_hermit(deck: &mut [Card], indices: &[usize]) -> Result<(), String> {
+pub fn use_hermit(hand: &mut [Card], indices: &[usize]) -> Result<(), String> {
     return Err("Not coded yet".to_string());
 }
 
-pub fn use_wheel_of_fortune(deck: &mut [Card], indices: &[usize]) -> Result<(), String> {
+pub fn use_wheel_of_fortune(hand: &mut [Card], indices: &[usize]) -> Result<(), String> {
     return Err("Not coded yet".to_string());
 }
 
-pub fn use_strength(deck: &mut [Card], indices: &[usize]) -> Result<(), String> {
+pub fn use_strength(hand: &mut [Card], indices: &[usize]) -> Result<(), String> {
     if indices.is_empty() {
         return Err("No cards selected".to_string());
     }
@@ -165,19 +165,36 @@ pub fn use_strength(deck: &mut [Card], indices: &[usize]) -> Result<(), String> 
     }
 
     for &idx in indices {
-        let rank = get_card_rank(&deck[idx]);
-        let next_rank = Rank::from_repr(rank as u8 + 1).unwrap_or(Rank::Ace);
-        set_card_rank(&mut deck[idx], next_rank);
+        let rank = get_card_rank(&hand[idx]);
+        let next_rank = Rank::from_repr(rank as u8 + 1).unwrap_or(Rank::Two);
+        set_card_rank(&mut hand[idx], next_rank);
     }
 
     Ok(())
 }
 
-pub fn use_hanged_man(deck: &mut [Card], indices: &[usize]) -> Result<(), String> {
-    return Err("Not coded yet".to_string());
+pub fn use_hanged_man(hand: &mut Vec<Card>, indices: &[usize]) -> Result<(), String> {
+    if indices.is_empty() {
+        return Err("No cards selected".to_string());
+    }
+
+    if indices.len() > 2 {
+        return Err("You can only use 2 cards".to_string());
+    }
+
+    let mut sorted_indices = indices.to_vec();
+    sorted_indices.sort_unstable();
+
+    for idx in sorted_indices.into_iter().rev() {
+        if idx < hand.len() {
+            hand.remove(idx);
+        }
+    }
+
+    Ok(())
 }
 
-pub fn use_death(deck: &mut [Card], indices: &[usize]) -> Result<(), String> {
+pub fn use_death(hand: &mut [Card], indices: &[usize]) -> Result<(), String> {
     if indices.is_empty() {
         return Err("No cards selected".to_string());
     }
@@ -186,7 +203,7 @@ pub fn use_death(deck: &mut [Card], indices: &[usize]) -> Result<(), String> {
         return Err("You must use 2 cards".to_string());
     }
 
-    deck[indices[1]] = deck[indices[0]];
+    hand[indices[0]] = hand[indices[1]];
 
     Ok(())
 }
@@ -211,6 +228,7 @@ mod tests {
         GameState {
             last_used: Consumable::Tarot(Tarot::Fool),
             tarots_used: 0,
+            hand: deck.clone(),
             deck,
         }
     }
@@ -222,7 +240,7 @@ mod tests {
     ) -> Result<Vec<Card>, String> {
         let mut gs = dummy_game_state(deck);
         use_tarot(&mut gs, tarot, indices)?;
-        Ok(gs.deck)
+        Ok(gs.hand)
     }
 
     fn use_suit_tarot(
@@ -232,7 +250,7 @@ mod tests {
     ) -> Result<Vec<Card>, String> {
         let mut gs = dummy_game_state(deck);
         use_tarot(&mut gs, tarot, indices)?;
-        Ok(gs.deck)
+        Ok(gs.hand)
     }
 
     #[test]
@@ -254,7 +272,7 @@ mod tests {
         let mut deck = vec![create_test_card(Rank::Ace, Suit::Spades)];
         let result = use_strength(&mut deck, &[0]);
         assert!(result.is_ok());
-        assert_eq!(get_card_rank(&deck[0]), Rank::Ace);
+        assert_eq!(get_card_rank(&deck[0]), Rank::Two);
     }
 
     #[test]
@@ -267,10 +285,10 @@ mod tests {
         let result = use_death(&mut deck, &[0, 1]);
         assert!(result.is_ok());
 
-        assert_eq!(get_card_rank(&deck[0]), Rank::Two);
-        assert_eq!(get_card_suit(&deck[0]), Suit::Spades);
-        assert_eq!(get_card_rank(&deck[1]), Rank::Two);
-        assert_eq!(get_card_suit(&deck[1]), Suit::Spades);
+        assert_eq!(get_card_rank(&deck[0]), Rank::King);
+        assert_eq!(get_card_suit(&deck[0]), Suit::Hearts);
+        assert_eq!(get_card_rank(&deck[1]), Rank::King);
+        assert_eq!(get_card_suit(&deck[1]), Suit::Hearts);
     }
 
     #[test]
