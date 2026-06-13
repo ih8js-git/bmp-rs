@@ -45,7 +45,7 @@ fn use_seal_spectral(spectral: Spectral, card: Option<&mut Card>) -> Result<(), 
 mod tests {
     use super::*;
     use crate::card::core::{Rank, Suit, create_test_card};
-    use crate::card::parse::get_card_seal;
+    use crate::card::operations::get_card_seal;
 
     #[test]
     fn test_use_seal_spectral_success() {

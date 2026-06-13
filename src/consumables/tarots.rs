@@ -1,5 +1,5 @@
 use crate::card::operations::{set_card_enhancement, set_card_rank, set_card_suit};
-use crate::card::parse::get_card_rank;
+use crate::card::operations::get_card_rank;
 use crate::card::{Card, Enhancement, Rank, Suit};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -115,7 +115,7 @@ pub fn use_strength(cards: &mut Vec<Card>) -> Result<&mut Vec<Card>, String> {
 
     for card in cards.iter_mut() {
         let rank = get_card_rank(card);
-        let next_rank = Rank::from_repr(rank as usize + 1).unwrap_or(Rank::Ace);
+        let next_rank = Rank::from_repr(rank as u8 + 1).unwrap_or(Rank::Ace);
         set_card_rank(card, next_rank);
     }
 
@@ -152,7 +152,7 @@ pub fn use_judgement(cards: &mut Vec<Card>) -> Result<&mut Vec<Card>, String> {
 mod tests {
     use super::*;
     use crate::card::core::create_test_card;
-    use crate::card::parse::{get_card_enhancement, get_card_rank, get_card_suit};
+    use crate::card::operations::{get_card_enhancement, get_card_rank, get_card_suit};
 
     #[test]
     fn test_tarot_strength() {
