@@ -1,17 +1,24 @@
 //mod blinds;
 mod card;
 mod consumable;
+mod decks;
 mod joker;
 mod levels;
+mod vouchers;
 
 use card::*;
 use consumable::*;
+use decks::*;
 use joker::*;
+use vouchers::*;
 
 pub struct GameState {
     last_used: Consumable,
     tarots_used: u16,
     deck: Vec<Card>,
+    // TODO: convert this to a single u32, each of the 32 vouchers,
+    // get 1 bit for a boolean
+    vouchers: Vec<Voucher>,
     hand: Vec<Card>,
     hand_size: u8,
     jokers: Vec<Joker>,
@@ -19,6 +26,8 @@ pub struct GameState {
     consumables: Vec<Consumable>,
     consumable_slots: u8,
     balance: u32,
+    hands: u8,
+    discards: u8,
     // starting_deck_size: u8,
     // skips_taken: u16,
     // ecto_hand_size_reduction: u8, // starts at 1
@@ -31,18 +40,7 @@ pub struct GameState {
 }
 
 fn main() {
-    let mut game_state = GameState {
-        last_used: Consumable::Tarot(Tarot::Fool),
-        tarots_used: 0,
-        deck: create_deck(),
-        hand: Vec::with_capacity(8),
-        hand_size: 8,
-        jokers: vec![],
-        joker_slots: 5,
-        consumables: vec![],
-        consumable_slots: 2,
-        balance: 4,
-    };
+    let mut game_state = create_game_state(Deck::Red);
 
     for _ in 0..game_state.hand_size {
         let card = game_state.deck.pop().unwrap();

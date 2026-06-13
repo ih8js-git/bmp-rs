@@ -224,20 +224,13 @@ mod tests {
     use crate::card::core::create_test_card;
     use crate::card::operations::{get_card_enhancement, get_card_rank, get_card_suit};
     use crate::consumable::Consumable;
+    use crate::decks::{Deck, create_game_state};
 
     fn dummy_game_state(deck: Vec<Card>) -> GameState {
-        GameState {
-            last_used: Consumable::Tarot(Tarot::Fool),
-            tarots_used: 0,
-            hand: deck.clone(),
-            deck,
-            hand_size: 8,
-            jokers: vec![],
-            joker_slots: 5,
-            consumables: vec![],
-            consumable_slots: 2,
-            balance: 4,
-        }
+        let mut state = create_game_state(Deck::Green);
+        state.hand = deck.clone();
+        state.deck = deck;
+        state
     }
 
     fn use_enhancement_tarot(

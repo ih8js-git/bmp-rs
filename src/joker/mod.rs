@@ -1,3 +1,3 @@
-pub mod joker;
+pub mod jokers;
 
-pub use self::joker::*;
+pub use self::jokers::*;
