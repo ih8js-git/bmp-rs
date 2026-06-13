@@ -1,4 +1,4 @@
-use crate::card::{Card, Enhancement, Rank, Suit};
+use crate::card::{Card, Enhancement, Rank, Seal, Suit};
 
 pub fn get_card_rank(card: &Card) -> Rank {
     match card.meta >> 12 {
@@ -46,6 +46,17 @@ pub fn get_card_enhancement(card: &Card) -> Enhancement {
     }
 }
 
+pub fn get_card_seal(card: &Card) -> Seal {
+    let seal = card.meta & 0b111;
+    match seal {
+        0 => Seal::None,
+        1 => Seal::Gold,
+        2 => Seal::Red,
+        3 => Seal::Blue,
+        4 => Seal::Purple,
+        _ => panic!("Invalid seal"),
+    }
+}
 pub fn parse_card_to_text(card: &Card) -> String {
     let rank = card.meta >> 12;
     let suit = (card.meta & 0b11_000_0000_000) >> 10;

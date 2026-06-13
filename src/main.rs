@@ -1,9 +1,9 @@
 mod card;
+mod consumables;
 mod levels;
-mod tarots;
 
 use card::*;
-use tarots::*;
+use consumables::tarots::*;
 
 fn main() {
     let mut cards = create_deck();
