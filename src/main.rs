@@ -14,6 +14,12 @@ pub struct GameState {
     // skips_taken: u16,
     // hand_size: u8,
     // ecto_hand_size_reduction: u8, // starts at 1
+    // hands_played,
+    // unused_discards,
+    // base_reroll_cost,
+    // current_round,
+    // how many each planet has been used
+    // how many each hand has been played
 }
 
 fn main() {
@@ -35,15 +41,7 @@ fn main() {
             .collect::<Vec<String>>()
     );
 
-    // We use std::mem::take to temporarily extract the deck from game_state.
-    // This allows us to pass &mut game_state AND a mutable slice of the deck to `use_tarot`
-    // simultaneously without violating Rust's aliasing rules (borrow checker).
-    // This requires exactly zero allocations and copies.
-    let mut deck = std::mem::take(&mut game_state.deck);
-    let result = use_tarot(&mut game_state, Tarot::Magician, &mut deck[0..2]);
-
-    // Put the modified deck back into the game_state
-    game_state.deck = deck;
+    let result = use_tarot(&mut game_state, Tarot::Magician, &[0, 1]);
 
     println!(
         "\nAfter use:\n{:?}",
