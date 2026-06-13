@@ -1,5 +1,5 @@
-use crate::card::operations::{set_card_enhancement, set_card_rank, set_card_suit};
 use crate::card::operations::get_card_rank;
+use crate::card::operations::{set_card_enhancement, set_card_rank, set_card_suit};
 use crate::card::{Card, Enhancement, Rank, Suit};
 
 #[derive(Debug, Copy, Clone, PartialEq)]

@@ -1,4 +1,7 @@
-use crate::card::{Card, Rank, Suit, Edition, Enhancement, Seal, get_card_rank, get_card_suit, get_card_edition, get_card_enhancement, get_card_seal};
+use crate::card::{
+    Card, Edition, Enhancement, Rank, Seal, Suit, get_card_edition, get_card_enhancement,
+    get_card_rank, get_card_seal, get_card_suit,
+};
 
 pub fn parse_card_to_text(card: &Card) -> String {
     let rank = get_card_rank(card);
