@@ -13,7 +13,9 @@
  * 11: High Card     | 5x1    | +10, +1
  */
 
-enum Hand {
+#[derive(Debug, Copy, Clone, PartialEq)]
+#[repr(u8)]
+pub enum Hand {
     FlushFive,
     FlushHouse,
     FiveOfAKind,

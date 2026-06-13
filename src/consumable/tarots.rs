@@ -8,6 +8,7 @@ use crate::consumable::Consumable;
 /// the order of the enhancements applied by the tarots (Hierophant through Magician),
 /// allowing for optimization.
 #[derive(Debug, Copy, Clone, PartialEq)]
+#[repr(u8)]
 pub enum Tarot {
     // make enum tarot and enhancement
     // pub enum Enhancement {
