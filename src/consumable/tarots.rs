@@ -1,23 +1,25 @@
+use crate::GameState;
 use crate::card::operations::get_card_rank;
 use crate::card::operations::{set_card_enhancement, set_card_rank, set_card_suit};
 use crate::card::{Card, Enhancement, Rank, Suit};
+use crate::consumable::Consumable;
 
 /// Represents tarot card. Importantly The order of the enums is the same as
-/// the order of the enhancements applied by the tarots (Hierophant through Magician), 
+/// the order of the enhancements applied by the tarots (Hierophant through Magician),
 /// allowing for optimization.
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub enum Tarot {        // make enum tarot and enhancement 
-                        // pub enum Enhancement {
-    Fool,               //    None,
-    Hierophant,         //    Bonus,
-    Empress,            //    Mult,
-    Lovers,             //    Wild,
-    Justice,            //    Glass,    
-    Chariot,            //    Steel,    
-    Tower,              //    Stone,
-    Devil,              //    Gold,
-    Magician,           //    Lucky,                  
-                        // }   
+pub enum Tarot {
+    // make enum tarot and enhancement
+    // pub enum Enhancement {
+    Fool,       //    None,
+    Hierophant, //    Bonus,
+    Empress,    //    Mult,
+    Lovers,     //    Wild,
+    Justice,    //    Glass,
+    Chariot,    //    Steel,
+    Tower,      //    Stone,
+    Devil,      //    Gold,
+    Magician,   //    Lucky,
     HighPriestess,
     Emperor,
     Hermit,
@@ -33,27 +35,27 @@ pub enum Tarot {        // make enum tarot and enhancement
     World,
 }
 
-fn enhance_cards(
-    cards: &mut Vec<Card>,
+pub fn enhance_cards(
+    cards: &mut [Card],
     num_of_allowed_cards: u8,
     enhancement: Enhancement,
-) -> Result<&mut Vec<Card>, String> {
+) -> Result<(), String> {
     if cards.is_empty() {
         return Err("No cards selected".to_string());
     }
 
     if cards.len() > num_of_allowed_cards as usize {
-        return Err(format!("You can only use {} card(s)", num_of_allowed_cards));
+        return Err(format!("You can only use {} cards", num_of_allowed_cards));
     }
 
     for card in cards.iter_mut() {
         set_card_enhancement(card, enhancement);
     }
 
-    Ok(cards)
+    Ok(())
 }
 
-fn change_cards_suit(cards: &mut Vec<Card>, suit: Suit) -> Result<&mut Vec<Card>, String> {
+pub fn change_cards_suit(cards: &mut [Card], suit: Suit) -> Result<(), String> {
     if cards.is_empty() {
         return Err("No cards selected".to_string());
     }
@@ -66,50 +68,64 @@ fn change_cards_suit(cards: &mut Vec<Card>, suit: Suit) -> Result<&mut Vec<Card>
         set_card_suit(card, suit);
     }
 
-    Ok(cards)
+    Ok(())
 }
 
-fn use_enhancement_tarot(tarot: Tarot, cards: &mut Vec<Card>) -> Result<&mut Vec<Card>, String> {
+pub fn use_tarot(
+    game_state: &mut GameState,
+    tarot: Tarot,
+    selected_cards: &mut [Card],
+) -> Result<(), String> {
+    game_state.tarots_used += 1;
+    game_state.last_used = Consumable::Tarot(tarot);
+
     match tarot {
-        Tarot::Magician => enhance_cards(cards, 2, Enhancement::Lucky),
-        Tarot::Empress => enhance_cards(cards, 2, Enhancement::Mult),
-        Tarot::Hierophant => enhance_cards(cards, 2, Enhancement::Bonus),
-        Tarot::Lovers => enhance_cards(cards, 1, Enhancement::Wild),
-        Tarot::Chariot => enhance_cards(cards, 1, Enhancement::Stone),
-        Tarot::Justice => enhance_cards(cards, 1, Enhancement::Glass),
-        Tarot::Devil => enhance_cards(cards, 1, Enhancement::Gold),
-        Tarot::Tower => enhance_cards(cards, 1, Enhancement::Stone),
-        _ => Err("Not a valid tarot for this function".to_string()),
+        Tarot::Fool => use_fool(game_state),
+        Tarot::Magician => enhance_cards(selected_cards, 2, Enhancement::Lucky),
+        Tarot::HighPriestess => use_high_priestess(selected_cards),
+        Tarot::Empress => enhance_cards(selected_cards, 2, Enhancement::Mult),
+        Tarot::Emperor => use_emperor(selected_cards),
+        Tarot::Hierophant => enhance_cards(selected_cards, 2, Enhancement::Bonus),
+        Tarot::Lovers => enhance_cards(selected_cards, 1, Enhancement::Wild),
+        Tarot::Chariot => enhance_cards(selected_cards, 1, Enhancement::Stone),
+        Tarot::Justice => enhance_cards(selected_cards, 1, Enhancement::Glass),
+        Tarot::Hermit => use_hermit(selected_cards),
+        Tarot::WheelOfFortune => use_wheel_of_fortune(selected_cards),
+        Tarot::Strength => use_strength(selected_cards),
+        Tarot::HangedMan => use_hanged_man(selected_cards),
+        Tarot::Death => use_death(selected_cards),
+        Tarot::Temperance => use_temperance(selected_cards),
+        Tarot::Devil => enhance_cards(selected_cards, 1, Enhancement::Gold),
+        Tarot::Tower => enhance_cards(selected_cards, 1, Enhancement::Stone),
+        Tarot::Star => change_cards_suit(selected_cards, Suit::Diamonds),
+        Tarot::Moon => change_cards_suit(selected_cards, Suit::Clubs),
+        Tarot::Sun => change_cards_suit(selected_cards, Suit::Hearts),
+        Tarot::Judgement => use_judgement(selected_cards),
+        Tarot::World => change_cards_suit(selected_cards, Suit::Spades),
     }
 }
 
-fn use_suit_tarot(tarot: Tarot, cards: &mut Vec<Card>) -> Result<&mut Vec<Card>, String> {
-    match tarot {
-        Tarot::Star => change_cards_suit(cards, Suit::Diamonds),
-        Tarot::Moon => change_cards_suit(cards, Suit::Clubs),
-        Tarot::Sun => change_cards_suit(cards, Suit::Hearts),
-        Tarot::World => change_cards_suit(cards, Suit::Spades),
-        _ => Err("Not a valid tarot for this function".to_string()),
-    }
-}
-
-pub fn use_fool(cards: &mut Vec<Card>) -> Result<&mut Vec<Card>, String> {
+pub fn use_fool(game_state: &mut GameState) -> Result<(), String> {
     return Err("Not coded yet".to_string());
 }
 
-pub fn use_high_priestess(cards: &mut Vec<Card>) -> Result<&mut Vec<Card>, String> {
+pub fn use_high_priestess(cards: &mut [Card]) -> Result<(), String> {
     return Err("Not coded yet".to_string());
 }
 
-pub fn use_emperor(cards: &mut Vec<Card>) -> Result<&mut Vec<Card>, String> {
+pub fn use_emperor(cards: &mut [Card]) -> Result<(), String> {
     return Err("Not coded yet".to_string());
 }
 
-pub fn use_wheel_of_fortune(cards: &mut Vec<Card>) -> Result<&mut Vec<Card>, String> {
+pub fn use_hermit(cards: &mut [Card]) -> Result<(), String> {
     return Err("Not coded yet".to_string());
 }
 
-pub fn use_strength(cards: &mut Vec<Card>) -> Result<&mut Vec<Card>, String> {
+pub fn use_wheel_of_fortune(cards: &mut [Card]) -> Result<(), String> {
+    return Err("Not coded yet".to_string());
+}
+
+pub fn use_strength(cards: &mut [Card]) -> Result<(), String> {
     if cards.is_empty() {
         return Err("No cards selected".to_string());
     }
@@ -124,14 +140,14 @@ pub fn use_strength(cards: &mut Vec<Card>) -> Result<&mut Vec<Card>, String> {
         set_card_rank(card, next_rank);
     }
 
-    Ok(cards)
+    Ok(())
 }
 
-pub fn use_hanged_man(cards: &mut Vec<Card>) -> Result<&mut Vec<Card>, String> {
+pub fn use_hanged_man(cards: &mut [Card]) -> Result<(), String> {
     return Err("Not coded yet".to_string());
 }
 
-pub fn use_death(cards: &mut Vec<Card>) -> Result<&mut Vec<Card>, String> {
+pub fn use_death(cards: &mut [Card]) -> Result<(), String> {
     if cards.is_empty() {
         return Err("No cards selected".to_string());
     }
@@ -142,22 +158,40 @@ pub fn use_death(cards: &mut Vec<Card>) -> Result<&mut Vec<Card>, String> {
 
     cards[1] = cards[0];
 
-    Ok(cards)
+    Ok(())
 }
 
-pub fn use_temperance(cards: &mut Vec<Card>) -> Result<&mut Vec<Card>, String> {
+pub fn use_temperance(cards: &mut [Card]) -> Result<(), String> {
     return Err("Not coded yet".to_string());
 }
 
-pub fn use_judgement(cards: &mut Vec<Card>) -> Result<&mut Vec<Card>, String> {
+pub fn use_judgement(cards: &mut [Card]) -> Result<(), String> {
     return Err("Not coded yet".to_string());
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::GameState;
     use crate::card::core::create_test_card;
     use crate::card::operations::{get_card_enhancement, get_card_rank, get_card_suit};
+    use crate::consumable::Consumable;
+
+    fn dummy_game_state() -> GameState {
+        GameState {
+            last_used: Consumable::Tarot(Tarot::Fool),
+            tarots_used: 0,
+            deck: vec![],
+        }
+    }
+
+    fn use_enhancement_tarot(tarot: Tarot, cards: &mut [Card]) -> Result<(), String> {
+        use_tarot(&mut dummy_game_state(), tarot, cards)
+    }
+
+    fn use_suit_tarot(tarot: Tarot, cards: &mut [Card]) -> Result<(), String> {
+        use_tarot(&mut dummy_game_state(), tarot, cards)
+    }
 
     #[test]
     fn test_tarot_strength() {
