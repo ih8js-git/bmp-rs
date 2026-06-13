@@ -28,7 +28,7 @@ pub fn set_card_suit(card: &mut Card, suit: Suit) {
 }
 
 pub fn get_card_suit(card: &Card) -> Suit {
-    let suit = ((card.meta & (0b11 << 10)) >> 10) as u8;
+    let suit = ((card.meta >> 10) & 0b11) as u8;
     unsafe { std::mem::transmute(suit) }                // We guarantee suit will be within enum boundaries
 }
 
@@ -38,7 +38,7 @@ pub fn set_card_edition(card: &mut Card, edition: Edition) {
 }
 
 pub fn get_card_edition(card: &Card) -> Edition {
-    let edition = ((card.meta & (0b111 << 7)) >> 7) as u8;
+    let edition = ((card.meta >> 7) & 0b111) as u8;
     unsafe { std::mem::transmute(edition) }                // We guarantee edition will be within enum boundaries
 }
 
@@ -48,7 +48,7 @@ pub fn set_card_enhancement(card: &mut Card, enhancement: Enhancement) {
 }
 
 pub fn get_card_enhancement(card: &Card) -> Enhancement {
-    let enhancement = ((card.meta & (0b1111 << 3)) >> 3) as u8;
+    let enhancement = ((card.meta >> 3) & 0b1111) as u8;
     unsafe { std::mem::transmute(enhancement) }            // We guarantee enhancement will be within enum boundaries
 }
 
@@ -175,5 +175,75 @@ mod tests {
 
         // Verify no bits overwrote or corrupted adjacent neighbors
         assert_eq!(card.meta, expected_meta);
+    }
+
+    #[test]
+    fn test_get_card_rank() {
+        let mut card = create_blank_card();
+        let target_rank = Rank::Ace;
+
+        set_card_rank(&mut card, target_rank);
+        assert_eq!(get_card_rank(&card), target_rank);
+    }
+
+    #[test]
+    fn test_get_card_suit() {
+        let mut card = create_blank_card();
+        let target_suit = Suit::Spades;
+
+        set_card_suit(&mut card, target_suit);
+        assert_eq!(get_card_suit(&card), target_suit);
+    }
+
+    #[test]
+    fn test_get_card_edition() {
+        let mut card = create_blank_card();
+        let target_edition = Edition::Foil;
+
+        set_card_edition(&mut card, target_edition);
+        assert_eq!(get_card_edition(&card), target_edition);
+    }
+
+    #[test]
+    fn test_get_card_enhancement() {
+        let mut card = create_blank_card();
+        let target_enhancement = Enhancement::Mult;
+
+        set_card_enhancement(&mut card, target_enhancement);
+        assert_eq!(get_card_enhancement(&card), target_enhancement);
+    }
+
+    #[test]
+    fn test_get_card_seal() {
+        let mut card = create_blank_card();
+        let target_seal = Seal::Gold;
+
+        set_card_seal(&mut card, target_seal);
+        assert_eq!(get_card_seal(&card), target_seal);
+    }
+
+    #[test]
+    fn test_getters_with_fully_packed_card() {
+        let mut card = create_blank_card();
+
+        // 1. Pack a highly specific combination of bits
+        let expected_rank = Rank::King;
+        let expected_suit = Suit::Diamonds;
+        let expected_edition = Edition::Polychrome;
+        let expected_enhancement = Enhancement::Lucky;
+        let expected_seal = Seal::Purple;
+
+        set_card_rank(&mut card, expected_rank);
+        set_card_suit(&mut card, expected_suit);
+        set_card_edition(&mut card, expected_edition);
+        set_card_enhancement(&mut card, expected_enhancement);
+        set_card_seal(&mut card, expected_seal);
+
+        // 2. Unpack everything using getters to verify zero bit-bleeding
+        assert_eq!(get_card_rank(&card), expected_rank);
+        assert_eq!(get_card_suit(&card), expected_suit);
+        assert_eq!(get_card_edition(&card), expected_edition);
+        assert_eq!(get_card_enhancement(&card), expected_enhancement);
+        assert_eq!(get_card_seal(&card), expected_seal);
     }
 }
