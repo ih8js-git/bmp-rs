@@ -147,3 +147,129 @@ pub fn use_temperance(cards: &mut Vec<Card>) -> Result<&mut Vec<Card>, String> {
 pub fn use_judgement(cards: &mut Vec<Card>) -> Result<&mut Vec<Card>, String> {
     return Err("Not coded yet".to_string());
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::card::{Edition, Enhancement, Rank, Seal, Suit};
+
+    fn create_test_card(rank: Rank, suit: Suit) -> Card {
+        let meta = (rank as u16) << 12
+            | (suit as u16) << 10
+            | (Edition::None as u16) << 7
+            | (Enhancement::None as u16) << 3
+            | (Seal::None as u16);
+        Card { meta, chips: 0 }
+    }
+
+    fn get_card_enhancement(card: &Card) -> Enhancement {
+        let enhancement = (card.meta & 0b1111_000) >> 3;
+        match enhancement {
+            0 => Enhancement::None,
+            1 => Enhancement::Bonus,
+            2 => Enhancement::Mult,
+            3 => Enhancement::Wild,
+            4 => Enhancement::Glass,
+            5 => Enhancement::Steel,
+            6 => Enhancement::Stone,
+            7 => Enhancement::Gold,
+            8 => Enhancement::Lucky,
+            _ => panic!("Invalid enhancement"),
+        }
+    }
+
+    fn get_card_suit(card: &Card) -> Suit {
+        let suit = (card.meta & 0b11_000_0000_000) >> 10;
+        match suit {
+            0 => Suit::Spades,
+            1 => Suit::Hearts,
+            2 => Suit::Clubs,
+            3 => Suit::Diamonds,
+            _ => panic!("Invalid suit"),
+        }
+    }
+
+    #[test]
+    fn test_tarot_strength() {
+        let mut cards = vec![
+            create_test_card(Rank::Two, Suit::Spades),
+            create_test_card(Rank::King, Suit::Hearts),
+        ];
+
+        let result = use_strength(&mut cards);
+        assert!(result.is_ok());
+
+        assert_eq!(parse_card_rank(&cards[0]), Rank::Three);
+        assert_eq!(parse_card_rank(&cards[1]), Rank::Ace);
+    }
+
+    #[test]
+    fn test_tarot_strength_ace() {
+        let mut cards = vec![create_test_card(Rank::Ace, Suit::Spades)];
+        let result = use_strength(&mut cards);
+        assert!(result.is_ok());
+        assert_eq!(parse_card_rank(&cards[0]), Rank::Ace);
+    }
+
+    #[test]
+    fn test_tarot_death() {
+        let mut cards = vec![
+            create_test_card(Rank::Two, Suit::Spades),
+            create_test_card(Rank::King, Suit::Hearts),
+        ];
+
+        let result = use_death(&mut cards);
+        assert!(result.is_ok());
+
+        assert_eq!(parse_card_rank(&cards[0]), Rank::Two);
+        assert_eq!(get_card_suit(&cards[0]), Suit::Spades);
+        assert_eq!(parse_card_rank(&cards[1]), Rank::Two);
+        assert_eq!(get_card_suit(&cards[1]), Suit::Spades);
+    }
+
+    #[test]
+    fn test_enhancement_tarots() {
+        let test_cases = vec![
+            (Tarot::Magician, Enhancement::Lucky, 2),
+            (Tarot::Empress, Enhancement::Mult, 2),
+            (Tarot::Hierophant, Enhancement::Bonus, 2),
+            (Tarot::Lovers, Enhancement::Wild, 1),
+            (Tarot::Chariot, Enhancement::Stone, 1),
+            (Tarot::Justice, Enhancement::Glass, 1),
+            (Tarot::Devil, Enhancement::Gold, 1),
+            (Tarot::Tower, Enhancement::Stone, 1),
+        ];
+
+        for (tarot, expected_enhancement, max_cards) in test_cases {
+            let mut cards = vec![create_test_card(Rank::Two, Suit::Spades); max_cards];
+            let result = use_enhancement_tarot(tarot, &mut cards);
+            assert!(result.is_ok());
+            for card in &cards {
+                assert_eq!(get_card_enhancement(card), expected_enhancement);
+            }
+        }
+    }
+
+    #[test]
+    fn test_suit_tarots() {
+        let test_cases = vec![
+            (Tarot::Star, Suit::Diamonds),
+            (Tarot::Moon, Suit::Clubs),
+            (Tarot::Sun, Suit::Hearts),
+            (Tarot::World, Suit::Spades),
+        ];
+
+        for (tarot, expected_suit) in test_cases {
+            let mut cards = vec![
+                create_test_card(Rank::Two, Suit::Spades),
+                create_test_card(Rank::Three, Suit::Hearts),
+                create_test_card(Rank::Four, Suit::Clubs),
+            ];
+            let result = use_suit_tarot(tarot, &mut cards);
+            assert!(result.is_ok());
+            for card in &cards {
+                assert_eq!(get_card_suit(card), expected_suit);
+            }
+        }
+    }
+}
