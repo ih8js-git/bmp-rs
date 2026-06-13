@@ -1,9 +1,15 @@
+mod blinds;
 mod card;
 mod consumable;
 mod levels;
 
 use card::*;
-use consumable::tarots::*;
+use consumable::*;
+
+pub struct GameState {
+    late_used: Option<Consumable>,
+    deck: Vec<Card>,
+}
 
 fn main() {
     let cards = create_deck();

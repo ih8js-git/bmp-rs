@@ -77,6 +77,5 @@ pub fn parse_card_seal_to_text(seal: Seal) -> String {
         Seal::Blue => "Blue Seal".to_string(),
         Seal::Gold => "Gold Seal".to_string(),
         Seal::Purple => "Purple Seal".to_string(),
-        _ => "Error".to_string(),
     }
 }
