@@ -13,13 +13,23 @@ pub fn set_card_chips(card: &mut Card, chips: u16) {
 }
 
 pub fn set_card_rank(card: &mut Card, rank: Rank) {
-    card.meta &= !(0b1111 << 12); // set prev rank bits to 0
-    card.meta |= (rank as u16) << 12; // insert new rank bits
+    card.meta &= !(0b1111 << 12);                       // set prev rank bits to 0
+    card.meta |= (rank as u16) << 12;                   // insert new rank bits
+}
+
+pub fn get_card_rank(card: &Card) -> Rank {
+    let rank = (card.meta >> 12) as u8;
+    unsafe { std::mem::transmute(rank) }                // We guarantee rank will be within enum boundaries
 }
 
 pub fn set_card_suit(card: &mut Card, suit: Suit) {
-    card.meta &= !(0b11 << 10);
-    card.meta |= (suit as u16) << 10;
+    card.meta &= !(0b11 << 10);                         // set prev suit bits to 0
+    card.meta |= (suit as u16) << 10;                   // insert new suit bits
+}
+
+pub fn get_card_suit(card: &Card) -> Suit {
+    let suit = ((card.meta & (0b11 << 10)) >> 10) as u8;
+    unsafe { std::mem::transmute(suit) }                // We guarantee suit will be within enum boundaries
 }
 
 pub fn set_card_edition(card: &mut Card, edition: Edition) {
@@ -27,14 +37,29 @@ pub fn set_card_edition(card: &mut Card, edition: Edition) {
     card.meta |= (edition as u16) << 7;
 }
 
+pub fn get_card_edition(card: &Card) -> Edition {
+    let edition = ((card.meta & (0b111 << 7)) >> 7) as u8;
+    unsafe { std::mem::transmute(edition) }                // We guarantee edition will be within enum boundaries
+}
+
 pub fn set_card_enhancement(card: &mut Card, enhancement: Enhancement) {
-    card.meta &= !(0b1111 << 3);
-    card.meta |= (enhancement as u16) << 3;
+    card.meta &= !(0b1111 << 3);                            // set prev enhancement bits to 0
+    card.meta |= (enhancement as u16) << 3;                 // insert enhancement suit bits
+}
+
+pub fn get_card_enhancement(card: &Card) -> Enhancement {
+    let enhancement = ((card.meta & (0b1111 << 3)) >> 3) as u8;
+    unsafe { std::mem::transmute(enhancement) }            // We guarantee enhancement will be within enum boundaries
 }
 
 pub fn set_card_seal(card: &mut Card, seal: Seal) {
-    card.meta &= !0b111;
-    card.meta |= seal as u16;
+    card.meta &= !0b111;                                   // set seal bits to 0
+    card.meta |= seal as u16;                              // insert seal suit bits
+}
+
+pub fn get_card_seal(card: &Card) -> Seal {
+    let seal = (card.meta & 0b111) as u8;
+    unsafe { std::mem::transmute(seal) }                // We guarantee seal will be within enum boundaries
 }
 
 #[cfg(test)]
