@@ -2,25 +2,30 @@ use crate::card::operations::get_card_rank;
 use crate::card::operations::{set_card_enhancement, set_card_rank, set_card_suit};
 use crate::card::{Card, Enhancement, Rank, Suit};
 
+/// Represents tarot card. Importantly The order of the enums is the same as
+/// the order of the enhancements applied by the tarots (Hierophant through Magician), 
+/// allowing for optimization.
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub enum Tarot {
-    Fool,
-    Magician,
+pub enum Tarot {        // make enum tarot and enhancement 
+                        // pub enum Enhancement {
+    Fool,               //    None,
+    Hierophant,         //    Bonus,
+    Empress,            //    Mult,
+    Lovers,             //    Wild,
+    Justice,            //    Glass,    
+    Chariot,            //    Steel,    
+    Tower,              //    Stone,
+    Devil,              //    Gold,
+    Magician,           //    Lucky,                  
+                        // }   
     HighPriestess,
-    Empress,
     Emperor,
-    Hierophant,
-    Lovers,
-    Chariot,
-    Justice,
     Hermit,
     WheelOfFortune,
     Strength,
     HangedMan,
     Death,
     Temperance,
-    Devil,
-    Tower,
     Star,
     Moon,
     Sun,
