@@ -152,7 +152,7 @@ pub fn use_judgement(cards: &mut Vec<Card>) -> Result<&mut Vec<Card>, String> {
 mod tests {
     use super::*;
     use crate::card::core::create_test_card;
-    use crate::card::parse::{get_card_rank, get_card_suit};
+    use crate::card::parse::{get_card_enhancement, get_card_rank, get_card_suit};
 
     #[test]
     fn test_tarot_strength() {
