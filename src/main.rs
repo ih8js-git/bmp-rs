@@ -1,9 +1,9 @@
 mod card;
-mod consumables;
+mod consumable;
 mod levels;
 
 use card::*;
-use consumables::tarots::*;
+use consumable::tarots::*;
 
 fn main() {
     let cards = create_deck();
