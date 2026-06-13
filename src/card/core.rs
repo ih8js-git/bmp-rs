@@ -14,6 +14,7 @@ pub struct Card {
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, EnumIter, FromRepr)]
+#[repr(u8)]
 pub enum Rank {
     Two,
     Three,
@@ -31,6 +32,7 @@ pub enum Rank {
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, EnumIter)]
+#[repr(u8)]
 pub enum Suit {
     Spades,
     Hearts,
@@ -39,6 +41,7 @@ pub enum Suit {
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
+#[repr(u8)]
 pub enum Edition {
     None,
     Foil,
@@ -48,6 +51,7 @@ pub enum Edition {
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
+#[repr(u8)]
 pub enum Enhancement {
     None,
     Bonus,
@@ -61,6 +65,7 @@ pub enum Enhancement {
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
+#[repr(u8)]
 pub enum Seal {
     None,
     Gold,
