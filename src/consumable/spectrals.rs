@@ -1,6 +1,8 @@
 use crate::card::{Card, Seal, set_card_seal};
 
-enum Spectral {
+#[derive(Debug, Copy, Clone, PartialEq)]
+#[repr(u8)]
+pub enum Spectral {
     Familiar,
     Grim,
     Incantation,
