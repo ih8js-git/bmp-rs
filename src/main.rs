@@ -1,10 +1,12 @@
 mod card;
 mod levels;
+mod tarots;
 
 use card::*;
+use tarots::*;
 
 fn main() {
-    let cards = create_deck();
+    let mut cards = create_deck();
 
     println!("{:?}", cards);
 

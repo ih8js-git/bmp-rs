@@ -13,8 +13,8 @@ pub fn set_card_chips(card: &mut Card, chips: u16) {
 }
 
 pub fn set_card_rank(card: &mut Card, rank: Rank) {
-    card.meta &= !(0b1111 << 12);                   // set prev rank bits to 0
-    card.meta |= (rank as u16) << 12;               // insert new rank bits
+    card.meta &= !(0b1111 << 12); // set prev rank bits to 0
+    card.meta |= (rank as u16) << 12; // insert new rank bits
 }
 
 pub fn set_card_suit(card: &mut Card, suit: Suit) {
@@ -43,10 +43,7 @@ mod tests {
 
     // Helper to create a clean card
     fn create_blank_card() -> Card {
-        Card {
-            meta: 0,
-            chips: 0,
-        }
+        Card { meta: 0, chips: 0 }
     }
 
     #[test]

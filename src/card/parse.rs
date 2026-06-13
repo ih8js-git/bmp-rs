@@ -1,4 +1,24 @@
 use crate::card::Card;
+use crate::card::Rank;
+
+pub fn parse_card_rank(card: &Card) -> Rank {
+    match card.meta >> 12 {
+        0 => Rank::Two,
+        1 => Rank::Three,
+        2 => Rank::Four,
+        3 => Rank::Five,
+        4 => Rank::Six,
+        5 => Rank::Seven,
+        6 => Rank::Eight,
+        7 => Rank::Nine,
+        8 => Rank::Ten,
+        9 => Rank::Jack,
+        10 => Rank::Queen,
+        11 => Rank::King,
+        12 => Rank::Ace,
+        _ => panic!("Invalid rank"),
+    }
+}
 
 pub fn parse_card_to_text(card: &Card) -> String {
     let rank = card.meta >> 12;

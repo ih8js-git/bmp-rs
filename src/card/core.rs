@@ -1,5 +1,5 @@
 use strum::IntoEnumIterator;
-use strum_macros::EnumIter;
+use strum_macros::{EnumIter, FromRepr};
 
 /*
  * |Rank|Suit|Edition|Enhancement|Seal|
@@ -7,13 +7,13 @@ use strum_macros::EnumIter;
  * |4b  |2b  |3b     |4b         |3b  |
  */
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct Card {
     pub meta: u16,
     pub chips: u16,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, EnumIter)]
+#[derive(Debug, Copy, Clone, PartialEq, EnumIter, FromRepr)]
 pub enum Rank {
     Two,
     Three,
