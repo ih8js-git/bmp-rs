@@ -161,6 +161,10 @@ pub fn create_game_state(deck: Deck) -> GameState {
         balance: 4,
         hands: 4,
         discards: 3,
+        current_round: 1,
+        starting_deck_size: 52,
+        skips_taken: 0,
+        base_reroll_cost: 5,
     };
 
     match deck {
@@ -213,6 +217,7 @@ pub fn create_game_state(deck: Deck) -> GameState {
         },
         Deck::Abandoned => GameState {
             deck: create_abandoned_deck(),
+            starting_deck_size: 40,
             ..base
         },
         Deck::Checkered => GameState {
