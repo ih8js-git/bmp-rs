@@ -1,3 +1,5 @@
+use crate::GameState;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum Voucher {
@@ -33,4 +35,12 @@ pub enum Voucher {
     Retcon,
     PaintBrush,
     Palette,
+}
+
+pub fn add_voucher(state: &mut GameState, voucher: Voucher) {
+    state.vouchers |= 1u32 << (voucher as u8);
+}
+
+pub fn has_voucher(state: &GameState, voucher: Voucher) -> bool {
+    state.vouchers & (1u32 << (voucher as u8)) != 0
 }

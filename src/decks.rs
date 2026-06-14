@@ -1,8 +1,8 @@
 use crate::GameState;
-use crate::Voucher;
 use crate::card::{Card, Edition, Enhancement, Rank, Seal, Suit};
 use crate::consumable::Spectral;
 use crate::consumable::{Consumable, Tarot};
+use crate::{Voucher, add_voucher, has_voucher};
 use strum::IntoEnumIterator;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -151,7 +151,7 @@ pub fn create_game_state(deck: Deck) -> GameState {
         last_used: Consumable::Tarot(Tarot::Fool),
         tarots_used: 0,
         deck: Vec::new(),
-        vouchers: Vec::with_capacity(8),
+        vouchers: 0,
         hand: Vec::with_capacity(8),
         hand_size: 8,
         jokers: Vec::with_capacity(5),
@@ -185,21 +185,27 @@ pub fn create_game_state(deck: Deck) -> GameState {
             hands: base.hands - 1,
             ..base
         },
-        Deck::Magic => GameState {
-            deck: create_default_deck(),
-            vouchers: vec![Voucher::CrystalBall],
-            consumables: vec![
-                Consumable::Tarot(Tarot::Fool),
-                Consumable::Tarot(Tarot::Fool),
-            ],
-            ..base
-        },
-        Deck::Nebula => GameState {
-            deck: create_default_deck(),
-            vouchers: vec![Voucher::Telescope],
-            consumable_slots: base.consumable_slots - 1,
-            ..base
-        },
+        Deck::Magic => {
+            let mut state = GameState {
+                deck: create_default_deck(),
+                consumables: vec![
+                    Consumable::Tarot(Tarot::Fool),
+                    Consumable::Tarot(Tarot::Fool),
+                ],
+                ..base
+            };
+            add_voucher(&mut state, Voucher::CrystalBall);
+            state
+        }
+        Deck::Nebula => {
+            let mut state = GameState {
+                deck: create_default_deck(),
+                consumable_slots: base.consumable_slots - 1,
+                ..base
+            };
+            add_voucher(&mut state, Voucher::Telescope);
+            state
+        }
         Deck::Ghost => GameState {
             deck: create_default_deck(),
             consumables: vec![Consumable::Spectral(Spectral::Hex)],
@@ -213,15 +219,16 @@ pub fn create_game_state(deck: Deck) -> GameState {
             deck: create_checkered_deck(),
             ..base
         },
-        Deck::Zodiac => GameState {
-            deck: create_default_deck(),
-            vouchers: vec![
-                Voucher::TarotMerchant,
-                Voucher::PlanetMerchant,
-                Voucher::Overstock,
-            ],
-            ..base
-        },
+        Deck::Zodiac => {
+            let mut state = GameState {
+                deck: create_default_deck(),
+                ..base
+            };
+            add_voucher(&mut state, Voucher::TarotMerchant);
+            add_voucher(&mut state, Voucher::PlanetMerchant);
+            add_voucher(&mut state, Voucher::Overstock);
+            state
+        }
         Deck::Painted => GameState {
             deck: create_default_deck(),
             hand_size: base.hand_size + 2,
@@ -252,7 +259,7 @@ mod tests {
         assert_eq!(state.joker_slots, 5);
         assert_eq!(state.consumable_slots, 2);
         assert_eq!(state.hand_size, 8);
-        assert!(state.vouchers.is_empty());
+        assert_eq!(state.vouchers, 0);
         assert!(state.consumables.is_empty());
     }
 
@@ -286,8 +293,7 @@ mod tests {
     #[test]
     fn test_magic_deck() {
         let state = create_game_state(Deck::Magic);
-        assert_eq!(state.vouchers.len(), 1);
-        assert_eq!(state.vouchers[0], Voucher::CrystalBall);
+        assert!(has_voucher(&state, Voucher::CrystalBall));
         assert_eq!(state.consumables.len(), 2);
         assert_eq!(state.consumables[0], Consumable::Tarot(Tarot::Fool));
         assert_eq!(state.consumables[1], Consumable::Tarot(Tarot::Fool));
@@ -296,8 +302,7 @@ mod tests {
     #[test]
     fn test_nebula_deck() {
         let state = create_game_state(Deck::Nebula);
-        assert_eq!(state.vouchers.len(), 1);
-        assert_eq!(state.vouchers[0], Voucher::Telescope);
+        assert!(has_voucher(&state, Voucher::Telescope));
         assert_eq!(state.consumable_slots, 1); // base 2 - 1
     }
 
@@ -344,10 +349,9 @@ mod tests {
     #[test]
     fn test_zodiac_deck() {
         let state = create_game_state(Deck::Zodiac);
-        assert_eq!(state.vouchers.len(), 3);
-        assert_eq!(state.vouchers[0], Voucher::TarotMerchant);
-        assert_eq!(state.vouchers[1], Voucher::PlanetMerchant);
-        assert_eq!(state.vouchers[2], Voucher::Overstock);
+        assert!(has_voucher(&state, Voucher::TarotMerchant));
+        assert!(has_voucher(&state, Voucher::PlanetMerchant));
+        assert!(has_voucher(&state, Voucher::Overstock));
     }
 
     #[test]

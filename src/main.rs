@@ -16,9 +16,7 @@ pub struct GameState {
     last_used: Consumable,
     tarots_used: u16,
     deck: Vec<Card>,
-    // TODO: convert this to a single u32, each of the 32 vouchers,
-    // get 1 bit for a boolean
-    vouchers: Vec<Voucher>,
+    vouchers: u32,
     hand: Vec<Card>,
     hand_size: u8,
     jokers: Vec<Joker>,
