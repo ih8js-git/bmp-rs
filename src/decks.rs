@@ -160,11 +160,15 @@ pub fn create_game_state(deck: Deck) -> GameState {
         consumable_slots: 2,
         balance: 4,
         hands: 4,
+        hands_used: 0,
         discards: 3,
+        discards_used: 0,
         current_round: 1,
         starting_deck_size: 52,
         skips_taken: 0,
         base_reroll_cost: 5,
+        planet_levels: [1; 12],
+        hand_types_played: [0; 12],
     };
 
     match deck {

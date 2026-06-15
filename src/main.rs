@@ -25,16 +25,16 @@ pub struct GameState {
     consumable_slots: u8,
     balance: u32,
     hands: u8,
+    hands_used: u8,
     discards: u8,
+    discards_used: u8,
     current_round: u8,
     starting_deck_size: u8,
     skips_taken: u8,
     base_reroll_cost: u8,
+    planet_levels: [u8; 12],
+    hand_types_played: [u8; 12],
     // ecto_hand_size_reduction: u8, // starts at 1
-    // hands_played,
-    // unused_discards,
-    // how many each planet has been used
-    // how many each hand has been played
 }
 
 fn main() {
