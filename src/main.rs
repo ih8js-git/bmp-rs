@@ -4,6 +4,7 @@ mod consumable;
 mod decks;
 mod joker;
 mod levels;
+mod score;
 mod vouchers;
 
 use card::*;
