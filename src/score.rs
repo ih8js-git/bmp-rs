@@ -27,28 +27,35 @@ pub fn get_hand_type(hand: &[Card]) -> (Hand, Vec<usize>) {
         true // All non-wild cards match (or all cards are wild)
     }
 
-    fn is_straight(hand: &[Card]) -> bool {
-        let mut r: Vec<usize> = hand.iter().map(|c| get_card_rank(c) as usize).collect();
-        r.sort_unstable(); // Sort ranks from lowest (Two) to highest (Ace)
+    fn is_straight(ranks: &[u8; 13], hand_len: usize) -> bool {
+        let mut consecutive = 0;
 
-        // Standard straight check (e.g. 5, 6, 7, 8, 9)
-        if r.windows(2).all(|w| w[1] == w[0] + 1) {
-            return true;
+        // Check for standard straight
+        for &count in ranks.iter() {
+            if count > 0 {
+                consecutive += 1;
+                if consecutive == hand_len {
+                    return true;
+                }
+            } else {
+                consecutive = 0; // reset if sequence breaks
+            }
         }
 
-        // Ace-low straight check (A, 2, 3, 4, 5)
-        // Since Ace is 12 and Two is 0, a sorted Ace-low straight looks like: [0, 1, 2, 3, 12]
-        if *r.last().unwrap() == 12 {
-            let mut is_low_ace = true;
-            for i in 0..(r.len() - 1) {
-                if r[i] != i {
-                    // Must be Two(0), Three(1), Four(2), etc.
-                    is_low_ace = false;
+        // Check for Ace-low straight (A, 2, 3, 4, 5)
+        if ranks[12] > 0 {
+            // If we have an Ace
+            consecutive = 1; // Count the Ace
+            for i in 0..(hand_len - 1) {
+                // Check Two, Three, Four...
+                if ranks[i] > 0 {
+                    consecutive += 1;
+                    if consecutive == hand_len {
+                        return true;
+                    }
+                } else {
                     break;
                 }
-            }
-            if is_low_ace {
-                return true;
             }
         }
 
@@ -66,7 +73,7 @@ pub fn get_hand_type(hand: &[Card]) -> (Hand, Vec<usize>) {
             } else {
                 return Some((Hand::FiveOfAKind, (0..hand.len()).collect()));
             }
-        } else if is_straight(hand) {
+        } else if is_straight(ranks, hand.len()) {
             if flush {
                 return Some((Hand::StraightFlush, (0..hand.len()).collect()));
             } else {
