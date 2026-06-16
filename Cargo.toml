@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+modular-bitfield = "0.13.1"
 strum = "0.28.0"
 strum_macros = "0.28.0"
 

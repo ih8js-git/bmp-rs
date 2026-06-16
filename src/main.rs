@@ -20,7 +20,7 @@ pub struct GameState {
     vouchers: u32,
     hand: Vec<Card>,
     hand_size: u8,
-    jokers: Vec<Joker>,
+    jokers: Vec<JokerState>,
     joker_slots: u8,
     consumables: Vec<Consumable>,
     consumable_slots: u8,
