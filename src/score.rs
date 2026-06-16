@@ -5,17 +5,28 @@ use crate::levels::Hand;
 
 pub fn get_hand_type(hand: &[Card], jokers: &[Joker]) -> (Hand, Vec<usize>) {
     let mut ranks = [0u8; 13];
-    let mut flush = false;
 
     for card in hand {
         ranks[get_card_rank(card) as usize] += 1;
     }
 
-    fn is_flush(hand: &[Card], jokers: &[Joker]) -> bool {
-        let mut target_suit = None;
+    let four_fingers = jokers.contains(&Joker::FourFingers);
+    let required_five_card_len = if four_fingers { 4 } else { 5 };
+
+    fn get_flush_indices(
+        hand: &[Card],
+        jokers: &[Joker],
+        required_len: usize,
+    ) -> Option<Vec<usize>> {
         let smeared = jokers.contains(&Joker::SmearedJoker);
-        for card in hand {
-            if get_card_enhancement(card) != Enhancement::Wild {
+        let mut suit_counts = [0; 4];
+        let mut wild_indices = Vec::new();
+        let mut suit_indices: [Vec<usize>; 4] = [Vec::new(), Vec::new(), Vec::new(), Vec::new()];
+
+        for (i, card) in hand.iter().enumerate() {
+            if get_card_enhancement(card) == Enhancement::Wild {
+                wild_indices.push(i);
+            } else {
                 let mut suit = get_card_suit(card);
                 if smeared {
                     if suit == crate::card::core::Suit::Diamonds {
@@ -24,43 +35,65 @@ pub fn get_hand_type(hand: &[Card], jokers: &[Joker]) -> (Hand, Vec<usize>) {
                         suit = crate::card::core::Suit::Spades;
                     }
                 }
-                if let Some(t) = target_suit {
-                    if suit != t {
-                        return false; // Found conflicting suits
-                    }
-                } else {
-                    target_suit = Some(suit); // First non-wild suit found
-                }
+                suit_counts[suit as usize] += 1;
+                suit_indices[suit as usize].push(i);
             }
         }
-        true // All non-wild cards match (or all cards are wild)
+
+        let mut best_suit = None;
+        let mut max_cards = 0;
+
+        for i in 0..4 {
+            let total = suit_counts[i] + wild_indices.len();
+            if total >= required_len && total > max_cards {
+                max_cards = total;
+                best_suit = Some(i);
+            }
+        }
+
+        if let Some(suit) = best_suit {
+            let mut indices = suit_indices[suit].clone();
+            indices.extend(wild_indices.clone());
+            indices.sort_unstable();
+            return Some(indices);
+        }
+        None
     }
 
-    fn is_straight(ranks: &[u8; 13], hand_len: usize) -> bool {
+    fn get_straight_indices(
+        ranks: &[u8; 13],
+        hand: &[Card],
+        required_len: usize,
+    ) -> Option<Vec<usize>> {
         let mut consecutive = 0;
+        let mut straight_ranks = Vec::new();
+        let mut best_straight_ranks = Vec::new();
 
         // Check for standard straight
-        for &count in ranks.iter() {
-            if count > 0 {
+        for i in 0..13 {
+            if ranks[i] > 0 {
                 consecutive += 1;
-                if consecutive == hand_len {
-                    return true;
+                straight_ranks.push(i);
+                if consecutive >= required_len {
+                    best_straight_ranks = straight_ranks.clone();
                 }
             } else {
-                consecutive = 0; // reset if sequence breaks
+                consecutive = 0;
+                straight_ranks.clear();
             }
         }
 
         // Check for Ace-low straight (A, 2, 3, 4, 5)
-        if ranks[12] > 0 {
-            // If we have an Ace
-            consecutive = 1; // Count the Ace
-            for i in 0..(hand_len - 1) {
-                // Check Two, Three, Four...
+        if best_straight_ranks.is_empty() && ranks[12] > 0 {
+            consecutive = 1;
+            straight_ranks.clear();
+            straight_ranks.push(12);
+            for i in 0..4 {
                 if ranks[i] > 0 {
                     consecutive += 1;
-                    if consecutive == hand_len {
-                        return true;
+                    straight_ranks.push(i);
+                    if consecutive >= required_len {
+                        best_straight_ranks = straight_ranks.clone();
                     }
                 } else {
                     break;
@@ -68,34 +101,59 @@ pub fn get_hand_type(hand: &[Card], jokers: &[Joker]) -> (Hand, Vec<usize>) {
             }
         }
 
-        false
+        if !best_straight_ranks.is_empty() {
+            let mut indices = Vec::new();
+            // Take up to 5 highest ranks
+            for &rank in best_straight_ranks.iter().rev().take(5) {
+                for (idx, card) in hand.iter().enumerate() {
+                    if get_card_rank(card) as usize == rank {
+                        if !indices.contains(&idx) {
+                            indices.push(idx);
+                            break;
+                        }
+                    }
+                }
+            }
+            indices.sort_unstable();
+            return Some(indices);
+        }
+
+        None
     }
 
     fn check_five_card_hands(
         hand: &[Card],
         ranks: &[u8; 13],
-        flush: bool,
+        flush_indices: Option<Vec<usize>>,
+        straight_indices: Option<Vec<usize>>,
     ) -> Option<(Hand, Vec<usize>)> {
         if ranks.contains(&5) {
-            if flush {
+            if flush_indices.is_some() {
                 return Some((Hand::FlushFive, (0..hand.len()).collect()));
             } else {
                 return Some((Hand::FiveOfAKind, (0..hand.len()).collect()));
             }
-        } else if is_straight(ranks, hand.len()) {
-            if flush {
-                return Some((Hand::StraightFlush, (0..hand.len()).collect()));
+        } else if let Some(s_ind) = straight_indices {
+            if let Some(f_ind) = flush_indices {
+                let mut all_ind = s_ind.clone();
+                for &i in &f_ind {
+                    if !all_ind.contains(&i) {
+                        all_ind.push(i);
+                    }
+                }
+                all_ind.sort_unstable();
+                return Some((Hand::StraightFlush, all_ind));
             } else {
-                return Some((Hand::Straight, (0..hand.len()).collect()));
+                return Some((Hand::Straight, s_ind));
             }
         } else if ranks.contains(&2) && ranks.contains(&3) {
-            if flush {
+            if flush_indices.is_some() {
                 return Some((Hand::FlushHouse, (0..hand.len()).collect()));
             } else {
                 return Some((Hand::FullHouse, (0..hand.len()).collect()));
             }
-        } else if flush {
-            return Some((Hand::Flush, (0..hand.len()).collect()));
+        } else if let Some(f_ind) = flush_indices {
+            return Some((Hand::Flush, f_ind));
         }
         None
     }
@@ -153,14 +211,13 @@ pub fn get_hand_type(hand: &[Card], jokers: &[Joker]) -> (Hand, Vec<usize>) {
         None
     }
 
-    if is_flush(hand, jokers) {
-        flush = true;
-    }
+    let flush_indices = get_flush_indices(hand, jokers, required_five_card_len);
+    let straight_indices = get_straight_indices(&ranks, hand, required_five_card_len);
 
-    if hand.len() == 5 {
+    if hand.len() >= required_five_card_len {
         // If the hand doesn't have 5 cards, no point checking for five card hands.
         // Unless they have the Four Fingers joker.
-        if let Some(h) = check_five_card_hands(hand, &ranks, flush) {
+        if let Some(h) = check_five_card_hands(hand, &ranks, flush_indices, straight_indices) {
             return h;
         }
     }
@@ -474,6 +531,106 @@ mod tests {
         assert_eq!(
             get_hand_type(&hand_red, &jokers),
             (Hand::Flush, vec![0, 1, 2, 3, 4])
+        );
+    }
+
+    #[test]
+    fn test_four_fingers() {
+        // 4-card flush
+        let hand = vec![
+            create_test_card(Rank::Two, Suit::Spades),
+            create_test_card(Rank::Four, Suit::Spades),
+            create_test_card(Rank::Six, Suit::Spades),
+            create_test_card(Rank::Eight, Suit::Spades),
+            create_test_card(Rank::Ten, Suit::Hearts),
+        ];
+
+        let jokers = vec![Joker::FourFingers];
+        assert_eq!(
+            get_hand_type(&hand, &jokers),
+            (Hand::Flush, vec![0, 1, 2, 3])
+        );
+
+        // 4-card straight
+        let hand2 = vec![
+            create_test_card(Rank::Five, Suit::Spades),
+            create_test_card(Rank::Six, Suit::Hearts),
+            create_test_card(Rank::Seven, Suit::Spades),
+            create_test_card(Rank::Eight, Suit::Clubs),
+            create_test_card(Rank::King, Suit::Hearts),
+        ];
+
+        assert_eq!(
+            get_hand_type(&hand2, &jokers),
+            (Hand::Straight, vec![0, 1, 2, 3])
+        );
+    }
+
+    #[test]
+    fn test_four_fingers_smeared() {
+        let hand = vec![
+            create_test_card(Rank::Two, Suit::Spades),
+            create_test_card(Rank::Four, Suit::Clubs), // Smeared makes this Spades
+            create_test_card(Rank::Six, Suit::Spades),
+            create_test_card(Rank::Eight, Suit::Clubs), // Smeared makes this Spades
+            create_test_card(Rank::Ten, Suit::Hearts),
+        ];
+
+        let jokers = vec![Joker::FourFingers, Joker::SmearedJoker];
+        assert_eq!(
+            get_hand_type(&hand, &jokers),
+            (Hand::Flush, vec![0, 1, 2, 3])
+        );
+    }
+
+    #[test]
+    fn test_four_fingers_wild() {
+        let hand = vec![
+            create_test_card(Rank::Two, Suit::Spades),
+            create_test_card(Rank::Four, Suit::Spades),
+            get_wild(Rank::Six, Suit::Hearts), // Wild counts as Spades
+            get_wild(Rank::Eight, Suit::Diamonds), // Wild counts as Spades
+            create_test_card(Rank::Ten, Suit::Hearts),
+        ];
+
+        let jokers = vec![Joker::FourFingers];
+        assert_eq!(
+            get_hand_type(&hand, &jokers),
+            (Hand::Flush, vec![0, 1, 2, 3])
+        );
+    }
+
+    #[test]
+    fn test_four_fingers_straight_flush() {
+        // 4-card straight flush
+        let hand = vec![
+            create_test_card(Rank::Five, Suit::Spades),
+            create_test_card(Rank::Six, Suit::Spades),
+            create_test_card(Rank::Seven, Suit::Spades),
+            create_test_card(Rank::Eight, Suit::Spades),
+            create_test_card(Rank::King, Suit::Hearts), // Non-contributing card
+        ];
+
+        let jokers = vec![Joker::FourFingers];
+        assert_eq!(
+            get_hand_type(&hand, &jokers),
+            (Hand::StraightFlush, vec![0, 1, 2, 3])
+        );
+
+        // 4-card straight flush with overlapping straight/flush
+        let hand_mixed = vec![
+            create_test_card(Rank::Five, Suit::Spades),
+            create_test_card(Rank::Six, Suit::Spades),
+            create_test_card(Rank::Seven, Suit::Spades),
+            create_test_card(Rank::Two, Suit::Spades), // Contributes to flush
+            create_test_card(Rank::Eight, Suit::Hearts), // Contributes to straight
+        ];
+
+        // This makes a 4-card straight (5, 6, 7, 8) and a 4-card flush (Spades)
+        // Balatro evaluates this as a Straight Flush with 5 scoring cards.
+        assert_eq!(
+            get_hand_type(&hand_mixed, &jokers),
+            (Hand::StraightFlush, vec![0, 1, 2, 3, 4])
         );
     }
 }
