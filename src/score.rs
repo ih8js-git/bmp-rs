@@ -1,8 +1,9 @@
 use crate::card::operations::{get_card_enhancement, get_card_rank, get_card_suit};
 use crate::card::{Card, Enhancement};
+use crate::joker::{JOKER_DEFS, Joker};
 use crate::levels::Hand;
 
-pub fn get_hand_type(hand: &[Card]) -> (Hand, Vec<usize>) {
+pub fn get_hand_type(hand: &[Card], jokers: &[Joker]) -> (Hand, Vec<usize>) {
     let mut ranks = [0u8; 13];
     let mut flush = false;
 
@@ -10,11 +11,19 @@ pub fn get_hand_type(hand: &[Card]) -> (Hand, Vec<usize>) {
         ranks[get_card_rank(card) as usize] += 1;
     }
 
-    fn is_flush(hand: &[Card]) -> bool {
+    fn is_flush(hand: &[Card], jokers: &[Joker]) -> bool {
         let mut target_suit = None;
+        let smeared = jokers.contains(&Joker::SmearedJoker);
         for card in hand {
             if get_card_enhancement(card) != Enhancement::Wild {
-                let suit = get_card_suit(card);
+                let mut suit = get_card_suit(card);
+                if smeared {
+                    if suit == crate::card::core::Suit::Diamonds {
+                        suit = crate::card::core::Suit::Hearts;
+                    } else if suit == crate::card::core::Suit::Clubs {
+                        suit = crate::card::core::Suit::Spades;
+                    }
+                }
                 if let Some(t) = target_suit {
                     if suit != t {
                         return false; // Found conflicting suits
@@ -144,7 +153,7 @@ pub fn get_hand_type(hand: &[Card]) -> (Hand, Vec<usize>) {
         None
     }
 
-    if is_flush(hand) {
+    if is_flush(hand, jokers) {
         flush = true;
     }
 
@@ -208,7 +217,10 @@ mod tests {
             create_test_card(Rank::King, Suit::Spades),
             create_test_card(Rank::King, Suit::Spades),
         ];
-        assert_eq!(get_hand_type(&hand), (Hand::FlushFive, vec![0, 1, 2, 3, 4]));
+        assert_eq!(
+            get_hand_type(&hand, &[]),
+            (Hand::FlushFive, vec![0, 1, 2, 3, 4])
+        );
     }
 
     #[test]
@@ -221,7 +233,7 @@ mod tests {
             create_test_card(Rank::King, Suit::Spades),
         ];
         assert_eq!(
-            get_hand_type(&hand),
+            get_hand_type(&hand, &[]),
             (Hand::FiveOfAKind, vec![0, 1, 2, 3, 4])
         );
     }
@@ -236,7 +248,7 @@ mod tests {
             create_test_card(Rank::Queen, Suit::Spades),
         ];
         assert_eq!(
-            get_hand_type(&hand),
+            get_hand_type(&hand, &[]),
             (Hand::FlushHouse, vec![0, 1, 2, 3, 4])
         );
     }
@@ -251,7 +263,7 @@ mod tests {
             create_test_card(Rank::Nine, Suit::Spades),
         ];
         assert_eq!(
-            get_hand_type(&hand),
+            get_hand_type(&hand, &[]),
             (Hand::StraightFlush, vec![0, 1, 2, 3, 4])
         );
     }
@@ -267,7 +279,7 @@ mod tests {
             create_test_card(Rank::Five, Suit::Hearts),
         ];
         assert_eq!(
-            get_hand_type(&hand),
+            get_hand_type(&hand, &[]),
             (Hand::StraightFlush, vec![0, 1, 2, 3, 4])
         );
     }
@@ -280,7 +292,10 @@ mod tests {
             create_test_card(Rank::King, Suit::Clubs),
             create_test_card(Rank::King, Suit::Diamonds),
         ];
-        assert_eq!(get_hand_type(&hand), (Hand::FourOfAKind, vec![0, 1, 2, 3]));
+        assert_eq!(
+            get_hand_type(&hand, &[]),
+            (Hand::FourOfAKind, vec![0, 1, 2, 3])
+        );
     }
 
     #[test]
@@ -294,7 +309,10 @@ mod tests {
             create_test_card(Rank::King, Suit::Diamonds),
         ];
         // The scoring cards are the Kings: indices 0, 2, 3, 4
-        assert_eq!(get_hand_type(&hand), (Hand::FourOfAKind, vec![0, 2, 3, 4]));
+        assert_eq!(
+            get_hand_type(&hand, &[]),
+            (Hand::FourOfAKind, vec![0, 2, 3, 4])
+        );
     }
 
     #[test]
@@ -306,7 +324,10 @@ mod tests {
             create_test_card(Rank::Queen, Suit::Spades),
             create_test_card(Rank::Queen, Suit::Hearts),
         ];
-        assert_eq!(get_hand_type(&hand), (Hand::FullHouse, vec![0, 1, 2, 3, 4]));
+        assert_eq!(
+            get_hand_type(&hand, &[]),
+            (Hand::FullHouse, vec![0, 1, 2, 3, 4])
+        );
     }
 
     #[test]
@@ -318,7 +339,10 @@ mod tests {
             create_test_card(Rank::Eight, Suit::Spades),
             create_test_card(Rank::Ten, Suit::Spades),
         ];
-        assert_eq!(get_hand_type(&hand), (Hand::Flush, vec![0, 1, 2, 3, 4]));
+        assert_eq!(
+            get_hand_type(&hand, &[]),
+            (Hand::Flush, vec![0, 1, 2, 3, 4])
+        );
     }
 
     #[test]
@@ -330,7 +354,10 @@ mod tests {
             get_wild(Rank::Eight, Suit::Hearts), // Wild card
             get_wild(Rank::Ten, Suit::Diamonds), // Wild card
         ];
-        assert_eq!(get_hand_type(&hand), (Hand::Flush, vec![0, 1, 2, 3, 4]));
+        assert_eq!(
+            get_hand_type(&hand, &[]),
+            (Hand::Flush, vec![0, 1, 2, 3, 4])
+        );
     }
 
     #[test]
@@ -342,7 +369,10 @@ mod tests {
             create_test_card(Rank::Ten, Suit::Spades),
             create_test_card(Rank::Jack, Suit::Hearts),
         ];
-        assert_eq!(get_hand_type(&hand), (Hand::Straight, vec![0, 1, 2, 3, 4]));
+        assert_eq!(
+            get_hand_type(&hand, &[]),
+            (Hand::Straight, vec![0, 1, 2, 3, 4])
+        );
     }
 
     #[test]
@@ -354,7 +384,10 @@ mod tests {
             create_test_card(Rank::Five, Suit::Spades),
             create_test_card(Rank::Ace, Suit::Hearts), // Ace is at end
         ];
-        assert_eq!(get_hand_type(&hand), (Hand::Straight, vec![0, 1, 2, 3, 4]));
+        assert_eq!(
+            get_hand_type(&hand, &[]),
+            (Hand::Straight, vec![0, 1, 2, 3, 4])
+        );
     }
 
     #[test]
@@ -366,7 +399,10 @@ mod tests {
             create_test_card(Rank::Four, Suit::Diamonds), // junk
             create_test_card(Rank::King, Suit::Spades),
         ];
-        assert_eq!(get_hand_type(&hand), (Hand::ThreeOfAKind, vec![1, 2, 4]));
+        assert_eq!(
+            get_hand_type(&hand, &[]),
+            (Hand::ThreeOfAKind, vec![1, 2, 4])
+        );
     }
 
     #[test]
@@ -378,7 +414,7 @@ mod tests {
             create_test_card(Rank::King, Suit::Clubs),
             create_test_card(Rank::Queen, Suit::Spades),
         ];
-        assert_eq!(get_hand_type(&hand), (Hand::TwoPair, vec![0, 1, 3, 4]));
+        assert_eq!(get_hand_type(&hand, &[]), (Hand::TwoPair, vec![0, 1, 3, 4]));
     }
 
     #[test]
@@ -390,7 +426,7 @@ mod tests {
             create_test_card(Rank::King, Suit::Clubs),
             create_test_card(Rank::Two, Suit::Spades), // junk
         ];
-        assert_eq!(get_hand_type(&hand), (Hand::Pair, vec![1, 3]));
+        assert_eq!(get_hand_type(&hand, &[]), (Hand::Pair, vec![1, 3]));
     }
 
     #[test]
@@ -402,6 +438,42 @@ mod tests {
             create_test_card(Rank::Six, Suit::Diamonds),
             create_test_card(Rank::Eight, Suit::Spades),
         ];
-        assert_eq!(get_hand_type(&hand), (Hand::HighCard, vec![2]));
+        assert_eq!(get_hand_type(&hand, &[]), (Hand::HighCard, vec![2]));
+    }
+
+    #[test]
+    fn test_smeared_joker_flush() {
+        let hand = vec![
+            create_test_card(Rank::Two, Suit::Spades),
+            create_test_card(Rank::Four, Suit::Spades),
+            create_test_card(Rank::Six, Suit::Clubs),
+            create_test_card(Rank::Eight, Suit::Spades),
+            create_test_card(Rank::Ten, Suit::Clubs),
+        ];
+        // Without smeared joker it's a high card
+        assert_eq!(get_hand_type(&hand, &[]), (Hand::HighCard, vec![4]));
+
+        // With smeared joker it's a flush
+        let jokers = vec![Joker::SmearedJoker];
+        assert_eq!(
+            get_hand_type(&hand, &jokers),
+            (Hand::Flush, vec![0, 1, 2, 3, 4])
+        );
+
+        let hand_red = vec![
+            create_test_card(Rank::Two, Suit::Hearts),
+            create_test_card(Rank::Four, Suit::Diamonds),
+            create_test_card(Rank::Six, Suit::Hearts),
+            create_test_card(Rank::Eight, Suit::Diamonds),
+            create_test_card(Rank::Ten, Suit::Hearts),
+        ];
+        // Without smeared joker it's a high card
+        assert_eq!(get_hand_type(&hand_red, &[]), (Hand::HighCard, vec![4]));
+
+        // With smeared joker it's a flush
+        assert_eq!(
+            get_hand_type(&hand_red, &jokers),
+            (Hand::Flush, vec![0, 1, 2, 3, 4])
+        );
     }
 }
