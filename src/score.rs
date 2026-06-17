@@ -3,6 +3,217 @@ use crate::card::{Card, Enhancement};
 use crate::joker::{JOKER_DEFS, Joker};
 use crate::levels::Hand;
 
+
+fn get_flush_indices(
+    hand: &[Card],
+    jokers: &[Joker],
+    required_len: usize,
+) -> Option<Vec<usize>> {
+    let smeared = jokers.contains(&Joker::SmearedJoker);
+    let mut suit_counts = [0; 4];
+    let mut wild_indices = Vec::new();
+    let mut suit_indices: [Vec<usize>; 4] = [Vec::new(), Vec::new(), Vec::new(), Vec::new()];
+
+    for (i, card) in hand.iter().enumerate() {
+        if get_card_enhancement(card) == Enhancement::Wild {
+            wild_indices.push(i);
+        } else {
+            let mut suit = get_card_suit(card);
+            if smeared {
+                if suit == crate::card::core::Suit::Diamonds {
+                    suit = crate::card::core::Suit::Hearts;
+                } else if suit == crate::card::core::Suit::Clubs {
+                    suit = crate::card::core::Suit::Spades;
+                }
+            }
+            suit_counts[suit as usize] += 1;
+            suit_indices[suit as usize].push(i);
+        }
+    }
+
+    let mut best_suit = None;
+    let mut max_cards = 0;
+
+    for i in 0..4 {
+        let total = suit_counts[i] + wild_indices.len();
+        if total >= required_len && total > max_cards {
+            max_cards = total;
+            best_suit = Some(i);
+        }
+    }
+
+    if let Some(suit) = best_suit {
+        let mut indices = Vec::new();
+        for i in 0..hand.len() {
+            if wild_indices.contains(&i) || suit_indices[suit].contains(&i) {
+                indices.push(i);
+            }
+        }
+        return Some(indices);
+    }
+    None
+}
+
+fn get_straight_indices(
+    ranks: &[u8; 13],
+    hand: &[Card],
+    required_len: usize,
+    jokers: &[Joker],
+) -> Option<Vec<usize>> {
+    let shortcut = jokers.contains(&Joker::Shortcut);
+    let max_gap = if shortcut { 2 } else { 1 };
+
+    let mut present_ranks = Vec::new();
+    if ranks[12] > 0 {
+        present_ranks.push(-1_i32);
+    }
+    for i in 0..13 {
+        if ranks[i] > 0 {
+            present_ranks.push(i as i32);
+        }
+    }
+
+    let mut best_straight_ranks = Vec::new();
+    let mut current_straight = Vec::new();
+
+    for i in 0..present_ranks.len() {
+        if current_straight.is_empty() {
+            current_straight.push(present_ranks[i]);
+        } else {
+            let last = *current_straight.last().unwrap();
+            let diff = present_ranks[i] - last;
+            if diff > 0 && diff <= max_gap {
+                current_straight.push(present_ranks[i]);
+            } else {
+                if current_straight.len() >= required_len {
+                    if current_straight.len() >= best_straight_ranks.len() {
+                        best_straight_ranks = current_straight.clone();
+                    }
+                }
+                current_straight.clear();
+                current_straight.push(present_ranks[i]);
+            }
+        }
+    }
+
+    if current_straight.len() >= required_len {
+        if current_straight.len() >= best_straight_ranks.len() {
+            best_straight_ranks = current_straight.clone();
+        }
+    }
+
+    if !best_straight_ranks.is_empty() {
+        let mut indices = Vec::new();
+        let take_count = 5.min(best_straight_ranks.len());
+        let mut needed_ranks: Vec<usize> = best_straight_ranks
+            .iter()
+            .rev()
+            .take(take_count)
+            .map(|&r| if r == -1 { 12 } else { r as usize })
+            .collect();
+
+        for (idx, card) in hand.iter().enumerate() {
+            let actual_rank = get_card_rank(card) as usize;
+            if let Some(pos) = needed_ranks.iter().position(|&r| r == actual_rank) {
+                indices.push(idx);
+                needed_ranks.remove(pos); // Take only one card per needed rank
+            }
+        }
+        return Some(indices);
+    }
+
+    None
+}
+
+fn check_five_card_hands(
+    hand: &[Card],
+    ranks: &[u8; 13],
+    flush_indices: Option<Vec<usize>>,
+    straight_indices: Option<Vec<usize>>,
+) -> Option<(Hand, Vec<usize>)> {
+    if ranks.contains(&5) {
+        if flush_indices.is_some() {
+            return Some((Hand::FlushFive, (0..hand.len()).collect()));
+        } else {
+            return Some((Hand::FiveOfAKind, (0..hand.len()).collect()));
+        }
+    } else if let Some(s_ind) = straight_indices {
+        if let Some(f_ind) = flush_indices {
+            let mut all_ind = Vec::new();
+            for i in 0..hand.len() {
+                if s_ind.contains(&i) || f_ind.contains(&i) {
+                    all_ind.push(i);
+                }
+            }
+            return Some((Hand::StraightFlush, all_ind));
+        } else {
+            return Some((Hand::Straight, s_ind));
+        }
+    } else if ranks.contains(&2) && ranks.contains(&3) {
+        if flush_indices.is_some() {
+            return Some((Hand::FlushHouse, (0..hand.len()).collect()));
+        } else {
+            return Some((Hand::FullHouse, (0..hand.len()).collect()));
+        }
+    } else if let Some(f_ind) = flush_indices {
+        return Some((Hand::Flush, f_ind));
+    }
+    None
+}
+
+fn check_four_card_hands(hand: &[Card], ranks: &[u8; 13]) -> Option<(Hand, Vec<usize>)> {
+    if ranks.contains(&4) {
+        // Find the rank that has 4 cards, and only return those indices
+        let target_rank = ranks.iter().position(|&count| count == 4).unwrap();
+        let mut indices = Vec::new();
+        for (i, card) in hand.iter().enumerate() {
+            if get_card_rank(card) as usize == target_rank {
+                indices.push(i);
+            }
+        }
+        return Some((Hand::FourOfAKind, indices));
+    } else if ranks.iter().filter(|&&count| count == 2).count() == 2 {
+        let mut indices = Vec::new();
+        for (i, card) in hand.iter().enumerate() {
+            if ranks[get_card_rank(card) as usize] == 2 {
+                indices.push(i);
+            }
+        }
+        return Some((Hand::TwoPair, indices));
+    }
+    None
+}
+
+fn check_three_card_hands(hand: &[Card], ranks: &[u8; 13]) -> Option<(Hand, Vec<usize>)> {
+    if ranks.contains(&3) {
+        // Find the rank that has 3 cards, and only return those indices
+        let target_rank = ranks.iter().position(|&count| count == 3).unwrap();
+        let mut indices = Vec::new();
+        for (i, card) in hand.iter().enumerate() {
+            if get_card_rank(card) as usize == target_rank {
+                indices.push(i);
+            }
+        }
+        return Some((Hand::ThreeOfAKind, indices));
+    }
+    None
+}
+
+fn check_two_card_hands(hand: &[Card], ranks: &[u8; 13]) -> Option<(Hand, Vec<usize>)> {
+    if ranks.contains(&2) {
+        // Find the rank that has 2 cards, and only return those indices
+        let target_rank = ranks.iter().position(|&count| count == 2).unwrap();
+        let mut indices = Vec::new();
+        for (i, card) in hand.iter().enumerate() {
+            if get_card_rank(card) as usize == target_rank {
+                indices.push(i);
+            }
+        }
+        return Some((Hand::Pair, indices));
+    }
+    None
+}
+
 pub fn get_hand_type(hand: &[Card], jokers: &[Joker]) -> (Hand, Vec<usize>) {
     let mut ranks = [0u8; 13];
 
@@ -12,216 +223,6 @@ pub fn get_hand_type(hand: &[Card], jokers: &[Joker]) -> (Hand, Vec<usize>) {
 
     let four_fingers = jokers.contains(&Joker::FourFingers);
     let required_five_card_len = if four_fingers { 4 } else { 5 };
-
-    fn get_flush_indices(
-        hand: &[Card],
-        jokers: &[Joker],
-        required_len: usize,
-    ) -> Option<Vec<usize>> {
-        let smeared = jokers.contains(&Joker::SmearedJoker);
-        let mut suit_counts = [0; 4];
-        let mut wild_indices = Vec::new();
-        let mut suit_indices: [Vec<usize>; 4] = [Vec::new(), Vec::new(), Vec::new(), Vec::new()];
-
-        for (i, card) in hand.iter().enumerate() {
-            if get_card_enhancement(card) == Enhancement::Wild {
-                wild_indices.push(i);
-            } else {
-                let mut suit = get_card_suit(card);
-                if smeared {
-                    if suit == crate::card::core::Suit::Diamonds {
-                        suit = crate::card::core::Suit::Hearts;
-                    } else if suit == crate::card::core::Suit::Clubs {
-                        suit = crate::card::core::Suit::Spades;
-                    }
-                }
-                suit_counts[suit as usize] += 1;
-                suit_indices[suit as usize].push(i);
-            }
-        }
-
-        let mut best_suit = None;
-        let mut max_cards = 0;
-
-        for i in 0..4 {
-            let total = suit_counts[i] + wild_indices.len();
-            if total >= required_len && total > max_cards {
-                max_cards = total;
-                best_suit = Some(i);
-            }
-        }
-
-        if let Some(suit) = best_suit {
-            let mut indices = Vec::new();
-            for i in 0..hand.len() {
-                if wild_indices.contains(&i) || suit_indices[suit].contains(&i) {
-                    indices.push(i);
-                }
-            }
-            return Some(indices);
-        }
-        None
-    }
-
-    fn get_straight_indices(
-        ranks: &[u8; 13],
-        hand: &[Card],
-        required_len: usize,
-        jokers: &[Joker],
-    ) -> Option<Vec<usize>> {
-        let shortcut = jokers.contains(&Joker::Shortcut);
-        let max_gap = if shortcut { 2 } else { 1 };
-
-        let mut present_ranks = Vec::new();
-        if ranks[12] > 0 {
-            present_ranks.push(-1_i32);
-        }
-        for i in 0..13 {
-            if ranks[i] > 0 {
-                present_ranks.push(i as i32);
-            }
-        }
-
-        let mut best_straight_ranks = Vec::new();
-        let mut current_straight = Vec::new();
-
-        for i in 0..present_ranks.len() {
-            if current_straight.is_empty() {
-                current_straight.push(present_ranks[i]);
-            } else {
-                let last = *current_straight.last().unwrap();
-                let diff = present_ranks[i] - last;
-                if diff > 0 && diff <= max_gap {
-                    current_straight.push(present_ranks[i]);
-                } else {
-                    if current_straight.len() >= required_len {
-                        if current_straight.len() >= best_straight_ranks.len() {
-                            best_straight_ranks = current_straight.clone();
-                        }
-                    }
-                    current_straight.clear();
-                    current_straight.push(present_ranks[i]);
-                }
-            }
-        }
-
-        if current_straight.len() >= required_len {
-            if current_straight.len() >= best_straight_ranks.len() {
-                best_straight_ranks = current_straight.clone();
-            }
-        }
-
-        if !best_straight_ranks.is_empty() {
-            let mut indices = Vec::new();
-            let take_count = 5.min(best_straight_ranks.len());
-            let mut needed_ranks: Vec<usize> = best_straight_ranks
-                .iter()
-                .rev()
-                .take(take_count)
-                .map(|&r| if r == -1 { 12 } else { r as usize })
-                .collect();
-
-            for (idx, card) in hand.iter().enumerate() {
-                let actual_rank = get_card_rank(card) as usize;
-                if let Some(pos) = needed_ranks.iter().position(|&r| r == actual_rank) {
-                    indices.push(idx);
-                    needed_ranks.remove(pos); // Take only one card per needed rank
-                }
-            }
-            return Some(indices);
-        }
-
-        None
-    }
-
-    fn check_five_card_hands(
-        hand: &[Card],
-        ranks: &[u8; 13],
-        flush_indices: Option<Vec<usize>>,
-        straight_indices: Option<Vec<usize>>,
-    ) -> Option<(Hand, Vec<usize>)> {
-        if ranks.contains(&5) {
-            if flush_indices.is_some() {
-                return Some((Hand::FlushFive, (0..hand.len()).collect()));
-            } else {
-                return Some((Hand::FiveOfAKind, (0..hand.len()).collect()));
-            }
-        } else if let Some(s_ind) = straight_indices {
-            if let Some(f_ind) = flush_indices {
-                let mut all_ind = Vec::new();
-                for i in 0..hand.len() {
-                    if s_ind.contains(&i) || f_ind.contains(&i) {
-                        all_ind.push(i);
-                    }
-                }
-                return Some((Hand::StraightFlush, all_ind));
-            } else {
-                return Some((Hand::Straight, s_ind));
-            }
-        } else if ranks.contains(&2) && ranks.contains(&3) {
-            if flush_indices.is_some() {
-                return Some((Hand::FlushHouse, (0..hand.len()).collect()));
-            } else {
-                return Some((Hand::FullHouse, (0..hand.len()).collect()));
-            }
-        } else if let Some(f_ind) = flush_indices {
-            return Some((Hand::Flush, f_ind));
-        }
-        None
-    }
-
-    fn check_four_card_hands(hand: &[Card], ranks: &[u8; 13]) -> Option<(Hand, Vec<usize>)> {
-        if ranks.contains(&4) {
-            // Find the rank that has 4 cards, and only return those indices
-            let target_rank = ranks.iter().position(|&count| count == 4).unwrap();
-            let mut indices = Vec::new();
-            for (i, card) in hand.iter().enumerate() {
-                if get_card_rank(card) as usize == target_rank {
-                    indices.push(i);
-                }
-            }
-            return Some((Hand::FourOfAKind, indices));
-        } else if ranks.iter().filter(|&&count| count == 2).count() == 2 {
-            let mut indices = Vec::new();
-            for (i, card) in hand.iter().enumerate() {
-                if ranks[get_card_rank(card) as usize] == 2 {
-                    indices.push(i);
-                }
-            }
-            return Some((Hand::TwoPair, indices));
-        }
-        None
-    }
-
-    fn check_three_card_hands(hand: &[Card], ranks: &[u8; 13]) -> Option<(Hand, Vec<usize>)> {
-        if ranks.contains(&3) {
-            // Find the rank that has 3 cards, and only return those indices
-            let target_rank = ranks.iter().position(|&count| count == 3).unwrap();
-            let mut indices = Vec::new();
-            for (i, card) in hand.iter().enumerate() {
-                if get_card_rank(card) as usize == target_rank {
-                    indices.push(i);
-                }
-            }
-            return Some((Hand::ThreeOfAKind, indices));
-        }
-        None
-    }
-
-    fn check_two_card_hands(hand: &[Card], ranks: &[u8; 13]) -> Option<(Hand, Vec<usize>)> {
-        if ranks.contains(&2) {
-            // Find the rank that has 2 cards, and only return those indices
-            let target_rank = ranks.iter().position(|&count| count == 2).unwrap();
-            let mut indices = Vec::new();
-            for (i, card) in hand.iter().enumerate() {
-                if get_card_rank(card) as usize == target_rank {
-                    indices.push(i);
-                }
-            }
-            return Some((Hand::Pair, indices));
-        }
-        None
-    }
 
     let flush_indices = get_flush_indices(hand, jokers, required_five_card_len);
     let straight_indices = get_straight_indices(&ranks, hand, required_five_card_len, jokers);
