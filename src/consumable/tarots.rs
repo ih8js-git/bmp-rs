@@ -10,7 +10,7 @@ use crate::consumable::Consumable;
 #[derive(Debug, Copy, Clone, PartialEq)]
 #[repr(u8)]
 pub enum Tarot {
-    // make enum tarot and enhancement
+
     // pub enum Enhancement {
     Fool,       //    None,
     Hierophant, //    Bonus,
