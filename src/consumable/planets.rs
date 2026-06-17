@@ -1,7 +1,8 @@
+use strum_macros::Display;
 use crate::Consumable;
 use crate::GameState;
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, Display)]
 #[repr(u8)]
 pub enum Planet {
     Mercury,
