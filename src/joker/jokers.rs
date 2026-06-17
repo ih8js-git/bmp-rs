@@ -10,7 +10,7 @@ pub enum Rarity {
 }
 
 // TODO: This doesn't really store what the joker actually *does*
-// but I'm unsure of how to store that infromation right now,
+// but I'm unsure of how to store that information right now,
 // but given that we have 22 bits left over, we should have plenty of room
 #[bitfield]
 #[derive(Debug, Copy, Clone)]
