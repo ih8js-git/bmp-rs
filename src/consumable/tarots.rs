@@ -1,3 +1,4 @@
+use strum_macros::Display;
 use crate::GameState;
 use crate::card::operations::get_card_rank;
 use crate::card::operations::{set_card_enhancement, set_card_rank, set_card_suit};
@@ -7,7 +8,7 @@ use crate::consumable::Consumable;
 /// Represents tarot card. Importantly The order of the enums is the same as
 /// the order of the enhancements applied by the tarots (Hierophant through Magician),
 /// allowing for optimization.
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, Display)]
 #[repr(u8)]
 pub enum Tarot {
 
