@@ -52,9 +52,12 @@ pub fn get_hand_type(hand: &[Card], jokers: &[Joker]) -> (Hand, Vec<usize>) {
         }
 
         if let Some(suit) = best_suit {
-            let mut indices = suit_indices[suit].clone();
-            indices.extend(wild_indices.clone());
-            indices.sort_unstable();
+            let mut indices = Vec::new();
+            for i in 0..hand.len() {
+                if wild_indices.contains(&i) || suit_indices[suit].contains(&i) {
+                    indices.push(i);
+                }
+            }
             return Some(indices);
         }
         None
@@ -111,18 +114,20 @@ pub fn get_hand_type(hand: &[Card], jokers: &[Joker]) -> (Hand, Vec<usize>) {
         if !best_straight_ranks.is_empty() {
             let mut indices = Vec::new();
             let take_count = 5.min(best_straight_ranks.len());
-            for &rank in best_straight_ranks.iter().rev().take(take_count) {
-                let actual_rank = if rank == -1 { 12 } else { rank as usize };
-                for (idx, card) in hand.iter().enumerate() {
-                    if get_card_rank(card) as usize == actual_rank {
-                        if !indices.contains(&idx) {
-                            indices.push(idx);
-                            break;
-                        }
-                    }
+            let mut needed_ranks: Vec<usize> = best_straight_ranks
+                .iter()
+                .rev()
+                .take(take_count)
+                .map(|&r| if r == -1 { 12 } else { r as usize })
+                .collect();
+
+            for (idx, card) in hand.iter().enumerate() {
+                let actual_rank = get_card_rank(card) as usize;
+                if let Some(pos) = needed_ranks.iter().position(|&r| r == actual_rank) {
+                    indices.push(idx);
+                    needed_ranks.remove(pos); // Take only one card per needed rank
                 }
             }
-            indices.sort_unstable();
             return Some(indices);
         }
 
@@ -143,13 +148,12 @@ pub fn get_hand_type(hand: &[Card], jokers: &[Joker]) -> (Hand, Vec<usize>) {
             }
         } else if let Some(s_ind) = straight_indices {
             if let Some(f_ind) = flush_indices {
-                let mut all_ind = s_ind.clone();
-                for &i in &f_ind {
-                    if !all_ind.contains(&i) {
+                let mut all_ind = Vec::new();
+                for i in 0..hand.len() {
+                    if s_ind.contains(&i) || f_ind.contains(&i) {
                         all_ind.push(i);
                     }
                 }
-                all_ind.sort_unstable();
                 return Some((Hand::StraightFlush, all_ind));
             } else {
                 return Some((Hand::Straight, s_ind));
