@@ -1,4 +1,3 @@
-use strum::IntoEnumIterator;
 use strum_macros::{EnumCount, EnumIter, FromRepr};
 
 /*

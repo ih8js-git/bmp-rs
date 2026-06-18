@@ -1,9 +1,5 @@
 use crate::card::core::create_card;
 use crate::card::{Card, Rank, Suit};
-use crate::consumable::Spectral;
-use crate::consumable::{Consumable, Tarot};
-use crate::game::create_game_state;
-use crate::{Voucher, has_voucher};
 use strum::IntoEnumIterator;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -69,6 +65,8 @@ mod tests {
     use super::*;
     use crate::Voucher;
     use crate::consumable::{Consumable, Spectral, Tarot};
+    use crate::game::create_game_state;
+    use crate::has_voucher;
 
     #[test]
     fn test_base_deck_properties() {
