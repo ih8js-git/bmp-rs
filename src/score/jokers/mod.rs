@@ -1,11 +1,22 @@
+use crate::card::Card;
 use crate::joker::{Joker, JokerState};
 
 use crate::levels::Hand;
 
 pub type JokerScoreFn = fn(state: &JokerState, hand: Hand) -> [f32; 3];
+pub type JokerCardScoreFn = fn(state: &JokerState, card: &Card) -> [f32; 3];
+pub type JokerRetriggerFn = fn(card: &Card, jokers: &[JokerState], state: &JokerState) -> usize;
 
 fn default_score(_state: &JokerState, _hand: Hand) -> [f32; 3] {
     [0.0, 0.0, 0.0]
+}
+
+fn default_card_score(_state: &JokerState, _card: &Card) -> [f32; 3] {
+    [0.0, 0.0, 0.0]
+}
+
+fn default_retrigger(_card: &Card, _jokers: &[JokerState], _state: &JokerState) -> usize {
+    0
 }
 
 pub mod _8_ball;
@@ -312,5 +323,18 @@ pub const SCORE_FNS: [JokerScoreFn; 150] = {
     fns[Joker::Chicot as usize] = chicot::score;
     fns[Joker::Perkeo as usize] = perkeo::score;
 
+    fns
+};
+
+pub const RETRIGGER_FNS: [JokerRetriggerFn; 150] = {
+    let mut fns: [JokerRetriggerFn; 150] = [default_retrigger; 150];
+    fns[Joker::SockAndBuskin as usize] = sock_and_buskin::retrigger;
+    fns
+};
+
+pub const CARD_SCORE_FNS: [JokerCardScoreFn; 150] = {
+    let mut fns: [JokerCardScoreFn; 150] = [default_card_score; 150];
+    fns[Joker::GreedyJoker as usize] = greedy_joker::card_score;
+    // TODO: Map specific joker card scoring functions here
     fns
 };
