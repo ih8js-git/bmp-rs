@@ -50,6 +50,18 @@ pub enum Edition {
     Negative,
 }
 
+impl Edition {
+    pub const fn added_cost(&self) -> u8 {
+        match self {
+            Edition::None => 0,
+            Edition::Foil => 2,
+            Edition::Holographic => 3,
+            Edition::Polychrome => 5,
+            Edition::Negative => 5,
+        }
+    }
+}
+
 /// Represents an enhancement on a card. Importantly The order of the enums is the same as
 /// the order of the tarots applying this enhancement, allowing for optimization.
 #[derive(Debug, Copy, Clone, PartialEq)]
