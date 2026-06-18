@@ -63,10 +63,10 @@ pub fn create_checkered_deck() -> Vec<Card> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::consumable::{create_spectral_consumable, create_tarot_consumable, Spectral, Tarot};
+    use crate::Voucher;
+    use crate::consumable::{Spectral, Tarot, create_spectral_consumable, create_tarot_consumable};
     use crate::game::create_game_state;
     use crate::has_voucher;
-    use crate::Voucher;
 
     #[test]
     fn test_base_deck_properties() {
@@ -130,7 +130,10 @@ mod tests {
     fn test_ghost_deck() {
         let state = create_game_state(Deck::Ghost);
         assert_eq!(state.consumables.len(), 1);
-        assert_eq!(state.consumables[0], create_spectral_consumable(Spectral::Hex));
+        assert_eq!(
+            state.consumables[0],
+            create_spectral_consumable(Spectral::Hex)
+        );
     }
     #[test]
     fn test_abandoned_deck() {
