@@ -4,10 +4,7 @@ use crate::levels::Hand;
 pub fn score(_state: &JokerState, hand: Hand) -> [f32; 3] {
     let mut mult = 0.0;
 
-    let contains_straight = match hand {
-        Hand::StraightFlush | Hand::Straight => true,
-        _ => false,
-    };
+    let contains_straight = matches!(hand, Hand::StraightFlush | Hand::Straight);
 
     if contains_straight {
         mult += 12.0;

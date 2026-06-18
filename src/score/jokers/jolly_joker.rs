@@ -6,17 +6,17 @@ pub fn score(_state: &JokerState, hand: Hand) -> [f32; 3] {
 
     // Jolly Joker: +8 Mult if played hand contains a Pair
     // TODO: This doesn't cover all cases because a flush might have a pair in it.
-    let contains_pair = match hand {
+    let contains_pair = matches!(
+        hand,
         Hand::Pair
-        | Hand::TwoPair
-        | Hand::ThreeOfAKind
-        | Hand::FullHouse
-        | Hand::FourOfAKind
-        | Hand::FiveOfAKind
-        | Hand::FlushHouse
-        | Hand::FlushFive => true,
-        _ => false,
-    };
+            | Hand::TwoPair
+            | Hand::ThreeOfAKind
+            | Hand::FullHouse
+            | Hand::FourOfAKind
+            | Hand::FiveOfAKind
+            | Hand::FlushHouse
+            | Hand::FlushFive
+    );
 
     if contains_pair {
         mult += 8.0;
