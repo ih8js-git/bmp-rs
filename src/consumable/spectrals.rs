@@ -1,6 +1,7 @@
+use strum_macros::Display;
 use crate::card::{Card, Seal, set_card_seal};
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, Display)]
 #[repr(u8)]
 pub enum Spectral {
     Familiar,

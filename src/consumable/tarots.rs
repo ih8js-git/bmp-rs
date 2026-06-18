@@ -2,7 +2,7 @@ use crate::GameState;
 use crate::card::operations::get_card_rank;
 use crate::card::operations::{set_card_enhancement, set_card_rank, set_card_suit};
 use crate::card::{Card, Enhancement, Rank, Suit};
-use crate::consumable::Consumable;
+use crate::consumable::core::Consumable;
 use strum_macros::Display;
 
 /// Represents tarot card. Importantly The order of the enums is the same as
