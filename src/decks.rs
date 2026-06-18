@@ -1,8 +1,8 @@
-use crate::GameState;
 use crate::card::core::create_card;
 use crate::card::{Card, Edition, Enhancement, Rank, Seal, Suit};
 use crate::consumable::Spectral;
 use crate::consumable::{Consumable, Tarot};
+use crate::game::{GameState, create_game_state};
 use crate::{Voucher, add_voucher, has_voucher};
 use strum::IntoEnumIterator;
 
@@ -26,7 +26,7 @@ pub enum Deck {
     Erratic,
 }
 
-fn create_default_deck() -> Vec<Card> {
+pub fn create_default_deck() -> Vec<Card> {
     let mut cards: Vec<Card> = Vec::with_capacity(52);
     for suit in Suit::iter() {
         for rank in Rank::iter() {
@@ -36,7 +36,7 @@ fn create_default_deck() -> Vec<Card> {
     return cards;
 }
 
-fn create_abandoned_deck() -> Vec<Card> {
+pub fn create_abandoned_deck() -> Vec<Card> {
     let mut cards: Vec<Card> = Vec::with_capacity(52);
     for suit in Suit::iter() {
         for rank in Rank::iter() {
@@ -48,7 +48,7 @@ fn create_abandoned_deck() -> Vec<Card> {
     return cards;
 }
 
-fn create_checkered_deck() -> Vec<Card> {
+pub fn create_checkered_deck() -> Vec<Card> {
     let mut cards: Vec<Card> = Vec::with_capacity(52);
     for suit in Suit::iter() {
         for rank in Rank::iter() {
@@ -62,111 +62,6 @@ fn create_checkered_deck() -> Vec<Card> {
         }
     }
     return cards;
-}
-
-pub fn create_game_state(deck: Deck) -> GameState {
-    let base = GameState {
-        last_used: Consumable::Tarot(Tarot::Fool),
-        tarots_used: 0,
-        deck: Vec::new(),
-        vouchers: 0,
-        hand: Vec::with_capacity(8),
-        hand_size: 8,
-        jokers: Vec::with_capacity(5),
-        joker_slots: 5,
-        consumables: Vec::with_capacity(2),
-        consumable_slots: 2,
-        balance: 4,
-        hands: 4,
-        hands_used: 0,
-        discards: 3,
-        discards_used: 0,
-        current_round: 1,
-        starting_deck_size: 52,
-        skips_taken: 0,
-        base_reroll_cost: 5,
-        planet_levels: [0; 12],
-        hand_types_played: [0; 12],
-    };
-
-    match deck {
-        Deck::Red => GameState {
-            deck: create_default_deck(),
-            discards: base.discards + 1,
-            ..base
-        },
-        Deck::Blue => GameState {
-            deck: create_default_deck(),
-            hands: base.hands + 1,
-            ..base
-        },
-        Deck::Yellow => GameState {
-            deck: create_default_deck(),
-            balance: base.balance + 10,
-            ..base
-        },
-        Deck::Black => GameState {
-            deck: create_default_deck(),
-            joker_slots: base.joker_slots + 1,
-            hands: base.hands - 1,
-            ..base
-        },
-        Deck::Magic => {
-            let mut state = GameState {
-                deck: create_default_deck(),
-                consumables: vec![
-                    Consumable::Tarot(Tarot::Fool),
-                    Consumable::Tarot(Tarot::Fool),
-                ],
-                ..base
-            };
-            add_voucher(&mut state, Voucher::CrystalBall);
-            state
-        }
-        Deck::Nebula => {
-            let mut state = GameState {
-                deck: create_default_deck(),
-                consumable_slots: base.consumable_slots - 1,
-                ..base
-            };
-            add_voucher(&mut state, Voucher::Telescope);
-            state
-        }
-        Deck::Ghost => GameState {
-            deck: create_default_deck(),
-            consumables: vec![Consumable::Spectral(Spectral::Hex)],
-            ..base
-        },
-        Deck::Abandoned => GameState {
-            deck: create_abandoned_deck(),
-            starting_deck_size: 40,
-            ..base
-        },
-        Deck::Checkered => GameState {
-            deck: create_checkered_deck(),
-            ..base
-        },
-        Deck::Zodiac => {
-            let mut state = GameState {
-                deck: create_default_deck(),
-                ..base
-            };
-            add_voucher(&mut state, Voucher::TarotMerchant);
-            add_voucher(&mut state, Voucher::PlanetMerchant);
-            add_voucher(&mut state, Voucher::Overstock);
-            state
-        }
-        Deck::Painted => GameState {
-            deck: create_default_deck(),
-            hand_size: base.hand_size + 2,
-            joker_slots: base.joker_slots - 1,
-            ..base
-        },
-        _ => GameState {
-            deck: create_default_deck(),
-            ..base
-        },
-    }
 }
 
 #[cfg(test)]

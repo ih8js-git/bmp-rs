@@ -2,6 +2,7 @@
 mod card;
 mod consumable;
 mod decks;
+mod game;
 mod joker;
 mod levels;
 mod score;
@@ -10,33 +11,9 @@ mod vouchers;
 use card::*;
 use consumable::*;
 use decks::*;
+use game::*;
 use joker::*;
 use vouchers::*;
-
-pub struct GameState {
-    last_used: Consumable,
-    tarots_used: u16,
-    deck: Vec<Card>,
-    vouchers: u32,
-    hand: Vec<Card>,
-    hand_size: u8,
-    jokers: Vec<JokerState>,
-    joker_slots: u8,
-    consumables: Vec<Consumable>,
-    consumable_slots: u8,
-    balance: u32,
-    hands: u8,
-    hands_used: u8,
-    discards: u8,
-    discards_used: u8,
-    current_round: u8,
-    starting_deck_size: u8,
-    skips_taken: u8,
-    base_reroll_cost: u8,
-    planet_levels: [u8; 12],
-    hand_types_played: [u8; 12],
-    // ecto_hand_size_reduction: u8, // starts at 1
-}
 
 fn main() {
     let mut game_state = create_game_state(Deck::Red);

@@ -29,7 +29,8 @@ pub fn score(_state: &JokerState, hand: Hand) -> [f32; 3] {
 mod tests {
     use super::*;
     use crate::card::core::{Rank, Suit, create_card};
-    use crate::decks::{Deck, create_game_state};
+    use crate::decks::Deck;
+    use crate::game::create_game_state;
     use crate::joker::Joker;
     use crate::score::core::get_score;
 
