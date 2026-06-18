@@ -1,5 +1,5 @@
 use crate::card::Card;
-use crate::consumable::{Consumable, Spectral, Tarot};
+use crate::consumable::{create_spectral_consumable, create_tarot_consumable, Consumable, ConsumableState, Spectral, Tarot};
 use crate::decks::{Deck, create_abandoned_deck, create_checkered_deck, create_default_deck};
 use crate::joker::JokerState;
 use crate::{Voucher, add_voucher};
@@ -13,7 +13,7 @@ pub struct GameState {
     pub hand_size: u8,
     pub jokers: Vec<JokerState>,
     pub joker_slots: u8,
-    pub consumables: Vec<Consumable>,
+    pub consumables: Vec<ConsumableState>,
     pub consumable_slots: u8,
     pub balance: u32,
     pub hands: u8,
@@ -80,8 +80,8 @@ pub fn create_game_state(deck: Deck) -> GameState {
             let mut state = GameState {
                 deck: create_default_deck(),
                 consumables: vec![
-                    Consumable::Tarot(Tarot::Fool),
-                    Consumable::Tarot(Tarot::Fool),
+                    create_tarot_consumable(Tarot::Fool),
+                    create_tarot_consumable(Tarot::Fool),
                 ],
                 ..base
             };
@@ -99,7 +99,7 @@ pub fn create_game_state(deck: Deck) -> GameState {
         }
         Deck::Ghost => GameState {
             deck: create_default_deck(),
-            consumables: vec![Consumable::Spectral(Spectral::Hex)],
+            consumables: vec![create_spectral_consumable(Spectral::Hex)],
             ..base
         },
         Deck::Abandoned => GameState {
