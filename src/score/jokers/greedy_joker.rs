@@ -1,20 +1,19 @@
 use crate::joker::JokerState;
-use crate::levels::Hand;
-
-pub fn score(_state: &JokerState, _hand: Hand) -> [f32; 3] {
-    [0.0, 0.0, 0.0]
-}
 
 use crate::card::Card;
 use crate::card::core::{Enhancement, Suit};
 use crate::card::operations::{get_card_enhancement, get_card_suit};
 
-pub fn card_score(_state: &JokerState, card: &Card) -> [f32; 3] {
+pub fn card_score(
+    _state: &JokerState,
+    card: &Card,
+    chips: &mut f64,
+    mult: &mut f64,
+) -> Result<(), &'static str> {
     if get_card_suit(card) == Suit::Diamonds || get_card_enhancement(card) == Enhancement::Wild {
-        [0.0, 3.0, 0.0]
-    } else {
-        [0.0, 0.0, 0.0]
+        *mult += 3.0;
     }
+    Ok(())
 }
 
 #[cfg(test)]

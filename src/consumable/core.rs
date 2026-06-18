@@ -38,5 +38,3 @@ pub fn create_spectral_consumable(s: Spectral) -> ConsumableState {
         is_negative: false,
     }
 }
-
-

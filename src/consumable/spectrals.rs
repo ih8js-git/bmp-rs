@@ -1,5 +1,5 @@
-use strum_macros::Display;
 use crate::card::{Card, Seal, set_card_seal};
+use strum_macros::Display;
 
 #[derive(Debug, Copy, Clone, PartialEq, Display)]
 #[repr(u8)]

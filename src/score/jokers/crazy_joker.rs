@@ -1,16 +1,19 @@
 use crate::joker::JokerState;
 use crate::levels::Hand;
 
-pub fn score(_state: &JokerState, hand: Hand) -> [f32; 3] {
-    let mut mult = 0.0;
-
+pub fn score(
+    _state: &JokerState,
+    hand: Hand,
+    _chips: &mut f64,
+    mult: &mut f64,
+) -> Result<(), &'static str> {
     let contains_straight = matches!(hand, Hand::StraightFlush | Hand::Straight);
 
     if contains_straight {
-        mult += 12.0;
+        *mult += 12.0;
     }
 
-    [0.0, mult, 0.0]
+    Ok(())
 }
 
 #[cfg(test)]

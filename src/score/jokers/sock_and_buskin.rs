@@ -4,8 +4,13 @@ use crate::card::operations::get_card_rank;
 use crate::joker::{Joker, JokerState};
 use crate::levels::Hand;
 
-pub fn score(_state: &JokerState, _hand: Hand) -> [f32; 3] {
-    [0.0, 0.0, 0.0]
+pub fn score(
+    _state: &JokerState,
+    _hand: Hand,
+    _chips: &mut f64,
+    _mult: &mut f64,
+) -> Result<(), &'static str> {
+    Ok(())
 }
 
 pub fn retrigger(card: &Card, jokers: &[JokerState], _state: &JokerState) -> usize {

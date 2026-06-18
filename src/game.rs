@@ -1,5 +1,8 @@
 use crate::card::Card;
-use crate::consumable::{create_spectral_consumable, create_tarot_consumable, Consumable, ConsumableState, Spectral, Tarot};
+use crate::consumable::{
+    Consumable, ConsumableState, Spectral, Tarot, create_spectral_consumable,
+    create_tarot_consumable,
+};
 use crate::decks::{Deck, create_abandoned_deck, create_checkered_deck, create_default_deck};
 use crate::joker::JokerState;
 use crate::{Voucher, add_voucher};

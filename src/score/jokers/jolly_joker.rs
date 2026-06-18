@@ -1,9 +1,12 @@
 use crate::joker::JokerState;
 use crate::levels::Hand;
 
-pub fn score(_state: &JokerState, hand: Hand) -> [f32; 3] {
-    let mut mult = 0.0;
-
+pub fn score(
+    _state: &JokerState,
+    hand: Hand,
+    _chips: &mut f64,
+    mult: &mut f64,
+) -> Result<(), &'static str> {
     // Jolly Joker: +8 Mult if played hand contains a Pair
     // TODO: This doesn't cover all cases because a flush might have a pair in it.
     let contains_pair = matches!(
@@ -19,10 +22,10 @@ pub fn score(_state: &JokerState, hand: Hand) -> [f32; 3] {
     );
 
     if contains_pair {
-        mult += 8.0;
+        *mult += 8.0;
     }
 
-    [0.0, mult, 0.0]
+    Ok(())
 }
 
 #[cfg(test)]
