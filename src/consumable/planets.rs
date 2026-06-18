@@ -1,6 +1,6 @@
-use strum_macros::Display;
 use crate::Consumable;
 use crate::GameState;
+use strum_macros::Display;
 
 #[derive(Debug, Copy, Clone, PartialEq, Display)]
 #[repr(u8)]
