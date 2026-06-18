@@ -1,8 +1,8 @@
+use crate::GameState;
 use crate::card::Edition;
 use crate::helper::parse_source_joker_to_enum;
 use crate::joker::JokerState;
-use crate::vouchers::{has_voucher, Voucher};
-use crate::GameState;
+use crate::vouchers::{Voucher, has_voucher};
 use std::cmp::max;
 use std::io::BufRead;
 use std::sync::OnceLock;
@@ -90,36 +90,14 @@ pub fn get_joker_sell_value(j: &JokerState, gs: &GameState) -> u8 {
 
 #[cfg(test)]
 mod tests {
+    use crate::GameState;
     use crate::card::Edition;
     use crate::consumable::Consumable;
     use crate::consumable::Tarot::Hermit;
     use crate::joker::{Joker, JokerState};
     use crate::tables::{get_joker_cost, get_joker_sell_value};
-    use crate::GameState;
 
-    const BASE_GS: GameState = GameState {
-        last_used: Consumable::Tarot(Hermit),
-        tarots_used: 0,
-        deck: vec![],
-        vouchers: 0,
-        hand: vec![],
-        hand_size: 0,
-        jokers: vec![],
-        joker_slots: 0,
-        consumables: vec![],
-        consumable_slots: 0,
-        balance: 0,
-        hands: 0,
-        hands_used: 0,
-        discards: 0,
-        discards_used: 0,
-        current_round: 0,
-        starting_deck_size: 0,
-        skips_taken: 0,
-        base_reroll_cost: 0,
-        planet_levels: [0; 12],
-        hand_types_played: [0; 12],
-    };
+    const BASE_GS: GameState = create_game_state(Deck::Red);
 
     #[test]
     fn test_joker_base_cost_no_edition_no_voucher_no_added_cost() {
