@@ -1,7 +1,7 @@
 use crate::card::core::{Card, Edition, Enhancement};
 use crate::card::operations::{get_card_edition, get_card_enhancement};
 use crate::joker::JokerState;
-use crate::levels::{hand_base_chips_and_mult, Hand};
+use crate::levels::{Hand, hand_base_chips_and_mult};
 
 pub fn score_played_cards(
     cards: &[Card],

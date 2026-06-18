@@ -3,7 +3,7 @@ use crate::card::{Card, Rank, Suit};
 use crate::consumable::Spectral;
 use crate::consumable::{Consumable, Tarot};
 use crate::game::create_game_state;
-use crate::{has_voucher, Voucher};
+use crate::{Voucher, has_voucher};
 use strum::IntoEnumIterator;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -67,8 +67,8 @@ pub fn create_checkered_deck() -> Vec<Card> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::consumable::{Consumable, Spectral, Tarot};
     use crate::Voucher;
+    use crate::consumable::{Consumable, Spectral, Tarot};
 
     #[test]
     fn test_base_deck_properties() {
