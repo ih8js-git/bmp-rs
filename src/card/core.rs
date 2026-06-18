@@ -1,5 +1,5 @@
 use strum::IntoEnumIterator;
-use strum_macros::{EnumIter, FromRepr};
+use strum_macros::{EnumCount, EnumIter, FromRepr};
 
 /*
  * |Rank|Suit|Edition|Enhancement|Seal|
@@ -40,7 +40,7 @@ pub enum Suit {
     Diamonds,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, EnumIter, EnumCount)]
 #[repr(u8)]
 pub enum Edition {
     None,
