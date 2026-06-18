@@ -1,4 +1,5 @@
 use modular_bitfield::prelude::*;
+use strum_macros::Display;
 
 #[derive(Specifier, Debug, Copy, Clone, PartialEq)]
 #[bits = 2]
@@ -184,12 +185,12 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
     defs[Joker::Brainstorm as usize] = create_def(true, true, true, Rarity::Rare, 10);
     defs[Joker::Satellite as usize] = create_def(false, true, true, Rarity::Uncommon, 6);
     defs[Joker::ShootTheMoon as usize] = create_def(true, true, true, Rarity::Common, 5);
-    defs[Joker::DriverSLicense as usize] = create_def(true, true, true, Rarity::Rare, 7);
+    defs[Joker::DriversLicense as usize] = create_def(true, true, true, Rarity::Rare, 7);
     defs[Joker::Cartomancer as usize] = create_def(true, true, true, Rarity::Uncommon, 6);
     defs[Joker::Astronomer as usize] = create_def(false, true, true, Rarity::Uncommon, 8);
     defs[Joker::BurntJoker as usize] = create_def(true, true, true, Rarity::Rare, 8);
     defs[Joker::Bootstraps as usize] = create_def(true, true, true, Rarity::Uncommon, 7);
-    defs[Joker::Caino as usize] = create_def(true, true, true, Rarity::Legendary, 20);
+    defs[Joker::Canio as usize] = create_def(true, true, true, Rarity::Legendary, 20);
     defs[Joker::Triboulet as usize] = create_def(true, true, true, Rarity::Legendary, 20);
     defs[Joker::Yorick as usize] = create_def(true, true, true, Rarity::Legendary, 20);
     defs[Joker::Chicot as usize] = create_def(false, true, true, Rarity::Legendary, 20);
@@ -200,17 +201,17 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
 #[bitfield]
 #[derive(Debug, Copy, Clone)]
 pub struct JokerState {
-    pub id: B8,              // 8 bits for Joker ID Enum value
-    pub edition: B3,         // 3 bits for Edition Enum value
-    pub is_rental: bool,     // 1 bit
-    pub is_perishable: bool, // 1 bit
-    pub is_eternal: bool,    // 1 bit
-    pub is_pinned: bool,     // 1 bit
-    pub sell_value: B5,      // 5 bits
-    pub scale: B12,          // 12 bits for scale
+    pub id: B8,               // 8 bits for Joker ID Enum value
+    pub edition: B3,          // 3 bits for Edition Enum value
+    pub is_rental: bool,      // 1 bit
+    pub is_perishable: bool,  // 1 bit
+    pub is_eternal: bool,     // 1 bit
+    pub is_pinned: bool,      // 1 bit
+    pub added_sell_value: B5, // 5 bits
+    pub scale: B12,           // 12 bits for scale
 }
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, Display)]
 #[repr(u8)]
 pub enum Joker {
     Joker,
@@ -353,12 +354,12 @@ pub enum Joker {
     Brainstorm,
     Satellite,
     ShootTheMoon,
-    DriverSLicense,
+    DriversLicense,
     Cartomancer,
     Astronomer,
     BurntJoker,
     Bootstraps,
-    Caino,
+    Canio,
     Triboulet,
     Yorick,
     Chicot,
