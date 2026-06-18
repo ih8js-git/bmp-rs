@@ -1,0 +1,7 @@
+#!/bin/sh
+
+echo "Running cargo check..."
+cargo check || exit 1
+
+echo "Running cargo test..."
+cargo test || exit 1
