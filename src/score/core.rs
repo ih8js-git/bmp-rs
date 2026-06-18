@@ -298,6 +298,20 @@ pub fn get_hand_type(hand: &[Card], jokers: &[JokerState]) -> (Hand, Vec<usize>)
     return (Hand::HighCard, vec![highest_index]);
 }
 
+pub fn count_retrigger_jokers(card: &Card, jokers: &[JokerState]) -> usize {
+    let mut retriggers = 0;
+
+    for joker in jokers {
+        let id = joker.id() as usize;
+        let retrigger_fn = crate::score::jokers::RETRIGGER_FNS[id];
+        // We have to pass both jokers, and joker, because
+        // Sock needs to know if Pareidolia is active, as an example
+        retriggers += retrigger_fn(card, jokers, joker);
+    }
+
+    retriggers
+}
+
 #[cfg(test)]
 mod tests {
     use crate::joker::JokerState;
@@ -756,5 +770,36 @@ mod tests {
             get_hand_type(&hand, &jokers),
             (Hand::StraightFlush, vec![0, 1, 2, 3])
         );
+    }
+
+    #[test]
+    fn test_sock_and_buskin_retrigger_flush_five() {
+        use crate::decks::Deck;
+        use crate::game::create_game_state;
+
+        let mut state = create_game_state(Deck::Red);
+        let mut joker_state = JokerState::new();
+        joker_state.set_id(Joker::SockAndBuskin as u8);
+        state.jokers.push(joker_state);
+
+        let mut hand = vec![
+            create_card(Rank::King, Suit::Spades),
+            create_card(Rank::King, Suit::Spades),
+            create_card(Rank::King, Suit::Spades),
+            create_card(Rank::King, Suit::Spades),
+            create_card(Rank::King, Suit::Spades),
+        ];
+
+        // Hand: Flush Five Level 0: 160 base chips, 16 base mult.
+        // 5 Kings, each has 10 chips.
+        // Sock and buskin retriggers each face card (King) 1 time.
+        // Total triggers per card = 2. Total cards = 5. Total triggers = 10.
+        // Chips from cards: 10 * 10 = 100 chips.
+        // Total chips: 160 + 100 = 260.
+        // Total mult: 16.
+        // Score = 260 * 16 = 4160.0.
+
+        let result = get_score(&mut state, &mut hand);
+        assert_eq!(result, 4160.0);
     }
 }
