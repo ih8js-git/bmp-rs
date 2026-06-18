@@ -1,4 +1,5 @@
 use crate::GameState;
+use crate::card::core::create_card;
 use crate::card::{Card, Edition, Enhancement, Rank, Seal, Suit};
 use crate::consumable::Spectral;
 use crate::consumable::{Consumable, Tarot};
@@ -29,34 +30,7 @@ fn create_default_deck() -> Vec<Card> {
     let mut cards: Vec<Card> = Vec::with_capacity(52);
     for suit in Suit::iter() {
         for rank in Rank::iter() {
-            let current_rank = rank;
-            let current_suit = suit;
-            let edition = Edition::None;
-            let enhancement = Enhancement::None;
-            let seal = Seal::None;
-            let meta = (current_rank as u16) << 12
-                | (current_suit as u16) << 10
-                | (edition as u16) << 7
-                | (enhancement as u16) << 3
-                | (seal as u16);
-
-            let chips: u16 = match current_rank {
-                Rank::Two => 2,
-                Rank::Three => 3,
-                Rank::Four => 4,
-                Rank::Five => 5,
-                Rank::Six => 6,
-                Rank::Seven => 7,
-                Rank::Eight => 8,
-                Rank::Nine => 9,
-                Rank::Ten => 10,
-                Rank::Jack => 10,
-                Rank::Queen => 10,
-                Rank::King => 10,
-                Rank::Ace => 11,
-            };
-
-            cards.push(Card { meta, chips });
+            cards.push(create_card(rank, suit));
         }
     }
     return cards;
@@ -66,38 +40,8 @@ fn create_abandoned_deck() -> Vec<Card> {
     let mut cards: Vec<Card> = Vec::with_capacity(52);
     for suit in Suit::iter() {
         for rank in Rank::iter() {
-            let current_rank = rank;
-            let current_suit = suit;
-            let edition = Edition::None;
-            let enhancement = Enhancement::None;
-            let seal = Seal::None;
-            let meta = (current_rank as u16) << 12
-                | (current_suit as u16) << 10
-                | (edition as u16) << 7
-                | (enhancement as u16) << 3
-                | (seal as u16);
-
-            let chips: u16 = match current_rank {
-                Rank::Two => 2,
-                Rank::Three => 3,
-                Rank::Four => 4,
-                Rank::Five => 5,
-                Rank::Six => 6,
-                Rank::Seven => 7,
-                Rank::Eight => 8,
-                Rank::Nine => 9,
-                Rank::Ten => 10,
-                Rank::Jack => 10,
-                Rank::Queen => 10,
-                Rank::King => 10,
-                Rank::Ace => 11,
-            };
-
-            if current_rank != Rank::Jack
-                && current_rank != Rank::Queen
-                && current_rank != Rank::King
-            {
-                cards.push(Card { meta, chips });
+            if rank != Rank::Jack && rank != Rank::Queen && rank != Rank::King {
+                cards.push(create_card(rank, suit));
             }
         }
     }
@@ -108,39 +52,13 @@ fn create_checkered_deck() -> Vec<Card> {
     let mut cards: Vec<Card> = Vec::with_capacity(52);
     for suit in Suit::iter() {
         for rank in Rank::iter() {
-            let current_rank = rank;
             let mut current_suit = suit;
             if current_suit == Suit::Clubs {
                 current_suit = Suit::Spades;
             } else if current_suit == Suit::Diamonds {
                 current_suit = Suit::Hearts;
             }
-            let edition = Edition::None;
-            let enhancement = Enhancement::None;
-            let seal = Seal::None;
-            let meta = (current_rank as u16) << 12
-                | (current_suit as u16) << 10
-                | (edition as u16) << 7
-                | (enhancement as u16) << 3
-                | (seal as u16);
-
-            let chips: u16 = match current_rank {
-                Rank::Two => 2,
-                Rank::Three => 3,
-                Rank::Four => 4,
-                Rank::Five => 5,
-                Rank::Six => 6,
-                Rank::Seven => 7,
-                Rank::Eight => 8,
-                Rank::Nine => 9,
-                Rank::Ten => 10,
-                Rank::Jack => 10,
-                Rank::Queen => 10,
-                Rank::King => 10,
-                Rank::Ace => 11,
-            };
-
-            cards.push(Card { meta, chips });
+            cards.push(create_card(rank, current_suit));
         }
     }
     return cards;

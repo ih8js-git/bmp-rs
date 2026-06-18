@@ -76,7 +76,7 @@ pub enum Seal {
     Purple,
 }
 
-pub fn create_test_card(rank: Rank, suit: Suit) -> Card {
+pub fn create_card(rank: Rank, suit: Suit) -> Card {
     let meta = (rank as u16) << 12
         | (suit as u16) << 10
         | (Edition::None as u16) << 7

@@ -312,11 +312,11 @@ mod tests {
             .collect()
     }
     use super::*;
-    use crate::card::core::{Enhancement, Rank, Suit, create_test_card};
+    use crate::card::core::{Enhancement, Rank, Suit, create_card};
     use crate::card::operations::set_card_enhancement;
 
     fn get_wild(rank: Rank, suit: Suit) -> Card {
-        let mut c = create_test_card(rank, suit);
+        let mut c = create_card(rank, suit);
         set_card_enhancement(&mut c, Enhancement::Wild);
         c
     }
@@ -324,11 +324,11 @@ mod tests {
     #[test]
     fn test_flush_five() {
         let hand = vec![
-            create_test_card(Rank::King, Suit::Spades),
-            create_test_card(Rank::King, Suit::Spades),
-            create_test_card(Rank::King, Suit::Spades),
-            create_test_card(Rank::King, Suit::Spades),
-            create_test_card(Rank::King, Suit::Spades),
+            create_card(Rank::King, Suit::Spades),
+            create_card(Rank::King, Suit::Spades),
+            create_card(Rank::King, Suit::Spades),
+            create_card(Rank::King, Suit::Spades),
+            create_card(Rank::King, Suit::Spades),
         ];
         assert_eq!(
             get_hand_type(&hand, &[]),
@@ -339,11 +339,11 @@ mod tests {
     #[test]
     fn test_five_of_a_kind() {
         let hand = vec![
-            create_test_card(Rank::King, Suit::Spades),
-            create_test_card(Rank::King, Suit::Hearts),
-            create_test_card(Rank::King, Suit::Clubs),
-            create_test_card(Rank::King, Suit::Diamonds),
-            create_test_card(Rank::King, Suit::Spades),
+            create_card(Rank::King, Suit::Spades),
+            create_card(Rank::King, Suit::Hearts),
+            create_card(Rank::King, Suit::Clubs),
+            create_card(Rank::King, Suit::Diamonds),
+            create_card(Rank::King, Suit::Spades),
         ];
         assert_eq!(
             get_hand_type(&hand, &[]),
@@ -354,11 +354,11 @@ mod tests {
     #[test]
     fn test_flush_house() {
         let hand = vec![
-            create_test_card(Rank::King, Suit::Spades),
-            create_test_card(Rank::King, Suit::Spades),
-            create_test_card(Rank::King, Suit::Spades),
-            create_test_card(Rank::Queen, Suit::Spades),
-            create_test_card(Rank::Queen, Suit::Spades),
+            create_card(Rank::King, Suit::Spades),
+            create_card(Rank::King, Suit::Spades),
+            create_card(Rank::King, Suit::Spades),
+            create_card(Rank::Queen, Suit::Spades),
+            create_card(Rank::Queen, Suit::Spades),
         ];
         assert_eq!(
             get_hand_type(&hand, &[]),
@@ -369,11 +369,11 @@ mod tests {
     #[test]
     fn test_straight_flush() {
         let hand = vec![
-            create_test_card(Rank::Five, Suit::Spades),
-            create_test_card(Rank::Six, Suit::Spades),
-            create_test_card(Rank::Seven, Suit::Spades),
-            create_test_card(Rank::Eight, Suit::Spades),
-            create_test_card(Rank::Nine, Suit::Spades),
+            create_card(Rank::Five, Suit::Spades),
+            create_card(Rank::Six, Suit::Spades),
+            create_card(Rank::Seven, Suit::Spades),
+            create_card(Rank::Eight, Suit::Spades),
+            create_card(Rank::Nine, Suit::Spades),
         ];
         assert_eq!(
             get_hand_type(&hand, &[]),
@@ -385,11 +385,11 @@ mod tests {
     fn test_ace_low_straight_flush() {
         // A, 2, 3, 4, 5
         let hand = vec![
-            create_test_card(Rank::Ace, Suit::Hearts),
-            create_test_card(Rank::Two, Suit::Hearts),
-            create_test_card(Rank::Three, Suit::Hearts),
-            create_test_card(Rank::Four, Suit::Hearts),
-            create_test_card(Rank::Five, Suit::Hearts),
+            create_card(Rank::Ace, Suit::Hearts),
+            create_card(Rank::Two, Suit::Hearts),
+            create_card(Rank::Three, Suit::Hearts),
+            create_card(Rank::Four, Suit::Hearts),
+            create_card(Rank::Five, Suit::Hearts),
         ];
         assert_eq!(
             get_hand_type(&hand, &[]),
@@ -400,10 +400,10 @@ mod tests {
     #[test]
     fn test_four_of_a_kind_ideal() {
         let hand = vec![
-            create_test_card(Rank::King, Suit::Spades),
-            create_test_card(Rank::King, Suit::Hearts),
-            create_test_card(Rank::King, Suit::Clubs),
-            create_test_card(Rank::King, Suit::Diamonds),
+            create_card(Rank::King, Suit::Spades),
+            create_card(Rank::King, Suit::Hearts),
+            create_card(Rank::King, Suit::Clubs),
+            create_card(Rank::King, Suit::Diamonds),
         ];
         assert_eq!(
             get_hand_type(&hand, &[]),
@@ -415,11 +415,11 @@ mod tests {
     fn test_four_of_a_kind_less_ideal() {
         // 5 cards played, one kicker
         let hand = vec![
-            create_test_card(Rank::King, Suit::Spades),
-            create_test_card(Rank::Queen, Suit::Hearts), // junk
-            create_test_card(Rank::King, Suit::Hearts),
-            create_test_card(Rank::King, Suit::Clubs),
-            create_test_card(Rank::King, Suit::Diamonds),
+            create_card(Rank::King, Suit::Spades),
+            create_card(Rank::Queen, Suit::Hearts), // junk
+            create_card(Rank::King, Suit::Hearts),
+            create_card(Rank::King, Suit::Clubs),
+            create_card(Rank::King, Suit::Diamonds),
         ];
         // The scoring cards are the Kings: indices 0, 2, 3, 4
         assert_eq!(
@@ -431,11 +431,11 @@ mod tests {
     #[test]
     fn test_full_house() {
         let hand = vec![
-            create_test_card(Rank::King, Suit::Spades),
-            create_test_card(Rank::King, Suit::Hearts),
-            create_test_card(Rank::King, Suit::Clubs),
-            create_test_card(Rank::Queen, Suit::Spades),
-            create_test_card(Rank::Queen, Suit::Hearts),
+            create_card(Rank::King, Suit::Spades),
+            create_card(Rank::King, Suit::Hearts),
+            create_card(Rank::King, Suit::Clubs),
+            create_card(Rank::Queen, Suit::Spades),
+            create_card(Rank::Queen, Suit::Hearts),
         ];
         assert_eq!(
             get_hand_type(&hand, &[]),
@@ -446,11 +446,11 @@ mod tests {
     #[test]
     fn test_flush_ideal() {
         let hand = vec![
-            create_test_card(Rank::Two, Suit::Spades),
-            create_test_card(Rank::Four, Suit::Spades),
-            create_test_card(Rank::Six, Suit::Spades),
-            create_test_card(Rank::Eight, Suit::Spades),
-            create_test_card(Rank::Ten, Suit::Spades),
+            create_card(Rank::Two, Suit::Spades),
+            create_card(Rank::Four, Suit::Spades),
+            create_card(Rank::Six, Suit::Spades),
+            create_card(Rank::Eight, Suit::Spades),
+            create_card(Rank::Ten, Suit::Spades),
         ];
         assert_eq!(
             get_hand_type(&hand, &[]),
@@ -461,9 +461,9 @@ mod tests {
     #[test]
     fn test_flush_with_wilds() {
         let hand = vec![
-            create_test_card(Rank::Two, Suit::Spades),
-            create_test_card(Rank::Four, Suit::Spades),
-            create_test_card(Rank::Six, Suit::Spades),
+            create_card(Rank::Two, Suit::Spades),
+            create_card(Rank::Four, Suit::Spades),
+            create_card(Rank::Six, Suit::Spades),
             get_wild(Rank::Eight, Suit::Hearts), // Wild card
             get_wild(Rank::Ten, Suit::Diamonds), // Wild card
         ];
@@ -476,11 +476,11 @@ mod tests {
     #[test]
     fn test_straight_ideal() {
         let hand = vec![
-            create_test_card(Rank::Seven, Suit::Spades),
-            create_test_card(Rank::Eight, Suit::Hearts),
-            create_test_card(Rank::Nine, Suit::Clubs),
-            create_test_card(Rank::Ten, Suit::Spades),
-            create_test_card(Rank::Jack, Suit::Hearts),
+            create_card(Rank::Seven, Suit::Spades),
+            create_card(Rank::Eight, Suit::Hearts),
+            create_card(Rank::Nine, Suit::Clubs),
+            create_card(Rank::Ten, Suit::Spades),
+            create_card(Rank::Jack, Suit::Hearts),
         ];
         assert_eq!(
             get_hand_type(&hand, &[]),
@@ -491,11 +491,11 @@ mod tests {
     #[test]
     fn test_ace_low_straight_mixed_suits() {
         let hand = vec![
-            create_test_card(Rank::Two, Suit::Spades),
-            create_test_card(Rank::Three, Suit::Hearts),
-            create_test_card(Rank::Four, Suit::Clubs),
-            create_test_card(Rank::Five, Suit::Spades),
-            create_test_card(Rank::Ace, Suit::Hearts), // Ace is at end
+            create_card(Rank::Two, Suit::Spades),
+            create_card(Rank::Three, Suit::Hearts),
+            create_card(Rank::Four, Suit::Clubs),
+            create_card(Rank::Five, Suit::Spades),
+            create_card(Rank::Ace, Suit::Hearts), // Ace is at end
         ];
         assert_eq!(
             get_hand_type(&hand, &[]),
@@ -506,11 +506,11 @@ mod tests {
     #[test]
     fn test_three_of_a_kind_less_ideal() {
         let hand = vec![
-            create_test_card(Rank::Three, Suit::Spades), // junk
-            create_test_card(Rank::King, Suit::Hearts),
-            create_test_card(Rank::King, Suit::Clubs),
-            create_test_card(Rank::Four, Suit::Diamonds), // junk
-            create_test_card(Rank::King, Suit::Spades),
+            create_card(Rank::Three, Suit::Spades), // junk
+            create_card(Rank::King, Suit::Hearts),
+            create_card(Rank::King, Suit::Clubs),
+            create_card(Rank::Four, Suit::Diamonds), // junk
+            create_card(Rank::King, Suit::Spades),
         ];
         assert_eq!(
             get_hand_type(&hand, &[]),
@@ -521,11 +521,11 @@ mod tests {
     #[test]
     fn test_two_pair_less_ideal() {
         let hand = vec![
-            create_test_card(Rank::King, Suit::Spades),
-            create_test_card(Rank::Queen, Suit::Hearts),
-            create_test_card(Rank::Two, Suit::Clubs), // junk
-            create_test_card(Rank::King, Suit::Clubs),
-            create_test_card(Rank::Queen, Suit::Spades),
+            create_card(Rank::King, Suit::Spades),
+            create_card(Rank::Queen, Suit::Hearts),
+            create_card(Rank::Two, Suit::Clubs), // junk
+            create_card(Rank::King, Suit::Clubs),
+            create_card(Rank::Queen, Suit::Spades),
         ];
         assert_eq!(get_hand_type(&hand, &[]), (Hand::TwoPair, vec![0, 1, 3, 4]));
     }
@@ -533,11 +533,11 @@ mod tests {
     #[test]
     fn test_pair_less_ideal() {
         let hand = vec![
-            create_test_card(Rank::Three, Suit::Spades), // junk
-            create_test_card(Rank::King, Suit::Hearts),
-            create_test_card(Rank::Four, Suit::Clubs), // junk
-            create_test_card(Rank::King, Suit::Clubs),
-            create_test_card(Rank::Two, Suit::Spades), // junk
+            create_card(Rank::Three, Suit::Spades), // junk
+            create_card(Rank::King, Suit::Hearts),
+            create_card(Rank::Four, Suit::Clubs), // junk
+            create_card(Rank::King, Suit::Clubs),
+            create_card(Rank::Two, Suit::Spades), // junk
         ];
         assert_eq!(get_hand_type(&hand, &[]), (Hand::Pair, vec![1, 3]));
     }
@@ -545,11 +545,11 @@ mod tests {
     #[test]
     fn test_high_card_less_ideal() {
         let hand = vec![
-            create_test_card(Rank::Two, Suit::Spades),
-            create_test_card(Rank::Four, Suit::Hearts),
-            create_test_card(Rank::King, Suit::Clubs), // High card
-            create_test_card(Rank::Six, Suit::Diamonds),
-            create_test_card(Rank::Eight, Suit::Spades),
+            create_card(Rank::Two, Suit::Spades),
+            create_card(Rank::Four, Suit::Hearts),
+            create_card(Rank::King, Suit::Clubs), // High card
+            create_card(Rank::Six, Suit::Diamonds),
+            create_card(Rank::Eight, Suit::Spades),
         ];
         assert_eq!(get_hand_type(&hand, &[]), (Hand::HighCard, vec![2]));
     }
@@ -557,11 +557,11 @@ mod tests {
     #[test]
     fn test_smeared_joker_flush() {
         let hand = vec![
-            create_test_card(Rank::Two, Suit::Spades),
-            create_test_card(Rank::Four, Suit::Spades),
-            create_test_card(Rank::Six, Suit::Clubs),
-            create_test_card(Rank::Eight, Suit::Spades),
-            create_test_card(Rank::Ten, Suit::Clubs),
+            create_card(Rank::Two, Suit::Spades),
+            create_card(Rank::Four, Suit::Spades),
+            create_card(Rank::Six, Suit::Clubs),
+            create_card(Rank::Eight, Suit::Spades),
+            create_card(Rank::Ten, Suit::Clubs),
         ];
         // Without smeared joker it's a high card
         assert_eq!(get_hand_type(&hand, &[]), (Hand::HighCard, vec![4]));
@@ -574,11 +574,11 @@ mod tests {
         );
 
         let hand_red = vec![
-            create_test_card(Rank::Two, Suit::Hearts),
-            create_test_card(Rank::Four, Suit::Diamonds),
-            create_test_card(Rank::Six, Suit::Hearts),
-            create_test_card(Rank::Eight, Suit::Diamonds),
-            create_test_card(Rank::Ten, Suit::Hearts),
+            create_card(Rank::Two, Suit::Hearts),
+            create_card(Rank::Four, Suit::Diamonds),
+            create_card(Rank::Six, Suit::Hearts),
+            create_card(Rank::Eight, Suit::Diamonds),
+            create_card(Rank::Ten, Suit::Hearts),
         ];
         // Without smeared joker it's a high card
         assert_eq!(get_hand_type(&hand_red, &[]), (Hand::HighCard, vec![4]));
@@ -594,11 +594,11 @@ mod tests {
     fn test_four_fingers() {
         // 4-card flush
         let hand = vec![
-            create_test_card(Rank::Two, Suit::Spades),
-            create_test_card(Rank::Four, Suit::Spades),
-            create_test_card(Rank::Six, Suit::Spades),
-            create_test_card(Rank::Eight, Suit::Spades),
-            create_test_card(Rank::Ten, Suit::Hearts),
+            create_card(Rank::Two, Suit::Spades),
+            create_card(Rank::Four, Suit::Spades),
+            create_card(Rank::Six, Suit::Spades),
+            create_card(Rank::Eight, Suit::Spades),
+            create_card(Rank::Ten, Suit::Hearts),
         ];
 
         let jokers = get_test_jokers(&[Joker::FourFingers]);
@@ -609,11 +609,11 @@ mod tests {
 
         // 4-card straight
         let hand2 = vec![
-            create_test_card(Rank::Five, Suit::Spades),
-            create_test_card(Rank::Six, Suit::Hearts),
-            create_test_card(Rank::Seven, Suit::Spades),
-            create_test_card(Rank::Eight, Suit::Clubs),
-            create_test_card(Rank::King, Suit::Hearts),
+            create_card(Rank::Five, Suit::Spades),
+            create_card(Rank::Six, Suit::Hearts),
+            create_card(Rank::Seven, Suit::Spades),
+            create_card(Rank::Eight, Suit::Clubs),
+            create_card(Rank::King, Suit::Hearts),
         ];
 
         assert_eq!(
@@ -625,11 +625,11 @@ mod tests {
     #[test]
     fn test_four_fingers_smeared() {
         let hand = vec![
-            create_test_card(Rank::Two, Suit::Spades),
-            create_test_card(Rank::Four, Suit::Clubs), // Smeared makes this Spades
-            create_test_card(Rank::Six, Suit::Spades),
-            create_test_card(Rank::Eight, Suit::Clubs), // Smeared makes this Spades
-            create_test_card(Rank::Ten, Suit::Hearts),
+            create_card(Rank::Two, Suit::Spades),
+            create_card(Rank::Four, Suit::Clubs), // Smeared makes this Spades
+            create_card(Rank::Six, Suit::Spades),
+            create_card(Rank::Eight, Suit::Clubs), // Smeared makes this Spades
+            create_card(Rank::Ten, Suit::Hearts),
         ];
 
         let jokers = get_test_jokers(&[Joker::FourFingers, Joker::SmearedJoker]);
@@ -642,11 +642,11 @@ mod tests {
     #[test]
     fn test_four_fingers_wild() {
         let hand = vec![
-            create_test_card(Rank::Two, Suit::Spades),
-            create_test_card(Rank::Four, Suit::Spades),
+            create_card(Rank::Two, Suit::Spades),
+            create_card(Rank::Four, Suit::Spades),
             get_wild(Rank::Six, Suit::Hearts), // Wild counts as Spades
             get_wild(Rank::Eight, Suit::Diamonds), // Wild counts as Spades
-            create_test_card(Rank::Ten, Suit::Hearts),
+            create_card(Rank::Ten, Suit::Hearts),
         ];
 
         let jokers = get_test_jokers(&[Joker::FourFingers]);
@@ -660,11 +660,11 @@ mod tests {
     fn test_four_fingers_straight_flush() {
         // 4-card straight flush
         let hand = vec![
-            create_test_card(Rank::Five, Suit::Spades),
-            create_test_card(Rank::Six, Suit::Spades),
-            create_test_card(Rank::Seven, Suit::Spades),
-            create_test_card(Rank::Eight, Suit::Spades),
-            create_test_card(Rank::King, Suit::Hearts), // Non-contributing card
+            create_card(Rank::Five, Suit::Spades),
+            create_card(Rank::Six, Suit::Spades),
+            create_card(Rank::Seven, Suit::Spades),
+            create_card(Rank::Eight, Suit::Spades),
+            create_card(Rank::King, Suit::Hearts), // Non-contributing card
         ];
 
         let jokers = get_test_jokers(&[Joker::FourFingers]);
@@ -675,11 +675,11 @@ mod tests {
 
         // 4-card straight flush with overlapping straight/flush
         let hand_mixed = vec![
-            create_test_card(Rank::Five, Suit::Spades),
-            create_test_card(Rank::Six, Suit::Spades),
-            create_test_card(Rank::Seven, Suit::Spades),
-            create_test_card(Rank::Two, Suit::Spades), // Contributes to flush
-            create_test_card(Rank::Eight, Suit::Hearts), // Contributes to straight
+            create_card(Rank::Five, Suit::Spades),
+            create_card(Rank::Six, Suit::Spades),
+            create_card(Rank::Seven, Suit::Spades),
+            create_card(Rank::Two, Suit::Spades), // Contributes to flush
+            create_card(Rank::Eight, Suit::Hearts), // Contributes to straight
         ];
 
         // This makes a 4-card straight (5, 6, 7, 8) and a 4-card flush (Spades)
@@ -693,11 +693,11 @@ mod tests {
     #[test]
     fn test_shortcut_straight() {
         let hand = vec![
-            create_test_card(Rank::Two, Suit::Spades),
-            create_test_card(Rank::Four, Suit::Hearts),
-            create_test_card(Rank::Six, Suit::Spades),
-            create_test_card(Rank::Eight, Suit::Clubs),
-            create_test_card(Rank::Ten, Suit::Hearts),
+            create_card(Rank::Two, Suit::Spades),
+            create_card(Rank::Four, Suit::Hearts),
+            create_card(Rank::Six, Suit::Spades),
+            create_card(Rank::Eight, Suit::Clubs),
+            create_card(Rank::Ten, Suit::Hearts),
         ];
 
         let jokers = get_test_jokers(&[Joker::Shortcut]);
@@ -708,11 +708,11 @@ mod tests {
 
         // Gap of 1 and 2
         let hand2 = vec![
-            create_test_card(Rank::Two, Suit::Spades),
-            create_test_card(Rank::Three, Suit::Hearts),
-            create_test_card(Rank::Five, Suit::Spades),
-            create_test_card(Rank::Six, Suit::Clubs),
-            create_test_card(Rank::Eight, Suit::Hearts),
+            create_card(Rank::Two, Suit::Spades),
+            create_card(Rank::Three, Suit::Hearts),
+            create_card(Rank::Five, Suit::Spades),
+            create_card(Rank::Six, Suit::Clubs),
+            create_card(Rank::Eight, Suit::Hearts),
         ];
 
         assert_eq!(
@@ -724,11 +724,11 @@ mod tests {
     #[test]
     fn test_shortcut_four_fingers() {
         let hand = vec![
-            create_test_card(Rank::Two, Suit::Spades),
-            create_test_card(Rank::Four, Suit::Hearts),
-            create_test_card(Rank::Six, Suit::Spades),
-            create_test_card(Rank::Eight, Suit::Clubs),
-            create_test_card(Rank::King, Suit::Hearts), // Non-contributing
+            create_card(Rank::Two, Suit::Spades),
+            create_card(Rank::Four, Suit::Hearts),
+            create_card(Rank::Six, Suit::Spades),
+            create_card(Rank::Eight, Suit::Clubs),
+            create_card(Rank::King, Suit::Hearts), // Non-contributing
         ];
 
         let jokers = get_test_jokers(&[Joker::Shortcut, Joker::FourFingers]);
@@ -741,11 +741,11 @@ mod tests {
     #[test]
     fn test_shortcut_four_fingers_smeared_wild_straight_flush() {
         let hand = vec![
-            create_test_card(Rank::Two, Suit::Spades),
-            create_test_card(Rank::Four, Suit::Clubs), // Smeared -> Spades
-            get_wild(Rank::Six, Suit::Hearts),         // Wild -> Spades
-            create_test_card(Rank::Eight, Suit::Spades),
-            create_test_card(Rank::King, Suit::Diamonds), // Non-contributing
+            create_card(Rank::Two, Suit::Spades),
+            create_card(Rank::Four, Suit::Clubs), // Smeared -> Spades
+            get_wild(Rank::Six, Suit::Hearts),    // Wild -> Spades
+            create_card(Rank::Eight, Suit::Spades),
+            create_card(Rank::King, Suit::Diamonds), // Non-contributing
         ];
 
         let jokers = get_test_jokers(&[Joker::Shortcut, Joker::FourFingers, Joker::SmearedJoker]);

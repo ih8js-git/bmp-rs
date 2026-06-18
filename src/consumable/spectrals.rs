@@ -46,24 +46,24 @@ fn use_seal_spectral(spectral: Spectral, card: Option<&mut Card>) -> Result<(), 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::card::core::{Rank, Suit, create_test_card};
+    use crate::card::core::{Rank, Suit, create_card};
     use crate::card::operations::get_card_seal;
 
     #[test]
     fn test_use_seal_spectral_success() {
-        let mut card = create_test_card(Rank::Two, Suit::Spades);
+        let mut card = create_card(Rank::Two, Suit::Spades);
         assert!(use_seal_spectral(Spectral::Tailisman, Some(&mut card)).is_ok());
         assert_eq!(get_card_seal(&card), Seal::Gold);
 
-        let mut card = create_test_card(Rank::Two, Suit::Spades);
+        let mut card = create_card(Rank::Two, Suit::Spades);
         assert!(use_seal_spectral(Spectral::DejaVu, Some(&mut card)).is_ok());
         assert_eq!(get_card_seal(&card), Seal::Red);
 
-        let mut card = create_test_card(Rank::Two, Suit::Spades);
+        let mut card = create_card(Rank::Two, Suit::Spades);
         assert!(use_seal_spectral(Spectral::Trance, Some(&mut card)).is_ok());
         assert_eq!(get_card_seal(&card), Seal::Blue);
 
-        let mut card = create_test_card(Rank::Two, Suit::Spades);
+        let mut card = create_card(Rank::Two, Suit::Spades);
         assert!(use_seal_spectral(Spectral::Medium, Some(&mut card)).is_ok());
         assert_eq!(get_card_seal(&card), Seal::Purple);
     }
@@ -77,7 +77,7 @@ mod tests {
 
     #[test]
     fn test_use_seal_spectral_invalid_spectral() {
-        let mut card = create_test_card(Rank::Two, Suit::Spades);
+        let mut card = create_card(Rank::Two, Suit::Spades);
         let result = use_seal_spectral(Spectral::BlackHole, Some(&mut card));
         assert!(result.is_err());
         assert_eq!(

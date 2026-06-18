@@ -221,7 +221,7 @@ pub fn use_judgement(deck: &mut [Card], indices: &[usize]) -> Result<(), String>
 mod tests {
     use super::*;
     use crate::GameState;
-    use crate::card::core::create_test_card;
+    use crate::card::core::create_card;
     use crate::card::operations::{get_card_enhancement, get_card_rank, get_card_suit};
     use crate::consumable::Consumable;
     use crate::decks::{Deck, create_game_state};
@@ -256,8 +256,8 @@ mod tests {
     #[test]
     fn test_tarot_strength() {
         let mut deck = vec![
-            create_test_card(Rank::Two, Suit::Spades),
-            create_test_card(Rank::King, Suit::Hearts),
+            create_card(Rank::Two, Suit::Spades),
+            create_card(Rank::King, Suit::Hearts),
         ];
 
         let result = use_strength(&mut deck, &[0, 1]);
@@ -269,7 +269,7 @@ mod tests {
 
     #[test]
     fn test_tarot_strength_ace() {
-        let mut deck = vec![create_test_card(Rank::Ace, Suit::Spades)];
+        let mut deck = vec![create_card(Rank::Ace, Suit::Spades)];
         let result = use_strength(&mut deck, &[0]);
         assert!(result.is_ok());
         assert_eq!(get_card_rank(&deck[0]), Rank::Two);
@@ -278,8 +278,8 @@ mod tests {
     #[test]
     fn test_tarot_death() {
         let mut deck = vec![
-            create_test_card(Rank::Two, Suit::Spades),
-            create_test_card(Rank::King, Suit::Hearts),
+            create_card(Rank::Two, Suit::Spades),
+            create_card(Rank::King, Suit::Hearts),
         ];
 
         let result = use_death(&mut deck, &[0, 1]);
@@ -305,7 +305,7 @@ mod tests {
         ];
 
         for (tarot, expected_enhancement, max_cards) in test_cases {
-            let deck = vec![create_test_card(Rank::Two, Suit::Spades); max_cards];
+            let deck = vec![create_card(Rank::Two, Suit::Spades); max_cards];
             let indices: Vec<usize> = (0..max_cards).collect();
             let deck = use_enhancement_tarot(tarot, deck, &indices).expect("Tarot failed");
             for card in &deck {
@@ -325,9 +325,9 @@ mod tests {
 
         for (tarot, expected_suit) in test_cases {
             let deck = vec![
-                create_test_card(Rank::Two, Suit::Spades),
-                create_test_card(Rank::Three, Suit::Hearts),
-                create_test_card(Rank::Four, Suit::Clubs),
+                create_card(Rank::Two, Suit::Spades),
+                create_card(Rank::Three, Suit::Hearts),
+                create_card(Rank::Four, Suit::Clubs),
             ];
             let indices: Vec<usize> = (0..3).collect();
             let deck = use_suit_tarot(tarot, deck, &indices).expect("Tarot failed");

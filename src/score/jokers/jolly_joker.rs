@@ -28,7 +28,7 @@ pub fn score(_state: &JokerState, hand: Hand) -> [f32; 3] {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::card::core::{Rank, Suit, create_test_card};
+    use crate::card::core::{Rank, Suit, create_card};
     use crate::decks::{Deck, create_game_state};
     use crate::joker::Joker;
     use crate::score::core::get_score;
@@ -42,11 +42,11 @@ mod tests {
         state.jokers.push(joker_state);
 
         let mut hand = vec![
-            create_test_card(Rank::King, Suit::Spades),
-            create_test_card(Rank::King, Suit::Hearts),
-            create_test_card(Rank::Two, Suit::Clubs),
-            create_test_card(Rank::Three, Suit::Diamonds),
-            create_test_card(Rank::Four, Suit::Spades),
+            create_card(Rank::King, Suit::Spades),
+            create_card(Rank::King, Suit::Hearts),
+            create_card(Rank::Two, Suit::Clubs),
+            create_card(Rank::Three, Suit::Diamonds),
+            create_card(Rank::Four, Suit::Spades),
         ];
 
         // We expect Pair (10 chips, 2 mult) + played cards (10 + 10 = 20 chips)
@@ -65,11 +65,11 @@ mod tests {
         state.jokers.push(joker_state);
 
         let mut hand = vec![
-            create_test_card(Rank::King, Suit::Spades),
-            create_test_card(Rank::Queen, Suit::Hearts),
-            create_test_card(Rank::Two, Suit::Clubs),
-            create_test_card(Rank::Three, Suit::Diamonds),
-            create_test_card(Rank::Four, Suit::Spades),
+            create_card(Rank::King, Suit::Spades),
+            create_card(Rank::Queen, Suit::Hearts),
+            create_card(Rank::Two, Suit::Clubs),
+            create_card(Rank::Three, Suit::Diamonds),
+            create_card(Rank::Four, Suit::Spades),
         ];
 
         // We expect High Card base at level 1: (5 chips, 1 mult). + played cards (10 = 10)
