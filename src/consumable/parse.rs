@@ -15,4 +15,3 @@ pub fn parse_planet_to_text(p: Planet) -> String {
 pub fn parse_tarot_to_text(t: Tarot) -> String {
     t.to_string()
 }
-

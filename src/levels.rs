@@ -30,7 +30,7 @@ pub enum Hand {
     HighCard,
 }
 
-fn hand_base_chips_and_mult(levels: u16, hand: Hand) -> (u16, u16) {
+pub fn hand_base_chips_and_mult(levels: u16, hand: Hand) -> (u16, u16) {
     match hand {
         Hand::FlushFive => (160 + (50 * levels), 16 + (3 * levels)),
         Hand::FlushHouse => (140 + (40 * levels), 14 + (4 * levels)),

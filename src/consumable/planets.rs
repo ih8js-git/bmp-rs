@@ -29,7 +29,8 @@ pub fn use_planet(game_state: &mut GameState, planet: Planet) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::decks::{Deck, create_game_state};
+    use crate::decks::Deck;
+    use crate::game::create_game_state;
 
     #[test]
     fn test_use_planet_increases_level() {
