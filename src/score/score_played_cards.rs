@@ -11,10 +11,10 @@ pub fn score_played_cards(
     hand: Hand,
     level: u16,
     jokers: &[JokerState],
-) -> [f32; 2] {
+) -> [f64; 2] {
     let (base_chips_u16, base_mult_u16) = hand_base_chips_and_mult(level, hand);
-    let mut base_chips = base_chips_u16 as f32;
-    let mut base_mult = base_mult_u16 as f32;
+    let mut chips = base_chips_u16 as f64;
+    let mut mult = base_mult_u16 as f64;
 
     for &idx in &scoring_indices {
         let card = &cards[idx];
@@ -27,24 +27,24 @@ pub fn score_played_cards(
         let card_edition = get_card_edition(card);
 
         for t in 0..trigger_count {
-            base_chips += card.chips as f32;
+            chips += card.chips as f64;
             match card_enhancement {
                 Enhancement::None => (),
-                Enhancement::Bonus => base_chips += 30.0,
-                Enhancement::Mult => base_mult += 4.0,
+                Enhancement::Bonus => chips += 30.0,
+                Enhancement::Mult => mult += 4.0,
                 Enhancement::Wild => (),
-                Enhancement::Glass => base_mult *= 2.0,
+                Enhancement::Glass => mult *= 2.0,
                 Enhancement::Steel => (),
-                Enhancement::Stone => base_chips += 50.0,
+                Enhancement::Stone => chips += 50.0,
                 Enhancement::Gold => (),
                 // TODO: Add RNG logic
                 Enhancement::Lucky => (),
             }
             match card_edition {
                 Edition::None => (),
-                Edition::Foil => base_chips += 50.0,
-                Edition::Holographic => base_mult += 10.0,
-                Edition::Polychrome => base_mult *= 1.5,
+                Edition::Foil => chips += 50.0,
+                Edition::Holographic => mult += 10.0,
+                Edition::Polychrome => mult *= 1.5,
                 Edition::Negative => {
                     panic!("Negative edition playing card. How did we even manage to get here?")
                 }
@@ -52,18 +52,16 @@ pub fn score_played_cards(
 
             for joker in jokers {
                 let id = joker.id() as usize;
-                let card_score_fn = crate::score::jokers::CARD_SCORE_FNS[id];
-                let [j_chips, j_mult, j_x_mult] = card_score_fn(joker, card);
-                base_chips += j_chips;
-                base_mult += j_mult;
-                if j_x_mult > 0.0 {
-                    base_mult *= j_x_mult;
+                let def = crate::joker::jokers::JOKER_DEFS[id];
+                if def.trigger_time() == crate::joker::jokers::TriggerTime::CardScored {
+                    let card_score_fn = crate::score::jokers::CARD_SCORE_FNS[id];
+                    card_score_fn(joker, card, &mut chips, &mut mult).unwrap();
                 }
             }
         }
     }
 
-    [base_chips, base_mult]
+    [chips, mult]
 }
 
 #[cfg(test)]
@@ -83,7 +81,7 @@ mod tests {
         card
     }
 
-    fn score_card(card: Card) -> f32 {
+    fn score_card(card: Card) -> f64 {
         let mut state = create_game_state(Deck::Red);
         let mut hand = vec![card];
         get_score(&mut state, &mut hand)
