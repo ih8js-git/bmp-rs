@@ -12,3 +12,6 @@ strum_macros = "0.28.0"
 dead_code = "allow"
 unused_variables = "allow"
 unused_imports = "allow"
+
+[dev-dependencies]
+husky-rs = "0.3.3"
