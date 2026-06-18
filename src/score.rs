@@ -269,7 +269,7 @@ pub fn get_hand_type(hand: &[Card], jokers: &[Joker]) -> (Hand, Vec<usize>) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::card::core::{create_test_card, Enhancement, Rank, Suit};
+    use crate::card::core::{Enhancement, Rank, Suit, create_test_card};
     use crate::card::operations::set_card_enhancement;
 
     fn get_wild(rank: Rank, suit: Suit) -> Card {
