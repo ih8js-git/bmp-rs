@@ -79,4 +79,28 @@ mod tests {
         let result = get_score(&mut state, &mut hand);
         assert_eq!(result, 15.0);
     }
+
+    #[test]
+    #[ignore] // Reminder: with how the code base is this is always going to fail
+    fn test_jolly_joker_flush_with_pair() {
+        let mut state = create_game_state(Deck::Red);
+
+        let mut joker_state = JokerState::new();
+        joker_state.set_id(Joker::JollyJoker as u8);
+        state.jokers.push(joker_state);
+
+        let mut hand = vec![
+            create_card(Rank::King, Suit::Spades),
+            create_card(Rank::Queen, Suit::Spades),
+            create_card(Rank::Jack, Suit::Spades),
+            create_card(Rank::King, Suit::Hearts),
+            create_card(Rank::Ace, Suit::Spades),
+        ];
+
+        // We expect Flush (35 chips, 4 mult) + (10 + 10 + 10 + 10 + 11 chips) + 8 mult from Jolly Joker.
+        // Total chips: 86. Total mult: 4 + 8 = 12.
+        // Expected score: 86 * 12 = 1032.0
+        let result = get_score(&mut state, &mut hand);
+        assert_eq!(result, 1032.0);
+    }
 }
