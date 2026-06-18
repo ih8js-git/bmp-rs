@@ -82,5 +82,22 @@ pub fn create_test_card(rank: Rank, suit: Suit) -> Card {
         | (Edition::None as u16) << 7
         | (Enhancement::None as u16) << 3
         | (Seal::None as u16);
-    Card { meta, chips: 0 }
+
+    let chips: u16 = match rank {
+        Rank::Two => 2,
+        Rank::Three => 3,
+        Rank::Four => 4,
+        Rank::Five => 5,
+        Rank::Six => 6,
+        Rank::Seven => 7,
+        Rank::Eight => 8,
+        Rank::Nine => 9,
+        Rank::Ten => 10,
+        Rank::Jack => 10,
+        Rank::Queen => 10,
+        Rank::King => 10,
+        Rank::Ace => 11,
+    };
+
+    Card { meta, chips }
 }

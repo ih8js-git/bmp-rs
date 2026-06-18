@@ -210,7 +210,9 @@ pub struct JokerState {
     pub scale: B12,          // 12 bits for scale
 }
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+use strum_macros::FromRepr;
+
+#[derive(Debug, Copy, Clone, PartialEq, FromRepr)]
 #[repr(u8)]
 pub enum Joker {
     Joker,

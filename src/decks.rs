@@ -167,7 +167,7 @@ pub fn create_game_state(deck: Deck) -> GameState {
         starting_deck_size: 52,
         skips_taken: 0,
         base_reroll_cost: 5,
-        planet_levels: [1; 12],
+        planet_levels: [0; 12],
         hand_types_played: [0; 12],
     };
 

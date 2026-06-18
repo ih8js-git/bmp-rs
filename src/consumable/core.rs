@@ -12,5 +12,3 @@ pub struct Consumable {
     // pub base_sell_value: u8, // I don't think this is necessary, leaving it commented for now
     pub added_sell_value: u8,
 }
-
-

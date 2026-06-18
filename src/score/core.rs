@@ -1,15 +1,47 @@
+use crate::GameState;
 use crate::card::operations::{get_card_enhancement, get_card_rank, get_card_suit};
 use crate::card::{Card, Enhancement};
 use crate::joker::Joker;
 use crate::levels::Hand;
 
+use crate::score::score_jokers::score_jokers;
+use crate::score::score_played_cards::score_played_cards;
+
+pub fn get_score(game_state: &mut GameState, cards_played: &mut [Card]) -> f32 {
+    // 1. Score PreHand Stuff i.e. DNA, Midas Mask, etc.
+
+    // 2. Determine the highest-ranking 5 card hand possible
+    // TODO: Return more infromation about the hand, so that jokers, don't have to do repetitive checks
+    let (hand_type, scoring_indices) = get_hand_type(cards_played, &game_state.jokers);
+
+    // 3. Score the cards played i.e. lusty, dusk, etc.
+    let current_level = game_state.planet_levels[hand_type as usize] as u16;
+
+    let [base_chips, base_mult] = score_played_cards(
+        cards_played,
+        scoring_indices,
+        hand_type,
+        current_level,
+        &game_state.jokers,
+    );
+
+    // 4. Score the cards held in hand i.e. steel, baron, etc.
+
+    // 5. Score the jokers, i.e. Jolly Joker, etc.
+    let [final_chips, final_mult] =
+        score_jokers(&game_state.jokers, hand_type, base_chips, base_mult);
+
+    final_chips * final_mult
+}
+
+use crate::joker::JokerState;
 
 fn get_flush_indices(
     hand: &[Card],
-    jokers: &[Joker],
+    jokers: &[JokerState],
     required_len: usize,
 ) -> Option<Vec<usize>> {
-    let smeared = jokers.contains(&Joker::SmearedJoker);
+    let smeared = jokers.iter().any(|j| j.id() == Joker::SmearedJoker as u8);
     let mut suit_counts = [0; 4];
     let mut wild_indices = Vec::new();
     let mut suit_indices: [Vec<usize>; 4] = [Vec::new(), Vec::new(), Vec::new(), Vec::new()];
@@ -58,9 +90,9 @@ fn get_straight_indices(
     ranks: &[u8; 13],
     hand: &[Card],
     required_len: usize,
-    jokers: &[Joker],
+    jokers: &[JokerState],
 ) -> Option<Vec<usize>> {
-    let shortcut = jokers.contains(&Joker::Shortcut);
+    let shortcut = jokers.iter().any(|j| j.id() == Joker::Shortcut as u8);
     let max_gap = if shortcut { 2 } else { 1 };
 
     let mut present_ranks = Vec::new();
@@ -214,14 +246,14 @@ fn check_two_card_hands(hand: &[Card], ranks: &[u8; 13]) -> Option<(Hand, Vec<us
     None
 }
 
-pub fn get_hand_type(hand: &[Card], jokers: &[Joker]) -> (Hand, Vec<usize>) {
+pub fn get_hand_type(hand: &[Card], jokers: &[JokerState]) -> (Hand, Vec<usize>) {
     let mut ranks = [0u8; 13];
 
     for card in hand {
         ranks[get_card_rank(card) as usize] += 1;
     }
 
-    let four_fingers = jokers.contains(&Joker::FourFingers);
+    let four_fingers = jokers.iter().any(|j| j.id() == Joker::FourFingers as u8);
     let required_five_card_len = if four_fingers { 4 } else { 5 };
 
     let flush_indices = get_flush_indices(hand, jokers, required_five_card_len);
@@ -268,8 +300,19 @@ pub fn get_hand_type(hand: &[Card], jokers: &[Joker]) -> (Hand, Vec<usize>) {
 
 #[cfg(test)]
 mod tests {
+    use crate::joker::JokerState;
+    fn get_test_jokers(jokers: &[Joker]) -> Vec<JokerState> {
+        jokers
+            .iter()
+            .map(|j| {
+                let mut s = JokerState::new();
+                s.set_id(*j as u8);
+                s
+            })
+            .collect()
+    }
     use super::*;
-    use crate::card::core::{create_test_card, Enhancement, Rank, Suit};
+    use crate::card::core::{Enhancement, Rank, Suit, create_test_card};
     use crate::card::operations::set_card_enhancement;
 
     fn get_wild(rank: Rank, suit: Suit) -> Card {
@@ -524,7 +567,7 @@ mod tests {
         assert_eq!(get_hand_type(&hand, &[]), (Hand::HighCard, vec![4]));
 
         // With smeared joker it's a flush
-        let jokers = vec![Joker::SmearedJoker];
+        let jokers = get_test_jokers(&[Joker::SmearedJoker]);
         assert_eq!(
             get_hand_type(&hand, &jokers),
             (Hand::Flush, vec![0, 1, 2, 3, 4])
@@ -558,7 +601,7 @@ mod tests {
             create_test_card(Rank::Ten, Suit::Hearts),
         ];
 
-        let jokers = vec![Joker::FourFingers];
+        let jokers = get_test_jokers(&[Joker::FourFingers]);
         assert_eq!(
             get_hand_type(&hand, &jokers),
             (Hand::Flush, vec![0, 1, 2, 3])
@@ -589,7 +632,7 @@ mod tests {
             create_test_card(Rank::Ten, Suit::Hearts),
         ];
 
-        let jokers = vec![Joker::FourFingers, Joker::SmearedJoker];
+        let jokers = get_test_jokers(&[Joker::FourFingers, Joker::SmearedJoker]);
         assert_eq!(
             get_hand_type(&hand, &jokers),
             (Hand::Flush, vec![0, 1, 2, 3])
@@ -606,7 +649,7 @@ mod tests {
             create_test_card(Rank::Ten, Suit::Hearts),
         ];
 
-        let jokers = vec![Joker::FourFingers];
+        let jokers = get_test_jokers(&[Joker::FourFingers]);
         assert_eq!(
             get_hand_type(&hand, &jokers),
             (Hand::Flush, vec![0, 1, 2, 3])
@@ -624,7 +667,7 @@ mod tests {
             create_test_card(Rank::King, Suit::Hearts), // Non-contributing card
         ];
 
-        let jokers = vec![Joker::FourFingers];
+        let jokers = get_test_jokers(&[Joker::FourFingers]);
         assert_eq!(
             get_hand_type(&hand, &jokers),
             (Hand::StraightFlush, vec![0, 1, 2, 3])
@@ -657,7 +700,7 @@ mod tests {
             create_test_card(Rank::Ten, Suit::Hearts),
         ];
 
-        let jokers = vec![Joker::Shortcut];
+        let jokers = get_test_jokers(&[Joker::Shortcut]);
         assert_eq!(
             get_hand_type(&hand, &jokers),
             (Hand::Straight, vec![0, 1, 2, 3, 4])
@@ -688,7 +731,7 @@ mod tests {
             create_test_card(Rank::King, Suit::Hearts), // Non-contributing
         ];
 
-        let jokers = vec![Joker::Shortcut, Joker::FourFingers];
+        let jokers = get_test_jokers(&[Joker::Shortcut, Joker::FourFingers]);
         assert_eq!(
             get_hand_type(&hand, &jokers),
             (Hand::Straight, vec![0, 1, 2, 3])
@@ -705,7 +748,7 @@ mod tests {
             create_test_card(Rank::King, Suit::Diamonds), // Non-contributing
         ];
 
-        let jokers = vec![Joker::Shortcut, Joker::FourFingers, Joker::SmearedJoker];
+        let jokers = get_test_jokers(&[Joker::Shortcut, Joker::FourFingers, Joker::SmearedJoker]);
 
         // This evaluates to a 4-card Straight (2, 4, 6, 8 via Shortcut & Four Fingers)
         // and a 4-card Flush (Spades via Smeared & Wild & Four Fingers)
