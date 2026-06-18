@@ -21,17 +21,34 @@ pub fn card_score(_state: &JokerState, card: &Card) -> [f32; 3] {
 mod tests {
     use super::*;
     use crate::card::core::{Rank, create_card};
+    use crate::decks::Deck;
+    use crate::game::create_game_state;
+    use crate::joker::Joker;
+    use crate::score::core::get_score;
 
     #[test]
     fn test_greedy_joker() {
-        let joker_state = JokerState::new();
+        let mut state = create_game_state(Deck::Red);
+        let mut joker_state = JokerState::new();
+        joker_state.set_id(Joker::GreedyJoker as u8);
+        state.jokers.push(joker_state);
 
         // Test Diamond card
         let diamond_card = create_card(Rank::Two, Suit::Diamonds);
-        assert_eq!(card_score(&joker_state, &diamond_card), [0.0, 3.0, 0.0]);
+        let mut hand_diamond = vec![diamond_card];
+
+        // Base chips: 5 (High card) + 2 (Two) = 7.
+        // Base mult: 1 (High card) + 3 (Greedy Joker) = 4.
+        // Score: 7 * 4 = 28.
+        assert_eq!(get_score(&mut state, &mut hand_diamond), 28.0);
 
         // Test non-Diamond card
         let spade_card = create_card(Rank::Two, Suit::Spades);
-        assert_eq!(card_score(&joker_state, &spade_card), [0.0, 0.0, 0.0]);
+        let mut hand_spade = vec![spade_card];
+
+        // Base chips: 5 (High card) + 2 (Two) = 7.
+        // Base mult: 1 (High card) + 0 = 1.
+        // Score: 7 * 1 = 7.
+        assert_eq!(get_score(&mut state, &mut hand_spade), 7.0);
     }
 }

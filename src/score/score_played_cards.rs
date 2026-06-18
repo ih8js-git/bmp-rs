@@ -49,6 +49,17 @@ pub fn score_played_cards(
                     panic!("Negative edition playing card. How did we even manage to get here?")
                 }
             }
+
+            for joker in jokers {
+                let id = joker.id() as usize;
+                let card_score_fn = crate::score::jokers::CARD_SCORE_FNS[id];
+                let [j_chips, j_mult, j_x_mult] = card_score_fn(joker, card);
+                base_chips += j_chips;
+                base_mult += j_mult;
+                if j_x_mult > 0.0 {
+                    base_mult *= j_x_mult;
+                }
+            }
         }
     }
 
