@@ -1,6 +1,6 @@
 # bmp-rs
 
-**bmp-rs** (Balatro Model Parser — Rust) is a Rust implementation of the game engine for [Balatro](https://www.playbalatro.com/), a poker-themed roguelike deckbuilder.
+**bmp-rs** (Balatro Multiplayer - Rust) is a Rust implementation of the game engine for [Balatro](https://www.playbalatro.com/) and it's [Multiplayer Mod](https://balatromp.com/).
 
 It models cards, decks, jokers, consumables (tarots, planets, spectrals), scoring, vouchers, and shop logic.
 
