@@ -10,7 +10,6 @@ pub const JOKER_AMOUNT: usize = 150;
 
 pub const DISCOUNT_VOUCHER_MULTIPLIER: [f32; 3] = [1.0, 0.75, 0.5];
 
-const JOKER_BASE_COST_RAW: &str = include_str!("./input/base_cost.txt");
 pub type CostTable = [[u8; Edition::COUNT]; DISCOUNT_VOUCHER_MULTIPLIER.len()];
 
 // for every joker, a table containing the cost for every voucher (row) & edition (col) combo
