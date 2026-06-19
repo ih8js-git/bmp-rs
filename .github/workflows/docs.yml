@@ -30,7 +30,7 @@ jobs:
           tool: mdbook
 
       - name: Build with mdBook
-        run: mdbook build my-docs
+        run: mdbook build docs
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
