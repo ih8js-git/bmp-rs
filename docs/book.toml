@@ -1,0 +1,9 @@
+[book]
+title = "bmp-docs"
+authors = ["ih8js-git"]
+language = "en"
+src = "src"
+title = "Project Documentation"
+
+[output.html]
+git-repository-url = "https://github.com/ih8js-git/bmp-rs"
