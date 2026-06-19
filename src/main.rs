@@ -3,9 +3,11 @@ mod card;
 mod consumable;
 mod decks;
 mod game;
+mod helper;
 mod joker;
 mod levels;
 mod score;
+mod tables;
 mod vouchers;
 
 use card::*;
