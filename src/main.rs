@@ -1,4 +1,5 @@
 //mod blinds;
+mod antes;
 mod card;
 mod consumable;
 mod decks;
@@ -7,11 +8,10 @@ mod helper;
 mod joker;
 mod levels;
 mod score;
+mod stakes;
 mod tables;
 mod vouchers;
 
-use card::*;
-use consumable::*;
 use decks::*;
 use game::*;
 use std::io;
@@ -70,5 +70,11 @@ fn main() {
         }
         _ => panic!("Invalid choice"),
     }
-    println!("{:?}", gs);
+
+    gs.round += 1;
+    println!("Round {}:", gs.round);
+    println!(
+        "Required chips: {}",
+        antes::get_required_chips(gs.round, gs.stake)
+    );
 }

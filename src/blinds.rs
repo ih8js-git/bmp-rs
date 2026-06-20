@@ -1,0 +1,33 @@
+enum BossBlind {
+    TheHook,
+    TheOx,
+    TheHouse,
+    TheWall,
+    TheWheel,
+    TheArm,
+    TheClub,
+    TheFish,
+    ThePsychic,
+    TheGoad,
+    TheWater,
+    TheWindow,
+    TheManacle,
+    TheEye,
+    TheMouth,
+    ThePlant,
+    TheSerpent,
+    ThePillar,
+    TheNeedle,
+    TheHead,
+    TheTooth,
+    TheFlint,
+    TheMark,
+}
+
+enum ShowDownBossBlind {
+    AmberAcorn,
+    VerdantLeaf,
+    VioletVessel,
+    CrimsonHeart,
+    CeruleanBell,
+}
