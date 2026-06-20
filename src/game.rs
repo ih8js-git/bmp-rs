@@ -7,6 +7,7 @@ use crate::decks::{Deck, create_abandoned_deck, create_checkered_deck, create_de
 use crate::joker::JokerState;
 use crate::{Voucher, add_voucher};
 
+#[derive(Debug)]
 pub struct GameState {
     pub last_used: Consumable,
     pub tarots_used: u16,
