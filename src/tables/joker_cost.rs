@@ -15,25 +15,26 @@ pub type CostTable = [[u8; Edition::COUNT]; DISCOUNT_VOUCHER_MULTIPLIER.len()];
 // for every joker, a table containing the cost for every voucher (row) & edition (col) combo
 pub static JOKER_COST_TABLES: OnceLock<[CostTable; JOKER_AMOUNT]> = OnceLock::new();
 pub fn init_joker_base_cost_table() {
-    let mut temp_tables =
-        [[[0u8; Edition::COUNT]; DISCOUNT_VOUCHER_MULTIPLIER.len()]; JOKER_AMOUNT];
+    JOKER_COST_TABLES.get_or_init(|| {
+        let mut temp_tables =
+            [[[0u8; Edition::COUNT]; DISCOUNT_VOUCHER_MULTIPLIER.len()]; JOKER_AMOUNT];
 
-    for (joker, base_cost) in JOKER_DEFS.iter().map(|def| def.base_price()).enumerate() {
-        for (discount_index, discount_multiplier) in DISCOUNT_VOUCHER_MULTIPLIER.iter().enumerate()
-        {
-            for edition in Edition::iter() {
-                let f_base_cost = base_cost as f32;
-                let f_edition_added_cost = edition.added_cost() as f32;
-                let f_res = (f_base_cost + f_edition_added_cost + 0.5) * discount_multiplier;
+        for (joker, base_cost) in JOKER_DEFS.iter().map(|def| def.base_price()).enumerate() {
+            for (discount_index, discount_multiplier) in
+                DISCOUNT_VOUCHER_MULTIPLIER.iter().enumerate()
+            {
+                for edition in Edition::iter() {
+                    let f_base_cost = base_cost as f32;
+                    let f_edition_added_cost = edition.added_cost() as f32;
+                    let f_res = (f_base_cost + f_edition_added_cost + 0.5) * discount_multiplier;
 
-                temp_tables[joker][discount_index][edition as usize] = f_res.floor() as u8;
+                    temp_tables[joker][discount_index][edition as usize] = f_res.floor() as u8;
+                }
             }
         }
-    }
 
-    if JOKER_COST_TABLES.set(temp_tables).is_err() {
-        panic!("JOKER_COST_TABLES was already initialized");
-    }
+        temp_tables
+    });
 }
 
 pub fn get_joker_cost(j: &JokerState, gs: &GameState) -> u8 {
