@@ -1,5 +1,5 @@
-//mod blinds;
 mod antes;
+mod blinds;
 mod card;
 mod consumable;
 mod decks;
@@ -75,6 +75,6 @@ fn main() {
     println!("Round {}:", gs.round);
     println!(
         "Required chips: {}",
-        antes::get_required_chips(gs.round, gs.stake)
+        antes::get_required_chips(gs.round, gs.stake, None)
     );
 }

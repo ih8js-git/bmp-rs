@@ -1,4 +1,6 @@
-enum BossBlind {
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u8)]
+pub enum BossBlind {
     TheHook,
     TheOx,
     TheHouse,
