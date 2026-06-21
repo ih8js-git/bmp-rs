@@ -51,6 +51,7 @@ fn default_joker_score(
 pub const SCORE_FNS: [JokerScoreFn; 150] = {
     let mut fns: [JokerScoreFn; 150] = [default_joker_score; 150];
     fns[Joker::Joker as usize] = joker::score;
+    fns[Joker::GreedyJoker as usize] = greedy_joker::score;
     fns[Joker::LustyJoker as usize] = lusty_joker::score;
     fns[Joker::WrathfulJoker as usize] = wrathful_joker::score;
     fns[Joker::GluttonousJoker as usize] = gluttonous_joker::score;
