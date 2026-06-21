@@ -1,3 +1,4 @@
-pub mod jokers;
+pub mod collection;
+pub mod core;
 
-pub use self::jokers::*;
+pub use self::core::*;
