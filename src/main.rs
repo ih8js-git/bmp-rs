@@ -7,6 +7,7 @@ mod game;
 mod helper;
 mod joker;
 mod levels;
+mod rng;
 mod score;
 mod stakes;
 mod tables;

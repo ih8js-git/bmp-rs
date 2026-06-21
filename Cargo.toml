@@ -7,6 +7,8 @@ edition = "2024"
 modular-bitfield = "0.13.1"
 strum = "0.28.0"
 strum_macros = "0.28.0"
+rand = "0.10.1"
+rand_pcg = "0.10.2"
 
 [lints.rust]
 dead_code = "allow"
