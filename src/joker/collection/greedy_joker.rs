@@ -3,6 +3,16 @@ use crate::joker::JokerState;
 use crate::card::Card;
 use crate::card::core::{Enhancement, Suit};
 use crate::card::operations::{get_card_enhancement, get_card_suit};
+use crate::levels::Hand;
+
+pub fn score(
+    _state: &JokerState,
+    _hand: Hand,
+    _chips: &mut f64,
+    _mult: &mut f64,
+) -> Result<(), &'static str> {
+    Ok(())
+}
 
 pub fn card_score(
     _state: &JokerState,
