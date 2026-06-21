@@ -1,11 +1,11 @@
 use crate::card::core::{Card, Edition, Enhancement, Seal};
 use crate::card::operations::get_card_seal;
 use crate::card::{get_card_edition, get_card_enhancement};
-use crate::joker::collection::{greedy_joker, sock_and_buskin};
+use crate::joker::collection::greedy_joker;
 use crate::joker::{Joker, JokerState};
 use crate::levels::{Hand, hand_base_chips_and_mult};
 use crate::score::core::count_retrigger_jokers;
-use crate::score::score_jokers::{JokerCardScoreFn, JokerRetriggerFn};
+use crate::score::score_jokers::JokerCardScoreFn;
 
 fn default_card_score(
     _state: &JokerState,
@@ -42,7 +42,7 @@ pub fn score_played_cards(
         let card_enhancement = get_card_enhancement(card);
         let card_edition = get_card_edition(card);
 
-        for t in 0..trigger_count {
+        for _ in 0..trigger_count {
             chips += card.chips as f64;
             match card_enhancement {
                 Enhancement::None => (),
