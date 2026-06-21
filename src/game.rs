@@ -5,7 +5,9 @@ use crate::consumable::{
 };
 use crate::decks::{Deck, create_abandoned_deck, create_checkered_deck, create_default_deck};
 use crate::joker::JokerState;
+use crate::rng::{PrecomputedRngQueue, RNGQueueType, create_all_rng_queues, create_generator};
 use crate::{Voucher, add_voucher};
+use strum::EnumCount;
 
 pub struct GameState {
     pub last_used: Consumable,
@@ -29,10 +31,18 @@ pub struct GameState {
     pub base_reroll_cost: u8,
     pub planet_levels: [u8; 12],
     pub hand_types_played: [u8; 12],
-    // pub ecto_hand_size_reduction: u8, // starts at 1
+
+    // RNG
+    pub rng_queues: [PrecomputedRngQueue; RNGQueueType::COUNT],
+    pub rng_next_queue_indices: [u32; RNGQueueType::COUNT], // keeps track of the next idx we need to pull from for every queue
+
+                                                            // pub ecto_hand_size_reduction: u8, // starts at 1
 }
 
 pub fn create_game_state(deck: Deck) -> GameState {
+    let seed = 123456789;
+    let mut rng = create_generator(seed);
+
     let base = GameState {
         last_used: Consumable::Tarot(Tarot::Fool),
         tarots_used: 0,
@@ -55,6 +65,9 @@ pub fn create_game_state(deck: Deck) -> GameState {
         base_reroll_cost: 5,
         planet_levels: [0; 12],
         hand_types_played: [0; 12],
+
+        rng_queues: create_all_rng_queues(&mut rng),
+        rng_next_queue_indices: [0; RNGQueueType::COUNT], // next idx we need to pull from for each queue
     };
 
     match deck {
