@@ -5,6 +5,7 @@ mod decks;
 mod game;
 mod joker;
 mod levels;
+mod rng;
 mod score;
 mod vouchers;
 
