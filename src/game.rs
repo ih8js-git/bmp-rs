@@ -6,9 +6,11 @@ use crate::consumable::{
 use crate::decks::{Deck, create_abandoned_deck, create_checkered_deck, create_default_deck};
 use crate::joker::JokerState;
 use crate::rng::{PrecomputedRngQueue, RNGQueueType, create_all_rng_queues, create_generator};
+use crate::stakes::Stake;
 use crate::{Voucher, add_voucher};
 use strum::EnumCount;
 
+#[derive(Debug)]
 pub struct GameState {
     pub last_used: Consumable,
     pub tarots_used: u16,
@@ -20,6 +22,8 @@ pub struct GameState {
     pub joker_slots: u8,
     pub consumables: Vec<ConsumableState>,
     pub consumable_slots: u8,
+    pub round: u8,
+    pub stake: Stake,
     pub balance: u32,
     pub hands: u8,
     pub hands_used: u8,
@@ -54,6 +58,8 @@ pub fn create_game_state(deck: Deck) -> GameState {
         joker_slots: 5,
         consumables: Vec::with_capacity(2),
         consumable_slots: 2,
+        round: 0,
+        stake: Stake::White,
         balance: 4,
         hands: 4,
         hands_used: 0,

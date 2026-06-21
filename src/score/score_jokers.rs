@@ -2,12 +2,7 @@ use crate::card::Edition;
 use crate::joker::JokerState;
 use crate::levels::Hand;
 
-pub fn score_jokers(
-    jokers: &[JokerState],
-    hand: Hand,
-    chips: &mut f64,
-    mult: &mut f64,
-) -> [f64; 2] {
+pub fn score_jokers(jokers: &[JokerState], hand: Hand, chips: &mut f64, mult: &mut f64) -> () {
     for joker in jokers {
         // Apply Edition bonuses
         let edition = joker.edition();
@@ -27,6 +22,4 @@ pub fn score_jokers(
             score_fn(joker, hand, chips, mult).unwrap();
         }
     }
-
-    [*chips, *mult]
 }

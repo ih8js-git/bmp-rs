@@ -1,8 +1,9 @@
 use crate::card::core::create_card;
 use crate::card::{Card, Rank, Suit};
 use strum::IntoEnumIterator;
+use strum_macros::{EnumIter, EnumString};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, EnumString)]
 #[repr(u8)]
 pub enum Deck {
     Red,

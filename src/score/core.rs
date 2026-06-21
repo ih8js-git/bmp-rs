@@ -17,7 +17,7 @@ pub fn get_score(game_state: &mut GameState, cards_played: &mut [Card]) -> f64 {
     // 3. Score the cards played i.e. lusty, dusk, etc.
     let current_level = game_state.planet_levels[hand_type as usize] as u16;
 
-    let [mut base_chips, mut base_mult] = score_played_cards(
+    let [mut chips, mut mult] = score_played_cards(
         cards_played,
         scoring_indices,
         hand_type,
@@ -28,14 +28,9 @@ pub fn get_score(game_state: &mut GameState, cards_played: &mut [Card]) -> f64 {
     // 4. Score the cards held in hand i.e. steel, baron, etc.
 
     // 5. Score the jokers, i.e. Jolly Joker, etc.
-    let [final_chips, final_mult] = score_jokers(
-        &game_state.jokers,
-        hand_type,
-        &mut base_chips,
-        &mut base_mult,
-    );
+    score_jokers(&game_state.jokers, hand_type, &mut chips, &mut mult);
 
-    final_chips * final_mult
+    chips * mult
 }
 
 use crate::joker::JokerState;
