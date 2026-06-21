@@ -1,6 +1,7 @@
 use rand::{Rng, SeedableRng};
 use rand_pcg::{Mcg128Xsl64, Pcg64Mcg};
 
+#[derive(Debug)]
 pub struct PrecomputedRngQueue {
     pub storage: Vec<u32>,
 }
