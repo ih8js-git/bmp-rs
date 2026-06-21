@@ -2,9 +2,10 @@ use crate::GameState;
 use crate::card::operations::{get_card_enhancement, get_card_rank, get_card_suit};
 use crate::card::{Card, Enhancement};
 use crate::joker::Joker;
+use crate::joker::collection::sock_and_buskin;
 use crate::levels::Hand;
 
-use crate::score::score_jokers::score_jokers;
+use crate::score::score_jokers::{JokerRetriggerFn, score_jokers};
 use crate::score::score_played_cards::score_played_cards;
 
 pub fn get_score(game_state: &mut GameState, cards_played: &mut [Card]) -> f64 {
@@ -301,13 +302,26 @@ pub fn get_hand_type(hand: &[Card], jokers: &[JokerState]) -> (Hand, Vec<usize>)
     }
     return (Hand::HighCard, vec![highest_index]);
 }
+pub(crate) fn default_retrigger(
+    _card: &Card,
+    _jokers: &[JokerState],
+    _state: &JokerState,
+) -> usize {
+    0
+}
+
+pub const RETRIGGER_FNS: [JokerRetriggerFn; 150] = {
+    let mut fns: [JokerRetriggerFn; 150] = [default_retrigger; 150];
+    fns[Joker::SockAndBuskin as usize] = sock_and_buskin::retrigger;
+    fns
+};
 
 pub fn count_retrigger_jokers(card: &Card, jokers: &[JokerState]) -> usize {
     let mut retriggers = 0;
 
     for joker in jokers {
         let id = joker.id() as usize;
-        let retrigger_fn = crate::score::jokers::RETRIGGER_FNS[id];
+        let retrigger_fn = RETRIGGER_FNS[id];
         // We have to pass both jokers, and joker, because
         // Sock needs to know if Pareidolia is active, as an example
         retriggers += retrigger_fn(card, jokers, joker);

@@ -1,9 +1,25 @@
 use crate::card::core::{Card, Edition, Enhancement, Seal};
 use crate::card::operations::get_card_seal;
 use crate::card::{get_card_edition, get_card_enhancement};
-use crate::joker::JokerState;
+use crate::joker::collection::{greedy_joker, sock_and_buskin};
+use crate::joker::{Joker, JokerState};
 use crate::levels::{Hand, hand_base_chips_and_mult};
 use crate::score::core::count_retrigger_jokers;
+use crate::score::score_jokers::{JokerCardScoreFn, JokerRetriggerFn};
+
+fn default_card_score(
+    _state: &JokerState,
+    _card: &Card,
+    _chips: &mut f64,
+    _mult: &mut f64,
+) -> Result<(), &'static str> {
+    Ok(())
+}
+pub const CARD_SCORE_FNS: [JokerCardScoreFn; 150] = {
+    let mut fns: [JokerCardScoreFn; 150] = [default_card_score; 150];
+    fns[Joker::GreedyJoker as usize] = greedy_joker::card_score;
+    fns
+};
 
 pub fn score_played_cards(
     cards: &[Card],
@@ -52,9 +68,9 @@ pub fn score_played_cards(
 
             for joker in jokers {
                 let id = joker.id() as usize;
-                let def = crate::joker::jokers::JOKER_DEFS[id];
-                if def.trigger_time() == crate::joker::jokers::TriggerTime::CardScored {
-                    let card_score_fn = crate::score::jokers::CARD_SCORE_FNS[id];
+                let def = crate::joker::core::JOKER_DEFS[id];
+                if def.trigger_time() == crate::joker::core::TriggerTime::CardScored {
+                    let card_score_fn = CARD_SCORE_FNS[id];
                     card_score_fn(joker, card, &mut chips, &mut mult).unwrap();
                 }
             }
