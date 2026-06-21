@@ -78,7 +78,7 @@ impl RNGQueueType {
 
         let next_n_idx = rng_next_queue_indices[queue_idx] as usize;
         let n = queue.storage[next_n_idx];
-        rng_next_queue_indices[next_n_idx] += 1;
+        rng_next_queue_indices[queue_idx] += 1;
 
         n
     }
@@ -110,6 +110,48 @@ mod tests {
     fn test_custom_size_override() {
         let mut rng = create_generator(123);
         let custom_size = 500;
-        let queue = RNGQueueType::Joker.create_queue_with_size(&mut rng, custom_size);
+        let _queue = RNGQueueType::Joker.create_queue_with_size(&mut rng, custom_size);
+    }
+
+    #[test]
+    fn test_get_next_advances_and_returns_correct_value() {
+        let mut rng = create_generator(42);
+        let queues = create_all_rng_queues(&mut rng);
+        let mut indices = [0u32; RNGQueueType::COUNT];
+
+        // Capture what the first two values should be manually from the queue
+        let joker_idx = RNGQueueType::Joker as usize;
+        let expected_first = queues[joker_idx].storage[0];
+        let expected_second = queues[joker_idx].storage[1];
+
+        // Act & Assert first pull
+        let first = RNGQueueType::Joker.get_next(&queues, &mut indices);
+        assert_eq!(first, expected_first);
+        assert_eq!(indices[joker_idx], 1, "Index should have incremented to 1");
+
+        // Act & Assert second pull
+        let second = RNGQueueType::Joker.get_next(&queues, &mut indices);
+        assert_eq!(second, expected_second);
+        assert_eq!(indices[joker_idx], 2, "Index should have incremented to 2");
+    }
+
+    #[test]
+    fn test_get_next_independent_queues() {
+        let mut rng = create_generator(999);
+        let queues = create_all_rng_queues(&mut rng);
+        let mut indices = [0u32; RNGQueueType::COUNT];
+
+        let joker_idx = RNGQueueType::Joker as usize;
+        let tarot_idx = RNGQueueType::Tarot as usize;
+
+        // Pull from Joker
+        RNGQueueType::Joker.get_next(&queues, &mut indices);
+        assert_eq!(indices[joker_idx], 1);
+        assert_eq!(indices[tarot_idx], 0, "Tarot index should remain untouched");
+
+        // Pull from Tarot
+        RNGQueueType::Tarot.get_next(&queues, &mut indices);
+        assert_eq!(indices[joker_idx], 1, "Joker index should remain unchanged");
+        assert_eq!(indices[tarot_idx], 1);
     }
 }
