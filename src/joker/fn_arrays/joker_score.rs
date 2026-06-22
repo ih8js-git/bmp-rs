@@ -1,32 +1,9 @@
-use crate::card::Card;
 use crate::joker::{Joker, JokerState};
-
+use crate::joker::collection::*;
 use crate::levels::Hand;
 
-pub type JokerRetriggerFn = fn(card: &Card, jokers: &[JokerState], state: &JokerState) -> usize;
-
-pub type JokerCardScoreFn = fn(
-    state: &JokerState,
-    card: &Card,
-    chips: &mut f64,
-    mult: &mut f64,
-) -> Result<(), &'static str>;
-
 pub type JokerScoreFn =
-    fn(state: &JokerState, hand: Hand, chips: &mut f64, mult: &mut f64) -> Result<(), &'static str>;
-
-fn default_retrigger(_card: &Card, _jokers: &[JokerState], _state: &JokerState) -> usize {
-    0
-}
-
-fn default_card_score(
-    _state: &JokerState,
-    _card: &Card,
-    _chips: &mut f64,
-    _mult: &mut f64,
-) -> Result<(), &'static str> {
-    Ok(())
-}
+fn(state: &JokerState, hand: Hand, chips: &mut f64, mult: &mut f64) -> Result<(), &'static str>;
 
 fn default_joker_score(
     _state: &JokerState,
@@ -36,18 +13,6 @@ fn default_joker_score(
 ) -> Result<(), &'static str> {
     Ok(())
 }
-
-pub const RETRIGGER_FNS: [JokerRetriggerFn; 150] = {
-    let mut fns: [JokerRetriggerFn; 150] = [default_retrigger; 150];
-    fns[Joker::SockAndBuskin as usize] = sock_and_buskin::retrigger;
-    fns
-};
-
-pub const CARD_SCORE_FNS: [JokerCardScoreFn; 150] = {
-    let mut fns: [JokerCardScoreFn; 150] = [default_card_score; 150];
-    fns[Joker::GreedyJoker as usize] = greedy_joker::card_score;
-    fns
-};
 
 pub const SCORE_FNS: [JokerScoreFn; 150] = {
     let mut fns: [JokerScoreFn; 150] = [default_joker_score; 150];
@@ -203,154 +168,3 @@ pub const SCORE_FNS: [JokerScoreFn; 150] = {
 
     fns
 };
-
-pub mod _8_ball;
-pub mod abstract_joker;
-pub mod acrobat;
-pub mod ancient_joker;
-pub mod arrowhead;
-pub mod astronomer;
-pub mod banner;
-pub mod baron;
-pub mod baseball_card;
-pub mod blackboard;
-pub mod bloodstone;
-pub mod blue_joker;
-pub mod blueprint;
-pub mod bootstraps;
-pub mod brainstorm;
-pub mod bull;
-pub mod burglar;
-pub mod burnt_joker;
-pub mod business_card;
-pub mod caino;
-pub mod campfire;
-pub mod card_sharp;
-pub mod cartomancer;
-pub mod castle;
-pub mod cavendish;
-pub mod ceremonial_dagger;
-pub mod certificate;
-pub mod chaos_the_clown;
-pub mod chicot;
-pub mod clever_joker;
-pub mod cloud9;
-pub mod constellation;
-pub mod crafty_joker;
-pub mod crazy_joker;
-pub mod credit_card;
-pub mod delayed_gratification;
-pub mod devious_joker;
-pub mod diet_cola;
-pub mod dna;
-pub mod driver_s_license;
-pub mod droll_joker;
-pub mod drunkard;
-pub mod dusk;
-pub mod egg;
-pub mod erosion;
-pub mod even_steven;
-pub mod faceless_joker;
-pub mod fibonacci;
-pub mod flash_card;
-pub mod flower_pot;
-pub mod fortune_teller;
-pub mod four_fingers;
-pub mod gift_card;
-pub mod glass_joker;
-pub mod gluttonous_joker;
-pub mod golden_joker;
-pub mod golden_ticket;
-pub mod greedy_joker;
-pub mod green_joker;
-pub mod gros_michel;
-pub mod hack;
-pub mod half_joker;
-pub mod hallucination;
-pub mod hanging_chad;
-pub mod hiker;
-pub mod hit_the_road;
-pub mod hologram;
-pub mod ice_cream;
-pub mod invisible_joker;
-pub mod joker;
-pub mod joker_stencil;
-pub mod jolly_joker;
-pub mod juggler;
-pub mod loyalty_card;
-pub mod luchador;
-pub mod lucky_cat;
-pub mod lusty_joker;
-pub mod mad_joker;
-pub mod madness;
-pub mod mail_in_rebate;
-pub mod marble_joker;
-pub mod matador;
-pub mod merry_andy;
-pub mod midas_mask;
-pub mod mime;
-pub mod misprint;
-pub mod mr_bones;
-pub mod mystic_summit;
-pub mod obelisk;
-pub mod odd_todd;
-pub mod onyx_agate;
-pub mod oops_all6s;
-pub mod pareidolia;
-pub mod perkeo;
-pub mod photograph;
-pub mod popcorn;
-pub mod raised_fist;
-pub mod ramen;
-pub mod red_card;
-pub mod reserved_parking;
-pub mod ride_the_bus;
-pub mod riff_raff;
-pub mod rocket;
-pub mod rough_gem;
-pub mod runner;
-pub mod satellite;
-pub mod scary_face;
-pub mod scholar;
-pub mod seance;
-pub mod seeing_double;
-pub mod seltzer;
-pub mod shoot_the_moon;
-pub mod shortcut;
-pub mod showman;
-pub mod sixth_sense;
-pub mod sly_joker;
-pub mod smeared_joker;
-pub mod smiley_face;
-pub mod sock_and_buskin;
-pub mod space_joker;
-pub mod spare_trousers;
-pub mod splash;
-pub mod square_joker;
-pub mod steel_joker;
-pub mod stone_joker;
-pub mod stuntman;
-pub mod supernova;
-pub mod superposition;
-pub mod swashbuckler;
-pub mod the_duo;
-pub mod the_family;
-pub mod the_idol;
-pub mod the_order;
-pub mod the_tribe;
-pub mod the_trio;
-pub mod throwback;
-pub mod to_do_list;
-pub mod to_the_moon;
-pub mod trading_card;
-pub mod triboulet;
-pub mod troubadour;
-pub mod turtle_bean;
-pub mod vagabond;
-pub mod vampire;
-pub mod walkie_talkie;
-pub mod wee_joker;
-pub mod wily_joker;
-pub mod wrathful_joker;
-pub mod yorick;
-pub mod zany_joker;

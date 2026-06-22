@@ -2,6 +2,7 @@ use crate::GameState;
 use crate::card::operations::{get_card_enhancement, get_card_rank, get_card_suit};
 use crate::card::{Card, Enhancement};
 use crate::joker::Joker;
+use crate::joker::fn_arrays::retrigger::RETRIGGER_FNS;
 use crate::levels::Hand;
 
 use crate::score::score_jokers::score_jokers;
@@ -302,7 +303,7 @@ pub fn count_retrigger_jokers(card: &Card, jokers: &[JokerState]) -> usize {
 
     for joker in jokers {
         let id = joker.id() as usize;
-        let retrigger_fn = crate::score::jokers::RETRIGGER_FNS[id];
+        let retrigger_fn = RETRIGGER_FNS[id];
         // We have to pass both jokers, and joker, because
         // Sock needs to know if Pareidolia is active, as an example
         retriggers += retrigger_fn(card, jokers, joker);

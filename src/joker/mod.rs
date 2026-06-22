@@ -1,3 +1,5 @@
-pub mod jokers;
+pub mod collection;
+pub mod core;
+pub mod fn_arrays;
 
-pub use self::jokers::*;
+pub use self::core::*;
