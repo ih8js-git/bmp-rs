@@ -3,6 +3,7 @@ mod blinds;
 mod card;
 mod consumable;
 mod decks;
+mod events;
 mod game;
 mod helper;
 mod joker;
