@@ -1,7 +1,7 @@
 name: Discord PR Ping
 on:
   pull_request:
-    types: [review_requested]
+    types: [opened]
 
 jobs:
   notify:
