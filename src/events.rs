@@ -1,19 +1,19 @@
+use crate::Blind;
 use crate::GameState;
 use crate::stakes::Stake;
 use crate::vouchers::{Voucher, has_voucher};
 
 pub fn cash_out(gs: &mut GameState) {
-    let reward = match gs.round % 3 {
-        0 => {
+    let reward = match gs.next_blind {
+        Blind::SmallBlind => {
             if gs.stake == Stake::White {
                 3
             } else {
                 0
             }
         }
-        1 => 4,
-        2 => 5,
-        _ => panic!("Cash out could not determine the round"),
+        Blind::BigBlind => 4,
+        Blind::BossBlind => 5,
     };
     // TODO add logic for green deck (no interest)
     let mut interest = gs.balance / 5;
@@ -35,13 +35,14 @@ pub fn cash_out(gs: &mut GameState) {
 mod tests {
     use super::*;
     use crate::decks::Deck;
+    use crate::game::Blind::SmallBlind;
     use crate::game::create_game_state;
 
     #[test]
     fn test_cash_out() {
         let mut gs = create_game_state(Deck::Red);
         gs.stake = Stake::White;
-        gs.round = 0;
+        gs.next_blind = SmallBlind;
         gs.hands_used = 1;
 
         let initial_balance = gs.balance;
