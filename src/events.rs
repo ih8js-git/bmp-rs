@@ -3,15 +3,19 @@ use crate::stakes::Stake;
 use crate::vouchers::{Voucher, has_voucher};
 
 pub fn cash_out(gs: &mut GameState) {
-    let mut reward: u32 = 0;
-    if gs.stake == Stake::White {
-        reward = match gs.round % 3 {
-            1 => 3,
-            2 => 4,
-            0 => 5,
-            _ => panic!("Cash out could not determine the round"),
-        };
-    }
+    let reward = match gs.round % 3 {
+        0 => {
+            if gs.stake == Stake::White {
+                3
+            } else {
+                0
+            }
+        }
+        1 => 4,
+        2 => 5,
+        _ => panic!("Cash out could not determine the round"),
+    };
+    // TODO add logic for green deck (no interest)
     let mut interest = gs.balance / 5;
     if has_voucher(gs, Voucher::MoneyTree) {
         if interest >= 20 {
