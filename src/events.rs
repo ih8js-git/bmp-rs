@@ -41,7 +41,7 @@ mod tests {
     fn test_cash_out() {
         let mut gs = create_game_state(Deck::Red);
         gs.stake = Stake::White;
-        gs.round = 1;
+        gs.round = 0;
         gs.hands_used = 1;
 
         let initial_balance = gs.balance;
