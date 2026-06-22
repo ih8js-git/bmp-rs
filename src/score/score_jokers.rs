@@ -1,5 +1,6 @@
 use crate::card::Edition;
 use crate::joker::JokerState;
+use crate::joker::fn_arrays::joker_score::SCORE_FNS;
 use crate::levels::Hand;
 
 pub fn score_jokers(jokers: &[JokerState], hand: Hand, chips: &mut f64, mult: &mut f64) -> () {
@@ -15,10 +16,10 @@ pub fn score_jokers(jokers: &[JokerState], hand: Hand, chips: &mut f64, mult: &m
         }
 
         let id = joker.id() as usize;
-        let def = crate::joker::jokers::JOKER_DEFS[id];
+        let def = crate::joker::core::JOKER_DEFS[id];
 
-        if def.trigger_time() == crate::joker::jokers::TriggerTime::PostHand {
-            let score_fn = crate::score::jokers::SCORE_FNS[id];
+        if def.trigger_time() == crate::joker::core::TriggerTime::PostHand {
+            let score_fn = SCORE_FNS[id];
             score_fn(joker, hand, chips, mult).unwrap();
         }
     }
