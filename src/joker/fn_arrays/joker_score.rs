@@ -1,9 +1,9 @@
-use crate::joker::{Joker, JokerState};
 use crate::joker::collection::*;
+use crate::joker::{Joker, JokerState};
 use crate::levels::Hand;
 
 pub type JokerScoreFn =
-fn(state: &JokerState, hand: Hand, chips: &mut f64, mult: &mut f64) -> Result<(), &'static str>;
+    fn(state: &JokerState, hand: Hand, chips: &mut f64, mult: &mut f64) -> Result<(), &'static str>;
 
 fn default_joker_score(
     _state: &JokerState,
