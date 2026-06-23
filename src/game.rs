@@ -6,11 +6,12 @@ use crate::consumable::{
 use crate::decks::{Deck, create_abandoned_deck, create_checkered_deck, create_default_deck};
 use crate::game::Blind::*;
 use crate::joker::JokerState;
-use crate::rng::{PrecomputedRngQueue, RNGQueueType, create_all_rng_queues, create_generator};
 use crate::stakes::Stake;
 use crate::{Voucher, add_voucher};
 use strum::EnumCount;
 use strum_macros::Display;
+use crate::rng::core::*;
+use crate::rng::queues::*;
 
 #[derive(Debug)]
 pub struct GameState {
