@@ -8,7 +8,7 @@ use crate::levels::Hand;
 use crate::score::score_jokers::score_jokers;
 use crate::score::score_played_cards::score_played_cards;
 
-pub fn get_score(game_state: &mut GameState, cards_played: &mut [Card]) -> f64 {
+pub fn get_score(game_state: &mut GameState, cards_played: &[Card]) -> f64 {
     // 1. Score PreHand Stuff i.e. DNA, Midas Mask, etc.
 
     // 2. Determine the highest-ranking 5 card hand possible

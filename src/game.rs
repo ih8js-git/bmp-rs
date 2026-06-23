@@ -17,6 +17,9 @@ pub struct GameState {
     pub balance: u32,
     pub vouchers: u32,
     pub hand: Vec<Card>,
+    // These indices are based off of the hand vec
+    pub selected_card_indices: [usize; 5],
+    pub selected_card_count: usize,
     pub jokers: Vec<JokerState>,
     pub joker_slots: u8,
     pub consumables: Vec<ConsumableState>,
@@ -68,6 +71,8 @@ pub fn create_game_state(deck: Deck) -> GameState {
         deck: Vec::new(),
         vouchers: 0,
         hand: Vec::with_capacity(8),
+        selected_card_indices: [0, 0, 0, 0, 0],
+        selected_card_count: 0,
         hand_size: 8,
         jokers: Vec::with_capacity(5),
         joker_slots: 5,
