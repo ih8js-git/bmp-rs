@@ -1,16 +1,15 @@
+use crate::blinds::Blind;
 use crate::card::Card;
 use crate::consumable::{
     Consumable, ConsumableState, Spectral, Tarot, create_spectral_consumable,
     create_tarot_consumable,
 };
 use crate::decks::{Deck, create_abandoned_deck, create_checkered_deck, create_default_deck};
-use crate::game::Blind::*;
 use crate::joker::JokerState;
 use crate::rng::{PrecomputedRngQueue, RNGQueueType, create_all_rng_queues, create_generator};
 use crate::stakes::Stake;
 use crate::{Voucher, add_voucher};
 use strum::EnumCount;
-use strum_macros::Display;
 
 #[derive(Debug)]
 pub struct GameState {
@@ -32,7 +31,7 @@ pub struct GameState {
     pub hand_types_played: [u8; 12],
 
     // Game Progression
-    pub next_blind: Blind,
+    pub current_blind: Blind,
     pub ante: u8,
 
     // Card related
@@ -44,6 +43,8 @@ pub struct GameState {
     pub hands_used: u8,
     pub discards: u8,
     pub discards_used: u8,
+    pub required_score: f64,
+    pub current_score: f64,
 
     // Shop
     pub base_reroll_cost: u8,
@@ -55,24 +56,6 @@ pub struct GameState {
     // RNG
     pub rng_queues: [PrecomputedRngQueue; RNGQueueType::COUNT],
     pub rng_next_queue_indices: [u32; RNGQueueType::COUNT], // keeps track of the next idx we need to pull from for every queue
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Display)]
-#[repr(u8)]
-pub enum Blind {
-    SmallBlind,
-    BigBlind,
-    BossBlind,
-}
-
-impl Blind {
-    pub fn next(self) -> Self {
-        match self {
-            SmallBlind => BigBlind,
-            BigBlind => BossBlind,
-            BossBlind => SmallBlind,
-        }
-    }
 }
 
 pub fn create_game_state(deck: Deck) -> GameState {
@@ -96,8 +79,10 @@ pub fn create_game_state(deck: Deck) -> GameState {
         hands_used: 0,
         discards: 3,
         discards_used: 0,
+        required_score: 0.0,
+        current_score: 0.0,
         ante: 0,
-        next_blind: SmallBlind,
+        current_blind: Blind::Small,
         starting_deck_size: 52,
         skips_taken: 0,
         base_reroll_cost: 5,

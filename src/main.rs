@@ -72,11 +72,7 @@ fn main() {
         }
         _ => panic!("Invalid choice"),
     }
+    gs.required_score = antes::get_required_score(gs.ante, gs.current_blind, gs.stake, None);
 
-    gs.next_blind = gs.next_blind.next();
-    println!("Round {}:", gs.next_blind);
-    println!(
-        "Required chips: {}",
-        antes::get_required_chips(gs.ante, gs.next_blind, gs.stake, None)
-    );
+    println!("Required chips: {}", gs.required_score);
 }
