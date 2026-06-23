@@ -34,7 +34,7 @@ pub struct GameState {
     pub hand_types_played: [u8; 12],
 
     // Game Progression
-    pub current_blind: Blind,
+    pub next_blind: Blind,
     pub ante: u8,
 
     // Card related
@@ -87,7 +87,7 @@ pub fn create_game_state(deck: Deck) -> GameState {
         required_score: 0.0,
         current_score: 0.0,
         ante: 0,
-        current_blind: Blind::Small,
+        next_blind: Blind::Small,
         starting_deck_size: 52,
         skips_taken: 0,
         base_reroll_cost: 5,

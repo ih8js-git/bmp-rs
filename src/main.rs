@@ -73,7 +73,7 @@ fn main() {
         }
         _ => panic!("Invalid choice"),
     }
-    gs.required_score = antes::get_required_score(gs.ante, gs.current_blind, gs.stake, None);
+    gs.required_score = antes::get_required_score(gs.ante, gs.next_blind, gs.stake, None);
 
     println!("Required chips: {}", gs.required_score);
     // These magic number are the aces in the deck

@@ -5,7 +5,7 @@ use crate::vouchers::{Voucher, has_voucher};
 use crate::{GameState, score};
 
 pub fn cash_out(gs: &mut GameState) {
-    let reward = match gs.current_blind {
+    let reward = match gs.next_blind {
         Blind::Small => {
             if gs.stake == Stake::White {
                 3
@@ -74,7 +74,7 @@ mod tests {
     fn test_cash_out() {
         let mut gs = create_game_state(Deck::Red);
         gs.stake = Stake::White;
-        gs.current_blind = Small;
+        gs.next_blind = Small;
         gs.hands_used = 1;
 
         let initial_balance = gs.balance;
