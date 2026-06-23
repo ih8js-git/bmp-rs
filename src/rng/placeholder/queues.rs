@@ -1,4 +1,4 @@
-use crate::rng::core::{PrecomputedRngQueue, RNG};
+use crate::rng::placeholder::core::{PrecomputedRngQueue, RNG};
 use strum::{EnumCount, IntoEnumIterator};
 use strum_macros::{Display, EnumCount, EnumIter};
 
@@ -6,6 +6,10 @@ type Q = PrecomputedRngQueue;
 #[derive(Clone, Copy, EnumIter, EnumCount, Display)]
 #[repr(u8)]
 pub enum RNGQueueType {
+    // Deck
+    DeckShuffleBlinds,
+    DeckShufflePacks,
+
     // Shop
     Joker,
     Tarot,
@@ -28,6 +32,11 @@ pub enum RNGQueueType {
     ToDoList,
     Rebate,
     Idol,
+    Certificate,
+    ReservedParking,
+    BusinessCard,
+    _8Ball,
+    Ancient,
 
     // Blind select
     SkipTag,
@@ -55,6 +64,7 @@ impl RNGQueueType {
             RNGQueueType::SkipTag => 100,
             RNGQueueType::BossBlind => 100,
             RNGQueueType::Idol => 100,
+            _ => 100_000,
         }
     }
 
@@ -96,7 +106,7 @@ pub fn create_all_rng_queues(rng: &mut RNG) -> [PrecomputedRngQueue; RNGQueueTyp
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::rng::core::create_generator;
+    use crate::rng::placeholder::core::create_generator;
 
     #[test]
     fn test_create_all_queues_length() {
