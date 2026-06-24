@@ -68,7 +68,12 @@ mod tests {
 
     // Helper to create a clean card
     fn create_blank_card() -> Card {
-        Card { meta: 0, chips: 0 }
+        Card {
+            meta: 0,
+            chips: 0,
+            id: 0,
+            played_this_ante: false,
+        }
     }
 
     #[test]

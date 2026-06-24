@@ -1,5 +1,4 @@
-use crate::card::core::create_card;
-use crate::card::{Card, Rank, Suit};
+use crate::card::{Card, Rank, Suit, create_card_with_id};
 use strum::IntoEnumIterator;
 use strum_macros::{EnumIter, EnumString};
 
@@ -25,9 +24,11 @@ pub enum Deck {
 
 pub fn create_default_deck() -> Vec<Card> {
     let mut cards: Vec<Card> = Vec::with_capacity(52);
+    let mut i = 0;
     for suit in Suit::iter() {
         for rank in Rank::iter() {
-            cards.push(create_card(rank, suit));
+            cards.push(create_card_with_id(rank, suit, i));
+            i += 1;
         }
     }
     return cards;
@@ -35,10 +36,12 @@ pub fn create_default_deck() -> Vec<Card> {
 
 pub fn create_abandoned_deck() -> Vec<Card> {
     let mut cards: Vec<Card> = Vec::with_capacity(52);
+    let mut i = 0;
     for suit in Suit::iter() {
         for rank in Rank::iter() {
             if rank != Rank::Jack && rank != Rank::Queen && rank != Rank::King {
-                cards.push(create_card(rank, suit));
+                cards.push(create_card_with_id(rank, suit, i));
+                i += 1;
             }
         }
     }
@@ -47,6 +50,7 @@ pub fn create_abandoned_deck() -> Vec<Card> {
 
 pub fn create_checkered_deck() -> Vec<Card> {
     let mut cards: Vec<Card> = Vec::with_capacity(52);
+    let mut i = 0;
     for suit in Suit::iter() {
         for rank in Rank::iter() {
             let mut current_suit = suit;
@@ -55,7 +59,8 @@ pub fn create_checkered_deck() -> Vec<Card> {
             } else if current_suit == Suit::Diamonds {
                 current_suit = Suit::Hearts;
             }
-            cards.push(create_card(rank, current_suit));
+            cards.push(create_card_with_id(rank, current_suit, i));
+            i += 1;
         }
     }
     return cards;
