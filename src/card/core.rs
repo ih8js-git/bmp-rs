@@ -10,6 +10,8 @@ use strum_macros::{EnumCount, EnumIter, FromRepr};
 pub struct Card {
     pub meta: u16,
     pub chips: u16,
+    pub id: u16,
+    pub played_this_ante: bool,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, EnumIter, FromRepr)]
@@ -88,6 +90,10 @@ pub enum Seal {
 }
 
 pub fn create_card(rank: Rank, suit: Suit) -> Card {
+    create_card_with_id(rank, suit, 0)
+}
+
+pub fn create_card_with_id(rank: Rank, suit: Suit, id: u16) -> Card {
     let meta = (rank as u16) << 12
         | (suit as u16) << 10
         | (Edition::None as u16) << 7
@@ -110,5 +116,10 @@ pub fn create_card(rank: Rank, suit: Suit) -> Card {
         Rank::Ace => 11,
     };
 
-    Card { meta, chips }
+    Card {
+        meta,
+        chips,
+        id,
+        played_this_ante: false,
+    }
 }
