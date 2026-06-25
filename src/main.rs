@@ -15,6 +15,7 @@ mod tables;
 mod vouchers;
 
 use decks::*;
+use events::*;
 use game::*;
 use std::io;
 use strum::IntoEnumIterator;
@@ -72,11 +73,23 @@ fn main() {
         }
         _ => panic!("Invalid choice"),
     }
+    gs.required_score = antes::get_required_score(gs.ante, gs.next_blind, gs.stake, None);
 
-    gs.next_blind = gs.next_blind.next();
-    println!("Round {}:", gs.next_blind);
-    println!(
-        "Required chips: {}",
-        antes::get_required_chips(gs.ante, gs.next_blind, gs.stake, None)
-    );
+    println!("Required chips: {}", gs.required_score);
+    // These magic number are the aces in the deck
+    gs.hand = vec![gs.deck[12], gs.deck[25], gs.deck[38], gs.deck[51]];
+    select_card(&mut gs, 0);
+    select_card(&mut gs, 1);
+    select_card(&mut gs, 2);
+    select_card(&mut gs, 3);
+    play_hand(&mut gs);
+    if gs.current_score < gs.required_score {
+        panic!("we just played a four of a kind aces that should have won")
+    }
+    println!("Hands used {}", gs.hands_used);
+    println!("Score {}", gs.current_score);
+    println!("Balance: {}", gs.balance);
+    println!("Cashing out");
+    cash_out(&mut gs);
+    println!("Balance: {}", gs.balance);
 }
