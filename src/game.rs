@@ -6,7 +6,8 @@ use crate::consumable::{
 };
 use crate::decks::{Deck, create_abandoned_deck, create_checkered_deck, create_default_deck};
 use crate::joker::JokerState;
-use crate::rng::{PrecomputedRngQueue, RNGQueueType, create_all_rng_queues, create_generator};
+use crate::rng::core::{PrecomputedRngQueue, create_generator};
+use crate::rng::queues::{RNGQueueType, create_all_rng_queues};
 use crate::stakes::Stake;
 use crate::{Voucher, add_voucher};
 use strum::EnumCount;
