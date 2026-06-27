@@ -6,21 +6,17 @@ use rand::seq::SliceRandom;
 
 /// shuffles deck for the next blind
 pub fn shuffle_deck_before_blind(gs: &mut GameState) {
-    // sort the cards by id
-    gs.deck.sort_by(|a, b| {
-        let length_comparison = a.id.cmp(&b.id);
-
-        if length_comparison == std::cmp::Ordering::Equal {
-            a.id.cmp(&b.id)
-        } else {
-            length_comparison
-        }
+    // sort draw_pile indices by card id
+    gs.draw_pile.sort_by(|&a, &b| {
+        let ca = &gs.cards[a as usize];
+        let cb = &gs.cards[b as usize];
+        ca.id.cmp(&cb.id)
     });
 
-    // shuffle deck
+    // shuffle draw_pile
     let rand_queue_idx = (gs.next_blind as u8 + gs.ante * 3) as usize;
     let rand = gs.rng_queues[RNGQueueType::DeckShuffleBlinds as usize].storage[rand_queue_idx];
     let mut rng = StdRng::seed_from_u64(rand as u64);
 
-    gs.deck.shuffle(&mut rng);
+    gs.draw_pile.shuffle(&mut rng);
 }
