@@ -78,7 +78,7 @@ mod tests {
     fn test_base_deck_properties() {
         // Erratic deck falls back to the base case
         let state = create_game_state(Deck::Plasma);
-        assert_eq!(state.deck.len(), 52);
+        assert_eq!(state.cards.len(), 52);
         assert_eq!(state.discards, 3);
         assert_eq!(state.hands, 4);
         assert_eq!(state.balance, 4);
@@ -145,9 +145,9 @@ mod tests {
     fn test_abandoned_deck() {
         use crate::card::Rank;
         let state = create_game_state(Deck::Abandoned);
-        assert_eq!(state.deck.len(), 40);
+        assert_eq!(state.cards.len(), 40);
 
-        let has_face_cards = state.deck.iter().any(|card| {
+        let has_face_cards = state.cards.iter().any(|card| {
             let rank = (card.meta >> 12) & 0xF;
             rank == Rank::Jack as u16 || rank == Rank::Queen as u16 || rank == Rank::King as u16
         });
@@ -158,11 +158,11 @@ mod tests {
     fn test_checkered_deck() {
         use crate::card::Suit;
         let state = create_game_state(Deck::Checkered);
-        assert_eq!(state.deck.len(), 52);
+        assert_eq!(state.cards.len(), 52);
 
         let mut spades = 0;
         let mut hearts = 0;
-        for card in state.deck.iter() {
+        for card in state.cards.iter() {
             let suit = (card.meta >> 10) & 0x3;
             if suit == Suit::Spades as u16 {
                 spades += 1;

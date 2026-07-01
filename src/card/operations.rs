@@ -1,4 +1,4 @@
-use crate::card::{Card, Edition, Enhancement, Rank, Seal, Suit};
+use crate::card::{Card, Edition, Enhancement, Flags, Rank, Seal, Suit};
 
 /*
  * |Rank|Suit|Edition|Enhancement|Seal|
@@ -72,7 +72,7 @@ mod tests {
             meta: 0,
             chips: 0,
             id: 0,
-            played_this_ante: false,
+            flags: Flags::new(),
         }
     }
 

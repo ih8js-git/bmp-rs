@@ -10,17 +10,20 @@ use crate::rng::core::{PrecomputedRngQueue, create_generator};
 use crate::rng::queues::{RNGQueueType, create_all_rng_queues};
 use crate::stakes::Stake;
 use crate::{Voucher, add_voucher};
+use smallvec::SmallVec;
 use strum::EnumCount;
 
 #[derive(Debug)]
 pub struct GameState {
     // Interactive
     pub balance: u32,
-    pub vouchers: u32,
-    pub hand: Vec<Card>,
-    // These indices are based off of the hand vec
-    pub selected_card_indices: [usize; 5],
-    pub selected_card_count: usize,
+
+    // Card related
+    pub hand_size: u8,
+    pub cards: SmallVec<[Card; 104]>,
+    pub draw_pile: SmallVec<[u16; 104]>,
+    pub hand: SmallVec<[u16; 16]>,
+
     pub jokers: Vec<JokerState>,
     pub joker_slots: u8,
     pub consumables: Vec<ConsumableState>,
@@ -33,14 +36,11 @@ pub struct GameState {
     pub skips_taken: u8,
     pub planet_levels: [u8; 12],
     pub hand_types_played: [u8; 12],
+    pub vouchers: u32,
 
     // Game Progression
     pub next_blind: Blind,
     pub ante: u8,
-
-    // Card related
-    pub deck: Vec<Card>,
-    pub hand_size: u8,
 
     // In blind
     pub hands: u8,
@@ -59,72 +59,79 @@ pub struct GameState {
 
     // RNG
     pub rng_queues: [PrecomputedRngQueue; RNGQueueType::COUNT],
-    pub rng_next_queue_indices: [u32; RNGQueueType::COUNT], // keeps track of the next idx we need to pull from for every queue
+    pub rng_next_queue_indices: [u32; RNGQueueType::COUNT],
+}
+
+fn init_deck(deck_fn: fn() -> Vec<Card>) -> (SmallVec<[Card; 104]>, SmallVec<[u16; 104]>, u8) {
+    let d = deck_fn();
+    let len = d.len();
+    let cards: SmallVec<[Card; 104]> = d.into_iter().collect();
+    let draw_pile: SmallVec<[u16; 104]> = (0..len as u16).collect();
+    (cards, draw_pile, len as u8)
 }
 
 pub fn create_game_state(deck: Deck) -> GameState {
     let seed = 123456789;
     let mut rng = create_generator(seed);
 
+    let (cards, draw_pile, starting_deck_size) = match deck {
+        Deck::Abandoned => init_deck(create_abandoned_deck),
+        Deck::Checkered => init_deck(create_checkered_deck),
+        _ => init_deck(create_default_deck),
+    };
+
     let base = GameState {
-        last_used: Consumable::Tarot(Tarot::Fool),
-        tarots_used: 0,
-        deck: Vec::new(),
-        vouchers: 0,
-        hand: Vec::with_capacity(8),
-        selected_card_indices: [0, 0, 0, 0, 0],
-        selected_card_count: 0,
+        balance: 4,
+        cards,
+        draw_pile,
+        hand: SmallVec::new(),
         hand_size: 8,
         jokers: Vec::with_capacity(5),
         joker_slots: 5,
         consumables: Vec::with_capacity(2),
         consumable_slots: 2,
-        stake: Stake::White,
-        balance: 4,
+        last_used: Consumable::Tarot(Tarot::Fool),
+        tarots_used: 0,
+        ecto_hand_size_reduction: 1,
+        skips_taken: 0,
+        planet_levels: [0; 12],
+        hand_types_played: [0; 12],
+        vouchers: 0,
+        next_blind: Blind::Small,
+        ante: 0,
         hands: 4,
         hands_used: 0,
         discards: 3,
         discards_used: 0,
         required_score: 0.0,
         current_score: 0.0,
-        ante: 0,
-        next_blind: Blind::Small,
-        starting_deck_size: 52,
-        skips_taken: 0,
         base_reroll_cost: 5,
-        planet_levels: [0; 12],
-        hand_types_played: [0; 12],
-
+        stake: Stake::White,
+        starting_deck_size,
         rng_queues: create_all_rng_queues(&mut rng),
-        rng_next_queue_indices: [0; RNGQueueType::COUNT], // next idx we need to pull from for each queue
-        ecto_hand_size_reduction: 1,
+        rng_next_queue_indices: [0; RNGQueueType::COUNT],
     };
 
     match deck {
         Deck::Red => GameState {
-            deck: create_default_deck(),
             discards: base.discards + 1,
             ..base
         },
         Deck::Blue => GameState {
-            deck: create_default_deck(),
             hands: base.hands + 1,
             ..base
         },
         Deck::Yellow => GameState {
-            deck: create_default_deck(),
             balance: base.balance + 10,
             ..base
         },
         Deck::Black => GameState {
-            deck: create_default_deck(),
             joker_slots: base.joker_slots + 1,
             hands: base.hands - 1,
             ..base
         },
         Deck::Magic => {
             let mut state = GameState {
-                deck: create_default_deck(),
                 consumables: vec![
                     create_tarot_consumable(Tarot::Fool),
                     create_tarot_consumable(Tarot::Fool),
@@ -136,7 +143,6 @@ pub fn create_game_state(deck: Deck) -> GameState {
         }
         Deck::Nebula => {
             let mut state = GameState {
-                deck: create_default_deck(),
                 consumable_slots: base.consumable_slots - 1,
                 ..base
             };
@@ -144,38 +150,21 @@ pub fn create_game_state(deck: Deck) -> GameState {
             state
         }
         Deck::Ghost => GameState {
-            deck: create_default_deck(),
             consumables: vec![create_spectral_consumable(Spectral::Hex)],
             ..base
         },
-        Deck::Abandoned => GameState {
-            deck: create_abandoned_deck(),
-            starting_deck_size: 40,
-            ..base
-        },
-        Deck::Checkered => GameState {
-            deck: create_checkered_deck(),
-            ..base
-        },
         Deck::Zodiac => {
-            let mut state = GameState {
-                deck: create_default_deck(),
-                ..base
-            };
+            let mut state = GameState { ..base };
             add_voucher(&mut state, Voucher::TarotMerchant);
             add_voucher(&mut state, Voucher::PlanetMerchant);
             add_voucher(&mut state, Voucher::Overstock);
             state
         }
         Deck::Painted => GameState {
-            deck: create_default_deck(),
             hand_size: base.hand_size + 2,
             joker_slots: base.joker_slots - 1,
             ..base
         },
-        _ => GameState {
-            deck: create_default_deck(),
-            ..base
-        },
+        _ => GameState { ..base },
     }
 }

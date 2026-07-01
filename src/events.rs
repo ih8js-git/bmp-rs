@@ -32,35 +32,19 @@ pub fn cash_out(gs: &mut GameState) {
     gs.balance += reward + interest + (gs.hands - gs.hands_used) as u32;
 }
 
-pub fn select_card(gs: &mut GameState, card_index: usize) {
-    gs.selected_card_indices[gs.selected_card_count] = card_index;
-    gs.selected_card_count += 1
-}
-
 // TODO: Right now this function is just a wrapper for the get_score function
 // but in the future it will do more things. It should be a simple high level
 // function that you call that will then call everything it needs to from there
 // TODO: either inside or outside this function we need to check if we actually
 // have enough hands to play another hand or not, becuase right now nothing is
 // stoping us from playing more hands than we actually have
-pub fn play_hand(gs: &mut GameState) {
+pub fn play_hand(gs: &mut GameState, cards_to_play: [u16; 5]) {
     gs.hands_used += 1;
-    let dummy_card = gs.hand[0];
-
-    // 2. Initialize our fixed array on the stack (zero heap allocation!)
-    let mut cards_to_play: [Card; 5] = [dummy_card; 5];
-
-    // 3. Get only the valid selections based on the count
-    let valid_selections = &gs.selected_card_indices[0..gs.selected_card_count];
-
-    // 4. Overwrite the dummy cards with the actual selected cards from the hand
-    for (i, &hand_index) in valid_selections.iter().enumerate() {
-        cards_to_play[i] = gs.hand[hand_index];
-    }
-
-    // 5. Pass a *slice* of the array containing only the valid cards to play_hand
-    // By slicing `0..gs.selected_card_count`, play_hand will never see the dummy cards.
-    gs.current_score = score::core::get_score(gs, &cards_to_play[0..gs.selected_card_count]);
+    let actual_cards: Vec<Card> = cards_to_play
+        .iter()
+        .map(|&idx| gs.cards[idx as usize])
+        .collect();
+    gs.current_score = score::core::get_score(gs, &actual_cards);
 }
 
 #[cfg(test)]

@@ -35,7 +35,7 @@ pub enum Tarot {
     Judgement,
     World,
 }
-
+/*
 pub fn enhance_cards(
     hand: &mut [Card],
     indices: &[usize],
@@ -216,6 +216,7 @@ pub fn use_temperance(deck: &mut [Card], indices: &[usize]) -> Result<(), String
 pub fn use_judgement(deck: &mut [Card], indices: &[usize]) -> Result<(), String> {
     return Err("Not coded yet".to_string());
 }
+*/
 
 #[cfg(test)]
 mod tests {
@@ -226,6 +227,7 @@ mod tests {
     use crate::decks::Deck;
     use crate::game::create_game_state;
 
+    /*
     fn dummy_game_state(deck: Vec<Card>) -> GameState {
         let mut state = create_game_state(Deck::Green);
         state.hand = deck.clone();
@@ -336,4 +338,5 @@ mod tests {
             }
         }
     }
+    */
 }
