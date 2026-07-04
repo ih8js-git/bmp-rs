@@ -13,6 +13,71 @@ use crate::{Voucher, add_voucher};
 use smallvec::SmallVec;
 use strum::EnumCount;
 
+pub enum GameAction {
+    // Global
+    MoveJoker {
+        from_idx: u8,
+        to_idx: u8,
+    },
+    SellJoker {
+        idx: u8,
+    },
+    SellConsumable {
+        idx: u16,
+    },
+    UseSimpleConsumable {
+        idx: u16,
+    },
+    UseConsumableWithTargets {
+        idx: u16,
+        amount: u8,
+        cards: [u16; 3],
+    },
+
+    // Blind Select
+    SkipBlind,
+    PlayBlind,
+
+    // In blind
+    PlayHand {
+        card_indices: [u16; 5],
+        amount: u8,
+    },
+    DiscardHand {
+        card_indices: [u16; 5],
+        amount: u8,
+    },
+    MoveCard {
+        from_idx: u16,
+        to_idx: u16,
+    },
+
+    // Cashout
+    Cashout,
+
+    // Shop
+    BuyVoucher {
+        idx: u8,
+    },
+    BuyBoosterPack {
+        idx: u8,
+    },
+    BuyFromShop {
+        idx: u8,
+    },
+    BuyAndUse {
+        idx: u8,
+    },
+    Reroll,
+    GoNext,
+
+    // In Booster Pack
+    SkipPack,
+    SelectFromPack {
+        idx: u8,
+    },
+}
+
 #[derive(Debug)]
 pub struct GameState {
     // Interactive
