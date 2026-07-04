@@ -30,7 +30,7 @@ pub fn use_planet(game_state: &mut GameState, planet: Planet) {
 mod tests {
     use super::*;
     use crate::decks::Deck;
-    use crate::game::create_game_state;
+    use crate::gamestate::create_game_state;
 
     #[test]
     fn test_use_planet_increases_level() {

@@ -1,4 +1,4 @@
-use crate::game::GameState;
+use crate::gamestate::GameState;
 use crate::rng::queues::RNGQueueType;
 use rand::SeedableRng;
 use rand::rngs::StdRng;

@@ -29,7 +29,7 @@ pub fn cash_out(gs: &mut GameState) {
     } else if interest >= 5 {
         interest = 5;
     }
-    gs.balance += reward + interest + (gs.hands - gs.hands_used) as u32;
+    gs.balance += reward + interest + gs.hands_remaining as u32;
 }
 
 // TODO: Right now this function is just a wrapper for the get_score function
@@ -39,7 +39,7 @@ pub fn cash_out(gs: &mut GameState) {
 // have enough hands to play another hand or not, becuase right now nothing is
 // stoping us from playing more hands than we actually have
 pub fn play_hand(gs: &mut GameState, cards_to_play: [u16; 5]) {
-    gs.hands_used += 1;
+    gs.hands_remaining -= 1;
     let actual_cards: Vec<Card> = cards_to_play
         .iter()
         .map(|&idx| gs.cards[idx as usize])
@@ -52,14 +52,14 @@ mod tests {
     use super::*;
     use crate::blinds::Blind::Small;
     use crate::decks::Deck;
-    use crate::game::create_game_state;
+    use crate::gamestate::create_game_state;
 
     #[test]
     fn test_cash_out() {
         let mut gs = create_game_state(Deck::Red);
         gs.stake = Stake::White;
         gs.next_blind = Small;
-        gs.hands_used = 1;
+        gs.hands_remaining = 3;
 
         let initial_balance = gs.balance;
         assert_eq!(initial_balance, 4);

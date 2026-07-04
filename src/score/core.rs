@@ -775,7 +775,7 @@ mod tests {
     #[test]
     fn test_sock_and_buskin_retrigger_flush_five() {
         use crate::decks::Deck;
-        use crate::game::create_game_state;
+        use crate::gamestate::create_game_state;
 
         let mut state = create_game_state(Deck::Red);
         let mut joker_state = JokerState::new();
