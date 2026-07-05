@@ -1,5 +1,6 @@
 use crate::card::{Card, Edition};
 use crate::consumable::ConsumableState;
+use crate::gamestate::GameState;
 use crate::joker::JokerState;
 use crate::levels::Hand;
 use crate::rng::core::PrecomputedRngQueue;
@@ -104,4 +105,68 @@ pub enum GameDelta {
     CurrentScore {
         diff: f64,
     },
+}
+
+impl GameDelta {
+    pub fn apply(&self, gs: &mut GameState) {
+        match self {
+            GameDelta::EctoUsed => {}
+            GameDelta::SkipBlind => {}
+            GameDelta::Balance { .. } => {}
+            GameDelta::HandSize { .. } => {}
+            GameDelta::JokerSlots { .. } => {}
+            GameDelta::AddConsumable { .. } => {}
+            GameDelta::RemoveConsumable { .. } => {}
+            GameDelta::AddCardToDeck { .. } => {}
+            GameDelta::RemoveCardFromDeck { .. } => {}
+            GameDelta::UpdateCardFull { .. } => {}
+            GameDelta::RemoveJoker { .. } => {}
+            GameDelta::AddJoker { .. } => {}
+            GameDelta::UpdateJokerScaling { .. } => {}
+            GameDelta::UpdateJokerEdition { .. } => {}
+            GameDelta::MoveJoker { .. } => {}
+            GameDelta::BuyVoucher { .. } => {}
+            GameDelta::HandTypesPlayed { .. } => {}
+            GameDelta::RNGQueue { .. } => {}
+            GameDelta::BaseRerollCost { .. } => {}
+            GameDelta::Ante { .. } => {}
+            GameDelta::NextBlind { .. } => {}
+            GameDelta::BaseHands { .. } => {}
+            GameDelta::BaseDiscards { .. } => {}
+            GameDelta::RemainingHands { .. } => {}
+            GameDelta::RemainingDiscards { .. } => {}
+            GameDelta::CurrentScore { .. } => {}
+        }
+    }
+
+    pub fn revert(&self, gs: &mut GameState) {
+        match self {
+            GameDelta::EctoUsed => {}
+            GameDelta::SkipBlind => {}
+            GameDelta::Balance { .. } => {}
+            GameDelta::HandSize { .. } => {}
+            GameDelta::JokerSlots { .. } => {}
+            GameDelta::AddConsumable { .. } => {}
+            GameDelta::RemoveConsumable { .. } => {}
+            GameDelta::AddCardToDeck { .. } => {}
+            GameDelta::RemoveCardFromDeck { .. } => {}
+            GameDelta::UpdateCardFull { .. } => {}
+            GameDelta::RemoveJoker { .. } => {}
+            GameDelta::AddJoker { .. } => {}
+            GameDelta::UpdateJokerScaling { .. } => {}
+            GameDelta::UpdateJokerEdition { .. } => {}
+            GameDelta::MoveJoker { .. } => {}
+            GameDelta::BuyVoucher { .. } => {}
+            GameDelta::HandTypesPlayed { .. } => {}
+            GameDelta::RNGQueue { .. } => {}
+            GameDelta::BaseRerollCost { .. } => {}
+            GameDelta::Ante { .. } => {}
+            GameDelta::NextBlind { .. } => {}
+            GameDelta::BaseHands { .. } => {}
+            GameDelta::BaseDiscards { .. } => {}
+            GameDelta::RemainingHands { .. } => {}
+            GameDelta::RemainingDiscards { .. } => {}
+            GameDelta::CurrentScore { .. } => {}
+        }
+    }
 }
