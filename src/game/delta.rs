@@ -1,12 +1,13 @@
 use crate::card::{Card, Edition};
-use crate::consumable::ConsumableState;
+use crate::consumable::{ConsumableState, Planet};
 use crate::game::state::GameState;
 use crate::joker::JokerState;
 use crate::levels::Hand;
-use crate::rng::core::PrecomputedRngQueue;
+use crate::rng::queues::RNGQueueType;
 use crate::vouchers::Voucher;
 
 pub enum GameDelta {
+    Null, // nothing happens, used for placeholders
     EctoUsed,
     SkipBlind,
     Balance {
@@ -25,6 +26,11 @@ pub enum GameDelta {
         consumable_state: ConsumableState,
         idx: u16,
     },
+    Planet {
+        planet: Planet,
+        diff: i8,
+    },
+
     // Cards
     AddCardToDeck {
         card: Card,
@@ -76,7 +82,7 @@ pub enum GameDelta {
     },
 
     RNGQueue {
-        queue: PrecomputedRngQueue,
+        queue: RNGQueueType,
         idx_diff: i32,
     },
 
@@ -110,6 +116,7 @@ pub enum GameDelta {
 impl GameDelta {
     pub fn apply(&self, gs: &mut GameState) {
         match self {
+            GameDelta::Null => (),
             GameDelta::EctoUsed => {}
             GameDelta::SkipBlind => {}
             GameDelta::Balance { .. } => {}
@@ -136,11 +143,13 @@ impl GameDelta {
             GameDelta::RemainingHands { .. } => {}
             GameDelta::RemainingDiscards { .. } => {}
             GameDelta::CurrentScore { .. } => {}
+            GameDelta::Planet { .. } => {}
         }
     }
 
     pub fn revert(&self, gs: &mut GameState) {
         match self {
+            GameDelta::Null => {}
             GameDelta::EctoUsed => {}
             GameDelta::SkipBlind => {}
             GameDelta::Balance { .. } => {}
@@ -167,6 +176,7 @@ impl GameDelta {
             GameDelta::RemainingHands { .. } => {}
             GameDelta::RemainingDiscards { .. } => {}
             GameDelta::CurrentScore { .. } => {}
+            GameDelta::Planet { .. } => {}
         }
     }
 }
