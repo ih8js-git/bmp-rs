@@ -4,6 +4,16 @@ use crate::stakes::Stake;
 use crate::vouchers::{Voucher, has_voucher};
 use crate::{game::state::GameState, score};
 
+pub enum JokerUpdateEvent {
+    HandPlayed,
+    Discard,
+    BlindSelect,
+    GoNext,
+    PlanetUsed,
+    TarotUsed,
+    Sell,
+}
+
 pub fn cash_out(gs: &mut GameState) {
     let reward = match gs.next_blind {
         Blind::Small => {
