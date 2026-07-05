@@ -5,8 +5,8 @@ use crate::consumable::{
     create_tarot_consumable,
 };
 use crate::decks::{Deck, create_abandoned_deck, create_checkered_deck, create_default_deck};
-use crate::gameaction::GameAction;
-use crate::gamedelta::GameDelta;
+use crate::game::action::GameAction;
+use crate::game::delta::GameDelta;
 use crate::joker::JokerState;
 use crate::rng::core::{PrecomputedRngQueue, create_generator};
 use crate::rng::queues::{RNGQueueType, create_all_rng_queues};

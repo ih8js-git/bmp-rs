@@ -1,5 +1,5 @@
-use crate::gamedelta::GameDelta;
-use crate::gamestate::GameState;
+use crate::game::delta::GameDelta;
+use crate::game::state::GameState;
 
 pub enum GameAction {
     // Global

@@ -1,4 +1,4 @@
-use crate::GameState;
+use crate::game::state::GameState;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]

@@ -1,6 +1,6 @@
 use crate::card::{Card, Edition};
 use crate::consumable::ConsumableState;
-use crate::gamestate::GameState;
+use crate::game::state::GameState;
 use crate::joker::JokerState;
 use crate::levels::Hand;
 use crate::rng::core::PrecomputedRngQueue;

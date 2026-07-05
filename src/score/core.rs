@@ -1,6 +1,6 @@
-use crate::GameState;
 use crate::card::operations::{get_card_enhancement, get_card_rank, get_card_suit};
 use crate::card::{Card, Enhancement};
+use crate::game::state::GameState;
 use crate::joker::Joker;
 use crate::joker::fn_arrays::retrigger::RETRIGGER_FNS;
 use crate::levels::Hand;
@@ -775,7 +775,7 @@ mod tests {
     #[test]
     fn test_sock_and_buskin_retrigger_flush_five() {
         use crate::decks::Deck;
-        use crate::gamestate::create_game_state;
+        use crate::game::state::create_game_state;
 
         let mut state = create_game_state(Deck::Red);
         let mut joker_state = JokerState::new();

@@ -71,7 +71,7 @@ mod tests {
     use super::*;
     use crate::Voucher;
     use crate::consumable::{Spectral, Tarot, create_spectral_consumable, create_tarot_consumable};
-    use crate::gamestate::create_game_state;
+    use crate::game::state::create_game_state;
     use crate::has_voucher;
 
     #[test]
