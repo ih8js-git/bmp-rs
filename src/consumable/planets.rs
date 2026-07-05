@@ -1,4 +1,5 @@
 use crate::consumable::core::Consumable;
+use crate::game::delta::GameDelta;
 use crate::game::state::GameState;
 use strum_macros::Display;
 
@@ -17,6 +18,16 @@ pub enum Planet {
     PlanetX,
     Ceres,
     Eris,
+}
+
+pub fn use_planet_to_deltas(p: Planet, game_state: &GameState) -> Vec<GameDelta> {
+    let mut res = Vec::new();
+
+    res.push(GameDelta::Planet { planet: p, diff: 1 });
+
+    // TODO constellation logic
+
+    res
 }
 
 pub fn use_planet(game_state: &mut GameState, planet: Planet) {
