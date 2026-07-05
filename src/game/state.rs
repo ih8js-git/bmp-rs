@@ -66,7 +66,8 @@ pub struct GameState {
 
 impl GameState {
     pub fn apply_action(&mut self, action: GameAction) {
-        for delta in action.to_deltas(self) {
+        let deltas = action.to_deltas(self);
+        for delta in &deltas {
             self.apply_delta(delta);
         }
     }
