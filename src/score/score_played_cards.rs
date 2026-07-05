@@ -54,7 +54,7 @@ pub fn score_played_cards(
             for joker in jokers {
                 let id = joker.id() as usize;
                 let def = crate::joker::core::JOKER_DEFS[id];
-                if def.trigger_time() == crate::joker::core::TriggerTime::CardScored {
+                if def.trigger_time() == crate::joker::core::ScoringTriggerTime::CardScored {
                     let card_score_fn = CARD_SCORE_FNS[id];
                     card_score_fn(joker, card, &mut chips, &mut mult).unwrap();
                 }
