@@ -21,7 +21,7 @@ mod tests {
     use super::*;
     use crate::card::core::{Rank, Suit, create_card};
     use crate::decks::Deck;
-    use crate::gamestate::create_game_state;
+    use crate::game::state::create_game_state;
     use crate::joker::Joker;
     use crate::score::core::get_score;
 

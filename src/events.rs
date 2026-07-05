@@ -2,7 +2,7 @@ use crate::blinds::Blind;
 use crate::card::Card;
 use crate::stakes::Stake;
 use crate::vouchers::{Voucher, has_voucher};
-use crate::{GameState, score};
+use crate::{game::state::GameState, score};
 
 pub fn cash_out(gs: &mut GameState) {
     let reward = match gs.next_blind {
@@ -52,7 +52,7 @@ mod tests {
     use super::*;
     use crate::blinds::Blind::Small;
     use crate::decks::Deck;
-    use crate::gamestate::create_game_state;
+    use crate::game::state::create_game_state;
 
     #[test]
     fn test_cash_out() {

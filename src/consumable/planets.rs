@@ -1,5 +1,5 @@
-use crate::GameState;
 use crate::consumable::core::Consumable;
+use crate::game::state::GameState;
 use strum_macros::Display;
 
 #[derive(Debug, Copy, Clone, PartialEq, Display)]
@@ -30,7 +30,7 @@ pub fn use_planet(game_state: &mut GameState, planet: Planet) {
 mod tests {
     use super::*;
     use crate::decks::Deck;
-    use crate::gamestate::create_game_state;
+    use crate::game::state::create_game_state;
 
     #[test]
     fn test_use_planet_increases_level() {

@@ -1,5 +1,5 @@
-use crate::GameState;
 use crate::card::Edition;
+use crate::game::state::GameState;
 use crate::joker::{JOKER_DEFS, JokerState};
 use crate::vouchers::{Voucher, has_voucher};
 use std::cmp::max;
@@ -69,7 +69,7 @@ pub fn get_joker_sell_value(j: &JokerState, gs: &GameState) -> u8 {
 mod tests {
     use crate::card::Edition;
     use crate::decks::Deck;
-    use crate::gamestate::create_game_state;
+    use crate::game::state::create_game_state;
     use crate::joker::{Joker, JokerState};
     use crate::tables::{get_joker_cost, get_joker_sell_value};
 

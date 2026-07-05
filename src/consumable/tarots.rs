@@ -1,8 +1,8 @@
-use crate::GameState;
 use crate::card::operations::get_card_rank;
 use crate::card::operations::{set_card_enhancement, set_card_rank, set_card_suit};
 use crate::card::{Card, Enhancement, Rank, Suit};
 use crate::consumable::core::Consumable;
+use crate::game::state::GameState;
 use strum_macros::Display;
 
 /// Represents tarot card. Importantly The order of the enums is the same as
@@ -220,12 +220,12 @@ pub fn use_judgement(deck: &mut [Card], indices: &[usize]) -> Result<(), String>
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::GameState;
-    use crate::card::core::create_card;
-    use crate::card::operations::{get_card_enhancement, get_card_rank, get_card_suit};
-    use crate::decks::Deck;
-    use crate::gamestate::create_game_state;
+    // use super::*;
+    // use crate::GameState;
+    // use crate::card::core::create_card;
+    // use crate::card::operations::{get_card_enhancement, get_card_rank, get_card_suit};
+    // use crate::decks::Deck;
+    // use crate::gamestate::create_game_state;
 
     /*
     fn dummy_game_state(deck: Vec<Card>) -> GameState {
