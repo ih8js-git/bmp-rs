@@ -5,6 +5,7 @@ mod card;
 mod consumable;
 mod decks;
 mod events;
+mod gameaction;
 mod gamedelta;
 mod gamestate;
 mod helper;

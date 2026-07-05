@@ -5,6 +5,8 @@ use crate::consumable::{
     create_tarot_consumable,
 };
 use crate::decks::{Deck, create_abandoned_deck, create_checkered_deck, create_default_deck};
+use crate::gameaction::GameAction;
+use crate::gamedelta::GameDelta;
 use crate::joker::JokerState;
 use crate::rng::core::{PrecomputedRngQueue, create_generator};
 use crate::rng::queues::{RNGQueueType, create_all_rng_queues};
@@ -12,71 +14,6 @@ use crate::stakes::Stake;
 use crate::{Voucher, add_voucher};
 use smallvec::SmallVec;
 use strum::EnumCount;
-
-pub enum GameAction {
-    // Global
-    MoveJoker {
-        from_idx: u8,
-        to_idx: u8,
-    },
-    SellJoker {
-        idx: u8,
-    },
-    SellConsumable {
-        idx: u16,
-    },
-    UseSimpleConsumable {
-        idx: u16,
-    },
-    UseConsumableWithTargets {
-        idx: u16,
-        amount: u8,
-        cards: [u16; 3],
-    },
-
-    // Blind Select
-    SkipBlind,
-    PlayBlind,
-
-    // In blind
-    PlayHand {
-        card_indices: [u16; 5],
-        amount: u8,
-    },
-    DiscardHand {
-        card_indices: [u16; 5],
-        amount: u8,
-    },
-    MoveCard {
-        from_idx: u16,
-        to_idx: u16,
-    },
-
-    // Cashout
-    Cashout,
-
-    // Shop
-    BuyVoucher {
-        idx: u8,
-    },
-    BuyBoosterPack {
-        idx: u8,
-    },
-    BuyFromShop {
-        idx: u8,
-    },
-    BuyAndUse {
-        idx: u8,
-    },
-    Reroll,
-    GoNext,
-
-    // In Booster Pack
-    SkipPack,
-    SelectFromPack {
-        idx: u8,
-    },
-}
 
 #[derive(Debug)]
 pub struct GameState {
@@ -125,6 +62,22 @@ pub struct GameState {
     // RNG
     pub rng_queues: [PrecomputedRngQueue; RNGQueueType::COUNT],
     pub rng_next_queue_indices: [u32; RNGQueueType::COUNT],
+}
+
+impl GameState {
+    pub fn apply_action(&mut self, action: GameAction) {
+        for delta in action.to_deltas(self) {
+            self.apply_delta(delta);
+        }
+    }
+
+    fn apply_delta(&mut self, delta: &GameDelta) {
+        delta.apply(self);
+    }
+
+    fn revert_delta(&mut self, delta: &GameDelta) {
+        delta.revert(self);
+    }
 }
 
 fn init_deck(deck_fn: fn() -> Vec<Card>) -> (SmallVec<[Card; 104]>, SmallVec<[u16; 104]>, u8) {
