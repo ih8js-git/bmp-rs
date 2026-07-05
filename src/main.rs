@@ -5,7 +5,8 @@ mod card;
 mod consumable;
 mod decks;
 mod events;
-mod game;
+mod gamedelta;
+mod gamestate;
 mod helper;
 mod joker;
 mod levels;
@@ -17,7 +18,7 @@ mod vouchers;
 
 use decks::*;
 use events::*;
-use game::*;
+use gamestate::*;
 use rng::placeholder::util::shuffle_deck_before_blind;
 use smallvec::SmallVec;
 use std::{io, process::exit};
@@ -91,13 +92,13 @@ fn main() {
         println!();
 
         //play_hand(&mut gs);
-        println!("Hands used {}", gs.hands_used);
+        println!("Hands remaining {}", gs.hands_remaining);
         println!("Score {}", gs.current_score);
         println!("Balance: {}", gs.balance);
         println!("Cashing out");
         //cash_out(&mut gs);
         println!("Balance: {}", gs.balance);
-        if gs.hands_used == gs.hands {
+        if gs.hands_remaining == 0 {
             println!("You Lose! You ran out of hands and couldn't reach the required score");
             exit(1)
         }

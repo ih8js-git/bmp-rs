@@ -69,7 +69,7 @@ pub fn get_joker_sell_value(j: &JokerState, gs: &GameState) -> u8 {
 mod tests {
     use crate::card::Edition;
     use crate::decks::Deck;
-    use crate::game::create_game_state;
+    use crate::gamestate::create_game_state;
     use crate::joker::{Joker, JokerState};
     use crate::tables::{get_joker_cost, get_joker_sell_value};
 

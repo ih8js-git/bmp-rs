@@ -108,10 +108,10 @@ pub struct GameState {
     pub ante: u8,
 
     // In blind
-    pub hands: u8,
-    pub hands_used: u8,
-    pub discards: u8,
-    pub discards_used: u8,
+    pub base_hands: u8,
+    pub hands_remaining: u8,
+    pub base_discards: u8,
+    pub discards_remaining: u8,
     pub required_score: f64,
     pub current_score: f64,
 
@@ -164,10 +164,10 @@ pub fn create_game_state(deck: Deck) -> GameState {
         vouchers: 0,
         next_blind: Blind::Small,
         ante: 0,
-        hands: 4,
-        hands_used: 0,
-        discards: 3,
-        discards_used: 0,
+        base_hands: 4,
+        hands_remaining: 0,
+        base_discards: 3,
+        discards_remaining: 0,
         required_score: 0.0,
         current_score: 0.0,
         base_reroll_cost: 5,
@@ -179,11 +179,11 @@ pub fn create_game_state(deck: Deck) -> GameState {
 
     match deck {
         Deck::Red => GameState {
-            discards: base.discards + 1,
+            base_discards: base.base_discards + 1,
             ..base
         },
         Deck::Blue => GameState {
-            hands: base.hands + 1,
+            base_hands: base.base_hands + 1,
             ..base
         },
         Deck::Yellow => GameState {
@@ -192,7 +192,7 @@ pub fn create_game_state(deck: Deck) -> GameState {
         },
         Deck::Black => GameState {
             joker_slots: base.joker_slots + 1,
-            hands: base.hands - 1,
+            base_hands: base.base_hands - 1,
             ..base
         },
         Deck::Magic => {

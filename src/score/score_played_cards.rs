@@ -71,7 +71,7 @@ mod tests {
     use crate::card::core::{Rank, Suit, create_card};
     use crate::card::operations::{set_card_edition, set_card_enhancement, set_card_seal};
     use crate::decks::Deck;
-    use crate::game::create_game_state;
+    use crate::gamestate::create_game_state;
     use crate::score::core::get_score;
 
     fn setup_card(enhancement: Enhancement, edition: Edition, seal: Seal) -> Card {

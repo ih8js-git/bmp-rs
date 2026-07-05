@@ -71,7 +71,7 @@ mod tests {
     use super::*;
     use crate::Voucher;
     use crate::consumable::{Spectral, Tarot, create_spectral_consumable, create_tarot_consumable};
-    use crate::game::create_game_state;
+    use crate::gamestate::create_game_state;
     use crate::has_voucher;
 
     #[test]
@@ -79,8 +79,8 @@ mod tests {
         // Erratic deck falls back to the base case
         let state = create_game_state(Deck::Plasma);
         assert_eq!(state.cards.len(), 52);
-        assert_eq!(state.discards, 3);
-        assert_eq!(state.hands, 4);
+        assert_eq!(state.base_discards, 3);
+        assert_eq!(state.base_hands, 4);
         assert_eq!(state.balance, 4);
         assert_eq!(state.joker_slots, 5);
         assert_eq!(state.consumable_slots, 2);
@@ -92,15 +92,15 @@ mod tests {
     #[test]
     fn test_red_deck() {
         let state = create_game_state(Deck::Red);
-        assert_eq!(state.discards, 4); // base 3 + 1
-        assert_eq!(state.hands, 4);
+        assert_eq!(state.base_discards, 4); // base 3 + 1
+        assert_eq!(state.base_hands, 4);
     }
 
     #[test]
     fn test_blue_deck() {
         let state = create_game_state(Deck::Blue);
-        assert_eq!(state.hands, 5); // base 4 + 1
-        assert_eq!(state.discards, 3);
+        assert_eq!(state.base_hands, 5); // base 4 + 1
+        assert_eq!(state.base_discards, 3);
     }
 
     #[test]
@@ -113,7 +113,7 @@ mod tests {
     fn test_black_deck() {
         let state = create_game_state(Deck::Black);
         assert_eq!(state.joker_slots, 6); // base 5 + 1
-        assert_eq!(state.hands, 3); // base 4 - 1
+        assert_eq!(state.base_hands, 3); // base 4 - 1
     }
 
     #[test]
