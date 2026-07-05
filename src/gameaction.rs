@@ -67,7 +67,7 @@ pub enum GameAction {
 }
 
 impl GameAction {
-    pub fn to_deltas(&self, gs: GameState) -> Vec<&GameDelta> {
+    pub fn to_deltas(&self, gs: &GameState) -> Vec<&GameDelta> {
         match self {
             GameAction::MoveJoker { .. } => Vec::new(),
             GameAction::SellJoker { .. } => Vec::new(),

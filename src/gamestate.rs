@@ -65,13 +65,17 @@ pub struct GameState {
 }
 
 impl GameState {
-    pub fn apply_action(&mut self, action: GameAction) {}
+    pub fn apply_action(&mut self, action: GameAction) {
+        for delta in action.to_deltas(self) {
+            self.apply_delta(delta);
+        }
+    }
 
-    fn apply_delta(&mut self, delta: GameDelta) {
+    fn apply_delta(&mut self, delta: &GameDelta) {
         delta.apply(self);
     }
 
-    fn revert_delta(&mut self, delta: GameDelta) {
+    fn revert_delta(&mut self, delta: &GameDelta) {
         delta.revert(self);
     }
 }
