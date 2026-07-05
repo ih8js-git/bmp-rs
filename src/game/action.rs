@@ -1,3 +1,4 @@
+use crate::consumable::simple_consumable_action_to_deltas;
 use crate::game::delta::GameDelta;
 use crate::game::state::GameState;
 
@@ -67,12 +68,12 @@ pub enum GameAction {
 }
 
 impl GameAction {
-    pub fn to_deltas(&self, gs: &GameState) -> Vec<&GameDelta> {
+    pub fn to_deltas(self, gs: &GameState) -> Vec<GameDelta> {
         match self {
             GameAction::MoveJoker { .. } => Vec::new(),
             GameAction::SellJoker { .. } => Vec::new(),
             GameAction::SellConsumable { .. } => Vec::new(),
-            GameAction::UseSimpleConsumable { .. } => Vec::new(),
+            GameAction::UseSimpleConsumable { idx } => simple_consumable_action_to_deltas(idx, gs),
             GameAction::UseConsumableWithTargets { .. } => Vec::new(),
             GameAction::SkipBlind => Vec::new(),
             GameAction::PlayBlind => Vec::new(),
