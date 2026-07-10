@@ -18,7 +18,7 @@ pub fn score_jokers(jokers: &[JokerState], hand: Hand, chips: &mut f64, mult: &m
         let id = joker.id() as usize;
         let def = crate::joker::core::JOKER_DEFS[id];
 
-        if def.trigger_time() == crate::joker::core::ScoringTriggerTime::PostHand {
+        if def.trigger_time == crate::joker::core::ScoringTriggerTime::PostHand {
             let score_fn = SCORE_FNS[id];
             score_fn(joker, hand, chips, mult).unwrap();
         }
