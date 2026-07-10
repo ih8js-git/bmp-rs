@@ -3,7 +3,10 @@ use crate::card::Card;
 use crate::stakes::Stake;
 use crate::vouchers::{Voucher, has_voucher};
 use crate::{game::state::GameState, score};
+use strum_macros::EnumCount;
 
+#[derive(EnumCount, PartialEq, Debug, Clone, Copy)]
+#[repr(u8)]
 pub enum JokerUpdateEvent {
     HandPlayed,
     Discard,
