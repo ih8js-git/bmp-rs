@@ -1,16 +1,11 @@
+use crate::events::EventTriggerToDelta;
 use crate::game::delta::GameDelta;
 use crate::joker::Joker;
 
-pub type PlanetUsedJokerUpdate = fn(idx: u8) -> GameDelta;
-
-fn default_fn(_joker_idx: u8) -> GameDelta {
-    GameDelta::Null
-}
-
-pub const PLANET_USED_FNS: [PlanetUsedJokerUpdate; 150] = {
-    let mut fns: [PlanetUsedJokerUpdate; 150] = [default_fn; 150];
-    fns[Joker::Constellation as usize] = |joker_idx| GameDelta::UpdateJokerScaling {
-        idx: joker_idx,
+pub const PLANET_USED_FNS: [EventTriggerToDelta; 150] = {
+    let mut fns: [EventTriggerToDelta; 150] = [|_, _| GameDelta::Null; 150];
+    fns[Joker::Constellation as usize] = |joker_idx, _| GameDelta::UpdateJokerScaling {
+        idx: joker_idx as u8,
         diff: 1,
     };
     fns

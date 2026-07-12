@@ -1,4 +1,6 @@
 use crate::consumable::core::Consumable;
+use crate::events::{JokerUpdateEvent, event_to_bitmask, notify_jokers};
+use crate::game::action::GameAction;
 use crate::game::delta::GameDelta;
 use crate::game::state::GameState;
 use strum_macros::Display;
@@ -23,9 +25,13 @@ pub enum Planet {
 pub fn use_planet_to_deltas(p: Planet, game_state: &GameState) -> Vec<GameDelta> {
     let mut res = Vec::new();
 
+    // Update levels
     res.push(GameDelta::Planet { planet: p, diff: 1 });
 
-    // TODO constellation logic
+    // notify listening jokers
+    if game_state.joker_event_listener_amount[Us as usize] > 0 {
+        notify_jokers(&mut res, GameAction::UsePlanet, game_state);
+    }
 
     res
 }
