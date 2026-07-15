@@ -3,7 +3,7 @@ use strum::{EnumCount, IntoEnumIterator};
 use strum_macros::{Display, EnumCount, EnumIter};
 
 type Q = PrecomputedRngQueue;
-#[derive(Clone, Copy, EnumIter, EnumCount, Display)]
+#[derive(Clone, Copy, EnumIter, EnumCount, Display, Debug)]
 #[repr(u8)]
 pub enum RNGQueueType {
     // Deck
