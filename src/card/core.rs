@@ -11,7 +11,7 @@ use strum_macros::{EnumCount, EnumIter, FromRepr};
  */
 
 #[bitfield]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Flags {
     played_this_ante: bool,
     destroyed: bool,
@@ -19,7 +19,7 @@ pub struct Flags {
     __: B6,
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Card {
     pub meta: u16,
     pub chips: u16,

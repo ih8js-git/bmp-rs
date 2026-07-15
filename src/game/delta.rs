@@ -6,6 +6,7 @@ use crate::levels::Hand;
 use crate::rng::queues::RNGQueueType;
 use crate::vouchers::Voucher;
 
+#[derive(Debug)]
 pub enum GameDelta {
     Null, // nothing happens, used for placeholders
     EctoUsed,
@@ -178,5 +179,77 @@ impl GameDelta {
             GameDelta::CurrentScore { .. } => {}
             GameDelta::Planet { .. } => {}
         }
+    }
+}
+
+#[cfg(test)]
+mod delta_tests {
+    use super::*;
+    use crate::decks::Deck;
+    use crate::game::state::create_game_state;
+
+    /// Applies a sequence of deltas step-by-step, taking snapshots of the state
+    /// at each step. It then reverts them in reverse order, validating that
+    /// every intermediate state matches the snapshot exactly, ultimately
+    /// returning the GameState to its absolute original form.
+    pub fn assert_deltas_are_perfectly_reversible(initial_state: &GameState, deltas: &[GameDelta])
+    where
+        GameState: Clone + PartialEq + std::fmt::Debug,
+    {
+        // 1. Accumulate snapshots as we apply each delta forward
+        let mut state_snapshots = Vec::with_capacity(deltas.len() + 1);
+        state_snapshots.push(initial_state.clone());
+
+        let mut current_state = initial_state.clone();
+
+        for (i, delta) in deltas.iter().enumerate() {
+            delta.apply(&mut current_state);
+            state_snapshots.push(current_state.clone());
+        }
+
+        // 2. Step backward and revert each delta, performing deep inspections
+        for i in (0..deltas.len()).rev() {
+            let delta = &deltas[i];
+
+            // Revert the delta applied at step i
+            delta.revert(&mut current_state);
+
+            // The state here must match the snapshot taken BEFORE applying step i
+            let expected_state = &state_snapshots[i];
+
+            assert_eq!(
+                &current_state,
+                expected_state,
+                "State mismatch during deep inspection! \n\
+                 Failed while reverting Delta #{idx} of {total}: {delta:?}\n\
+                 Expected State: {expected:#?}\n\
+                 Actual Reverted State: {actual:#?}",
+                idx = i + 1,
+                total = deltas.len(),
+                delta = delta,
+                expected = expected_state,
+                actual = &current_state
+            );
+        }
+
+        // Final verification: Ensure the state returned to absolute baseline
+        assert_eq!(
+            &current_state, initial_state,
+            "Final reverted state did not match the original initial state."
+        );
+    }
+
+    #[test]
+    fn test_complex_chain_of_deltas() {
+        let initial = create_game_state(Deck::Blue);
+
+        let scenario = vec![
+            GameDelta::Balance { diff: 15 },
+            GameDelta::BaseHands { diff: -1 },
+            GameDelta::Balance { diff: -5 },
+            GameDelta::RemainingHands { diff: 2 },
+        ];
+
+        assert_deltas_are_perfectly_reversible(&initial, &scenario);
     }
 }

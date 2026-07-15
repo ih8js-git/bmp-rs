@@ -3,7 +3,7 @@ use crate::game::delta::GameDelta;
 use crate::game::state::GameState;
 use strum_macros::EnumCount;
 
-#[derive(Debug, EnumCount)]
+#[derive(Debug, EnumCount, PartialEq)]
 pub enum GameAction {
     // Global
     MoveJoker {
@@ -71,7 +71,7 @@ pub enum GameAction {
 
 impl GameAction {
     #[inline(always)]
-    pub fn index(&self) -> usize {
+    pub const fn index(&self) -> usize {
         match self {
             GameAction::MoveJoker { .. } => 0,
             GameAction::SellJoker { .. } => 1,
