@@ -1,4 +1,4 @@
-use crate::events::JokerUpdateEvent;
+use crate::joker::fn_arrays::planet::PLANET_FN_IDX;
 use modular_bitfield::prelude::*;
 use strum_macros::Display;
 
@@ -24,7 +24,7 @@ pub enum ScoringTriggerTime {
 }
 
 #[bitfield]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct JokerState {
     pub id: B8,               // 8 bits for Joker ID Enum value
     pub edition: B3,          // 3 bits for Edition Enum value
@@ -44,7 +44,7 @@ pub struct JokerDef {
     pub rarity: Rarity,
     pub base_price: u8,
     pub trigger_time: ScoringTriggerTime,
-    pub update_events: &'static [JokerUpdateEvent],
+    pub subscribed_to_actions_mask: u64,
 }
 
 impl JokerDef {
@@ -56,7 +56,7 @@ impl JokerDef {
             rarity: Rarity::Common,
             base_price: 0,
             trigger_time: ScoringTriggerTime::Other,
-            update_events: &[],
+            subscribed_to_actions_mask: 0u64,
         }
     }
 }
@@ -71,7 +71,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 2,
         trigger_time: ScoringTriggerTime::PostHand,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::GreedyJoker as usize] = JokerDef {
@@ -81,7 +81,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 5,
         trigger_time: ScoringTriggerTime::CardScored,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::LustyJoker as usize] = JokerDef {
@@ -91,7 +91,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 5,
         trigger_time: ScoringTriggerTime::CardScored,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::WrathfulJoker as usize] = JokerDef {
@@ -101,7 +101,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 5,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::GluttonousJoker as usize] = JokerDef {
@@ -111,7 +111,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 5,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::JollyJoker as usize] = JokerDef {
@@ -121,7 +121,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 3,
         trigger_time: ScoringTriggerTime::PostHand,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::ZanyJoker as usize] = JokerDef {
@@ -131,7 +131,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::MadJoker as usize] = JokerDef {
@@ -141,7 +141,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::CrazyJoker as usize] = JokerDef {
@@ -151,7 +151,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::PostHand,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::DrollJoker as usize] = JokerDef {
@@ -161,7 +161,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::SlyJoker as usize] = JokerDef {
@@ -171,7 +171,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 3,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::WilyJoker as usize] = JokerDef {
@@ -181,7 +181,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::CleverJoker as usize] = JokerDef {
@@ -191,7 +191,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::DeviousJoker as usize] = JokerDef {
@@ -201,7 +201,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::PostHand,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::CraftyJoker as usize] = JokerDef {
@@ -211,7 +211,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::HalfJoker as usize] = JokerDef {
@@ -221,7 +221,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 5,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::JokerStencil as usize] = JokerDef {
@@ -231,7 +231,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 8,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::FourFingers as usize] = JokerDef {
@@ -241,7 +241,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 7,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Mime as usize] = JokerDef {
@@ -251,7 +251,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 5,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::CreditCard as usize] = JokerDef {
@@ -261,7 +261,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 1,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::CeremonialDagger as usize] = JokerDef {
@@ -271,7 +271,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Banner as usize] = JokerDef {
@@ -281,7 +281,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 5,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::MysticSummit as usize] = JokerDef {
@@ -291,7 +291,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 5,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::MarbleJoker as usize] = JokerDef {
@@ -301,7 +301,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::LoyaltyCard as usize] = JokerDef {
@@ -311,7 +311,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 5,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::_8Ball as usize] = JokerDef {
@@ -321,7 +321,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 5,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Misprint as usize] = JokerDef {
@@ -331,7 +331,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Dusk as usize] = JokerDef {
@@ -341,7 +341,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 5,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::RaisedFist as usize] = JokerDef {
@@ -351,7 +351,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 5,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::ChaosTheClown as usize] = JokerDef {
@@ -361,7 +361,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Fibonacci as usize] = JokerDef {
@@ -371,7 +371,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 8,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::SteelJoker as usize] = JokerDef {
@@ -381,7 +381,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 7,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::ScaryFace as usize] = JokerDef {
@@ -391,7 +391,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::AbstractJoker as usize] = JokerDef {
@@ -401,7 +401,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::DelayedGratification as usize] = JokerDef {
@@ -411,7 +411,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Hack as usize] = JokerDef {
@@ -421,7 +421,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Pareidolia as usize] = JokerDef {
@@ -431,7 +431,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 5,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::GrosMichel as usize] = JokerDef {
@@ -441,7 +441,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 5,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::EvenSteven as usize] = JokerDef {
@@ -451,7 +451,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::OddTodd as usize] = JokerDef {
@@ -461,7 +461,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Scholar as usize] = JokerDef {
@@ -471,7 +471,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::BusinessCard as usize] = JokerDef {
@@ -481,7 +481,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Supernova as usize] = JokerDef {
@@ -491,7 +491,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 5,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::RideTheBus as usize] = JokerDef {
@@ -501,7 +501,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::SpaceJoker as usize] = JokerDef {
@@ -511,7 +511,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 5,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Egg as usize] = JokerDef {
@@ -521,7 +521,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Burglar as usize] = JokerDef {
@@ -531,7 +531,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Blackboard as usize] = JokerDef {
@@ -541,7 +541,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Runner as usize] = JokerDef {
@@ -551,7 +551,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 5,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::IceCream as usize] = JokerDef {
@@ -561,7 +561,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 5,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Dna as usize] = JokerDef {
@@ -571,7 +571,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Rare,
         base_price: 8,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Splash as usize] = JokerDef {
@@ -581,7 +581,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 3,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::BlueJoker as usize] = JokerDef {
@@ -591,7 +591,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 5,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::SixthSense as usize] = JokerDef {
@@ -601,7 +601,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Constellation as usize] = JokerDef {
@@ -611,7 +611,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[JokerUpdateEvent::PlanetUsed],
+        subscribed_to_actions_mask: 1u64 << PLANET_FN_IDX,
     };
 
     defs[Joker::Hiker as usize] = JokerDef {
@@ -621,7 +621,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 5,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::FacelessJoker as usize] = JokerDef {
@@ -631,7 +631,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::GreenJoker as usize] = JokerDef {
@@ -641,7 +641,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Superposition as usize] = JokerDef {
@@ -651,7 +651,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::ToDoList as usize] = JokerDef {
@@ -661,7 +661,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Cavendish as usize] = JokerDef {
@@ -671,7 +671,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::CardSharp as usize] = JokerDef {
@@ -681,7 +681,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::RedCard as usize] = JokerDef {
@@ -691,7 +691,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 5,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Madness as usize] = JokerDef {
@@ -701,7 +701,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 7,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::SquareJoker as usize] = JokerDef {
@@ -711,7 +711,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Seance as usize] = JokerDef {
@@ -721,7 +721,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::RiffRaff as usize] = JokerDef {
@@ -731,7 +731,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Vampire as usize] = JokerDef {
@@ -741,7 +741,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 7,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Shortcut as usize] = JokerDef {
@@ -751,7 +751,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 7,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Hologram as usize] = JokerDef {
@@ -761,7 +761,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 7,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Vagabond as usize] = JokerDef {
@@ -771,7 +771,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Rare,
         base_price: 8,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Baron as usize] = JokerDef {
@@ -781,7 +781,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Rare,
         base_price: 8,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Cloud9 as usize] = JokerDef {
@@ -791,7 +791,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 7,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Rocket as usize] = JokerDef {
@@ -801,7 +801,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Obelisk as usize] = JokerDef {
@@ -811,7 +811,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Rare,
         base_price: 8,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::MidasMask as usize] = JokerDef {
@@ -821,7 +821,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 7,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Luchador as usize] = JokerDef {
@@ -831,7 +831,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 5,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Photograph as usize] = JokerDef {
@@ -841,7 +841,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 5,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::GiftCard as usize] = JokerDef {
@@ -851,7 +851,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::TurtleBean as usize] = JokerDef {
@@ -861,7 +861,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Erosion as usize] = JokerDef {
@@ -871,7 +871,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::ReservedParking as usize] = JokerDef {
@@ -881,7 +881,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::MailInRebate as usize] = JokerDef {
@@ -891,7 +891,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::ToTheMoon as usize] = JokerDef {
@@ -901,7 +901,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 5,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Hallucination as usize] = JokerDef {
@@ -911,7 +911,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::FortuneTeller as usize] = JokerDef {
@@ -921,7 +921,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Juggler as usize] = JokerDef {
@@ -931,7 +931,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Drunkard as usize] = JokerDef {
@@ -941,7 +941,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::StoneJoker as usize] = JokerDef {
@@ -951,7 +951,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::GoldenJoker as usize] = JokerDef {
@@ -961,7 +961,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::LuckyCat as usize] = JokerDef {
@@ -971,7 +971,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::BaseballCard as usize] = JokerDef {
@@ -981,7 +981,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Rare,
         base_price: 8,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Bull as usize] = JokerDef {
@@ -991,7 +991,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::DietCola as usize] = JokerDef {
@@ -1001,7 +1001,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::TradingCard as usize] = JokerDef {
@@ -1011,7 +1011,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::FlashCard as usize] = JokerDef {
@@ -1021,7 +1021,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 5,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Popcorn as usize] = JokerDef {
@@ -1031,7 +1031,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 5,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::SpareTrousers as usize] = JokerDef {
@@ -1041,7 +1041,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::AncientJoker as usize] = JokerDef {
@@ -1051,7 +1051,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Rare,
         base_price: 8,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Ramen as usize] = JokerDef {
@@ -1061,7 +1061,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::WalkieTalkie as usize] = JokerDef {
@@ -1071,7 +1071,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Seltzer as usize] = JokerDef {
@@ -1081,7 +1081,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Castle as usize] = JokerDef {
@@ -1091,7 +1091,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::SmileyFace as usize] = JokerDef {
@@ -1101,7 +1101,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Campfire as usize] = JokerDef {
@@ -1111,7 +1111,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Rare,
         base_price: 9,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::GoldenTicket as usize] = JokerDef {
@@ -1121,7 +1121,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 5,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::MrBones as usize] = JokerDef {
@@ -1131,7 +1131,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 5,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Acrobat as usize] = JokerDef {
@@ -1141,7 +1141,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::SockAndBuskin as usize] = JokerDef {
@@ -1151,7 +1151,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Swashbuckler as usize] = JokerDef {
@@ -1161,7 +1161,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Troubadour as usize] = JokerDef {
@@ -1171,7 +1171,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Certificate as usize] = JokerDef {
@@ -1181,7 +1181,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::SmearedJoker as usize] = JokerDef {
@@ -1191,7 +1191,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 7,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Throwback as usize] = JokerDef {
@@ -1201,7 +1201,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::HangingChad as usize] = JokerDef {
@@ -1211,7 +1211,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 4,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::RoughGem as usize] = JokerDef {
@@ -1221,7 +1221,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 7,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Bloodstone as usize] = JokerDef {
@@ -1231,7 +1231,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 7,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Arrowhead as usize] = JokerDef {
@@ -1241,7 +1241,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 7,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::OnyxAgate as usize] = JokerDef {
@@ -1251,7 +1251,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 7,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::GlassJoker as usize] = JokerDef {
@@ -1261,7 +1261,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Showman as usize] = JokerDef {
@@ -1271,7 +1271,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 5,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::FlowerPot as usize] = JokerDef {
@@ -1281,7 +1281,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Blueprint as usize] = JokerDef {
@@ -1291,7 +1291,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Rare,
         base_price: 10,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::WeeJoker as usize] = JokerDef {
@@ -1301,7 +1301,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Rare,
         base_price: 8,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::MerryAndy as usize] = JokerDef {
@@ -1311,7 +1311,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 7,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::OopsAll6s as usize] = JokerDef {
@@ -1321,7 +1321,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 4,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::TheIdol as usize] = JokerDef {
@@ -1331,7 +1331,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::SeeingDouble as usize] = JokerDef {
@@ -1341,7 +1341,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Matador as usize] = JokerDef {
@@ -1351,7 +1351,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 7,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::HitTheRoad as usize] = JokerDef {
@@ -1361,7 +1361,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Rare,
         base_price: 8,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::TheDuo as usize] = JokerDef {
@@ -1371,7 +1371,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Rare,
         base_price: 8,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::TheTrio as usize] = JokerDef {
@@ -1381,7 +1381,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Rare,
         base_price: 8,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::TheFamily as usize] = JokerDef {
@@ -1391,7 +1391,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Rare,
         base_price: 8,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::TheOrder as usize] = JokerDef {
@@ -1401,7 +1401,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Rare,
         base_price: 8,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::TheTribe as usize] = JokerDef {
@@ -1411,7 +1411,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Rare,
         base_price: 8,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Stuntman as usize] = JokerDef {
@@ -1421,7 +1421,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Rare,
         base_price: 7,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::InvisibleJoker as usize] = JokerDef {
@@ -1431,7 +1431,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Rare,
         base_price: 8,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Brainstorm as usize] = JokerDef {
@@ -1441,7 +1441,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Rare,
         base_price: 10,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Satellite as usize] = JokerDef {
@@ -1451,7 +1451,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::ShootTheMoon as usize] = JokerDef {
@@ -1461,7 +1461,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Common,
         base_price: 5,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::DriversLicense as usize] = JokerDef {
@@ -1471,7 +1471,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Rare,
         base_price: 7,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Cartomancer as usize] = JokerDef {
@@ -1481,7 +1481,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 6,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Astronomer as usize] = JokerDef {
@@ -1491,7 +1491,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 8,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::BurntJoker as usize] = JokerDef {
@@ -1501,7 +1501,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Rare,
         base_price: 8,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Bootstraps as usize] = JokerDef {
@@ -1511,7 +1511,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Uncommon,
         base_price: 7,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Canio as usize] = JokerDef {
@@ -1521,7 +1521,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Legendary,
         base_price: 20,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Triboulet as usize] = JokerDef {
@@ -1531,7 +1531,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Legendary,
         base_price: 20,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Yorick as usize] = JokerDef {
@@ -1541,7 +1541,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Legendary,
         base_price: 20,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Chicot as usize] = JokerDef {
@@ -1551,7 +1551,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Legendary,
         base_price: 20,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs[Joker::Perkeo as usize] = JokerDef {
@@ -1561,7 +1561,7 @@ pub const JOKER_DEFS: [JokerDef; 150] = {
         rarity: Rarity::Legendary,
         base_price: 20,
         trigger_time: ScoringTriggerTime::Other,
-        update_events: &[],
+        subscribed_to_actions_mask: 0u64,
     };
 
     defs
