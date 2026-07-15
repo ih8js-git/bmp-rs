@@ -5,7 +5,6 @@ use crate::consumable::{
     create_tarot_consumable,
 };
 use crate::decks::{Deck, create_abandoned_deck, create_checkered_deck, create_default_deck};
-use crate::events::JokerUpdateEvent;
 use crate::game::action::GameAction;
 use crate::game::delta::GameDelta;
 use crate::joker::JokerState;
@@ -16,10 +15,10 @@ use crate::{Voucher, add_voucher};
 use smallvec::SmallVec;
 use strum::EnumCount;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct GameState {
     // Interactive
-    pub balance: u32,
+    pub balance: i32,
 
     // Card related
     pub hand_size: u8,
@@ -34,7 +33,7 @@ pub struct GameState {
 
     // keeps track of how many joker care about each event.
     // updated when a joker is added/removed
-    pub joker_event_listener_amount: [u8; JokerUpdateEvent::COUNT],
+    pub action_subscribed_amount: [u8; GameAction::COUNT],
 
     // History
     pub last_used: Consumable,
@@ -114,7 +113,7 @@ pub fn create_game_state(deck: Deck) -> GameState {
         joker_slots: 5,
         consumables: Vec::with_capacity(2),
         consumable_slots: 2,
-        joker_event_listener_amount: [0; JokerUpdateEvent::COUNT],
+        action_subscribed_amount: [0; GameAction::COUNT],
         last_used: Consumable::Tarot(Tarot::Fool),
         tarots_used: 0,
         ecto_hand_size_reduction: 1,
