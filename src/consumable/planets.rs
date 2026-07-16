@@ -1,5 +1,9 @@
-use crate::GameState;
 use crate::consumable::core::Consumable;
+use crate::events::notify_jokers;
+use crate::game::action::GameAction;
+use crate::game::delta::GameDelta;
+use crate::game::state::GameState;
+use crate::joker::fn_arrays::planet::PLANET_FN_IDX;
 use strum_macros::Display;
 
 #[derive(Debug, Copy, Clone, PartialEq, Display)]
@@ -19,6 +23,20 @@ pub enum Planet {
     Eris,
 }
 
+pub fn use_planet_to_deltas(p: Planet, game_state: &GameState) -> Vec<GameDelta> {
+    let mut res = Vec::new();
+
+    // Update levels
+    res.push(GameDelta::Planet { planet: p, diff: 1 });
+
+    // notify listening jokers
+    if game_state.action_subscribed_amount[PLANET_FN_IDX] > 0 {
+        notify_jokers(&mut res, GameAction::UsePlanet { idx: 0 }, game_state); // planet location irrelivant
+    }
+
+    res
+}
+
 pub fn use_planet(game_state: &mut GameState, planet: Planet) {
     let index = planet as usize;
 
@@ -30,7 +48,7 @@ pub fn use_planet(game_state: &mut GameState, planet: Planet) {
 mod tests {
     use super::*;
     use crate::decks::Deck;
-    use crate::game::create_game_state;
+    use crate::game::state::create_game_state;
 
     #[test]
     fn test_use_planet_increases_level() {

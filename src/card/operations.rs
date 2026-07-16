@@ -1,4 +1,4 @@
-use crate::card::{Card, Edition, Enhancement, Rank, Seal, Suit};
+use crate::card::{Card, Edition, Enhancement, Flags, Rank, Seal, Suit};
 
 /*
  * |Rank|Suit|Edition|Enhancement|Seal|
@@ -68,7 +68,12 @@ mod tests {
 
     // Helper to create a clean card
     fn create_blank_card() -> Card {
-        Card { meta: 0, chips: 0 }
+        Card {
+            meta: 0,
+            chips: 0,
+            id: 0,
+            flags: Flags::new(),
+        }
     }
 
     #[test]

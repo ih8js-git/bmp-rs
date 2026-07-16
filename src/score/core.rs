@@ -1,13 +1,14 @@
-use crate::GameState;
 use crate::card::operations::{get_card_enhancement, get_card_rank, get_card_suit};
 use crate::card::{Card, Enhancement};
+use crate::game::state::GameState;
 use crate::joker::Joker;
+use crate::joker::fn_arrays::retrigger::RETRIGGER_FNS;
 use crate::levels::Hand;
 
 use crate::score::score_jokers::score_jokers;
 use crate::score::score_played_cards::score_played_cards;
 
-pub fn get_score(game_state: &mut GameState, cards_played: &mut [Card]) -> f64 {
+pub fn get_score(game_state: &mut GameState, cards_played: &[Card]) -> f64 {
     // 1. Score PreHand Stuff i.e. DNA, Midas Mask, etc.
 
     // 2. Determine the highest-ranking 5 card hand possible
@@ -17,7 +18,7 @@ pub fn get_score(game_state: &mut GameState, cards_played: &mut [Card]) -> f64 {
     // 3. Score the cards played i.e. lusty, dusk, etc.
     let current_level = game_state.planet_levels[hand_type as usize] as u16;
 
-    let [mut base_chips, mut base_mult] = score_played_cards(
+    let [mut chips, mut mult] = score_played_cards(
         cards_played,
         scoring_indices,
         hand_type,
@@ -28,14 +29,9 @@ pub fn get_score(game_state: &mut GameState, cards_played: &mut [Card]) -> f64 {
     // 4. Score the cards held in hand i.e. steel, baron, etc.
 
     // 5. Score the jokers, i.e. Jolly Joker, etc.
-    let [final_chips, final_mult] = score_jokers(
-        &game_state.jokers,
-        hand_type,
-        &mut base_chips,
-        &mut base_mult,
-    );
+    score_jokers(&game_state.jokers, hand_type, &mut chips, &mut mult);
 
-    final_chips * final_mult
+    chips * mult
 }
 
 use crate::joker::JokerState;
@@ -307,7 +303,7 @@ pub fn count_retrigger_jokers(card: &Card, jokers: &[JokerState]) -> usize {
 
     for joker in jokers {
         let id = joker.id() as usize;
-        let retrigger_fn = crate::score::jokers::RETRIGGER_FNS[id];
+        let retrigger_fn = RETRIGGER_FNS[id];
         // We have to pass both jokers, and joker, because
         // Sock needs to know if Pareidolia is active, as an example
         retriggers += retrigger_fn(card, jokers, joker);
@@ -779,7 +775,7 @@ mod tests {
     #[test]
     fn test_sock_and_buskin_retrigger_flush_five() {
         use crate::decks::Deck;
-        use crate::game::create_game_state;
+        use crate::game::state::create_game_state;
 
         let mut state = create_game_state(Deck::Red);
         let mut joker_state = JokerState::new();

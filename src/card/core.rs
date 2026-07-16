@@ -1,3 +1,7 @@
+use crate::card::operations;
+use modular_bitfield::prelude::*;
+use std::fmt;
+
 use strum_macros::{EnumCount, EnumIter, FromRepr};
 
 /*
@@ -6,13 +10,45 @@ use strum_macros::{EnumCount, EnumIter, FromRepr};
  * |4b  |2b  |3b     |4b         |3b  |
  */
 
-#[derive(Debug, Copy, Clone)]
+#[bitfield]
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub struct Flags {
+    played_this_ante: bool,
+    destroyed: bool,
+    #[skip]
+    __: B6,
+}
+
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Card {
     pub meta: u16,
     pub chips: u16,
+    pub id: u16,
+    pub flags: Flags,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, EnumIter, FromRepr)]
+impl fmt::Display for Card {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let enhancement = operations::get_card_enhancement(self);
+        let seal = operations::get_card_seal(self);
+        let edition = operations::get_card_edition(self);
+        let rank = operations::get_card_rank(self);
+        let suit = operations::get_card_suit(self);
+
+        if edition != Edition::None {
+            write!(f, "{edition} ")?;
+        }
+        if enhancement != Enhancement::None {
+            write!(f, "{enhancement} ")?;
+        }
+        if seal != Seal::None {
+            write!(f, "{seal} Seal ")?;
+        }
+        write!(f, "{rank} of {suit}")
+    }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, EnumIter, FromRepr, strum_macros::Display)]
 #[repr(u8)]
 pub enum Rank {
     Two,
@@ -30,7 +66,7 @@ pub enum Rank {
     Ace,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, EnumIter)]
+#[derive(Debug, Copy, Clone, PartialEq, EnumIter, strum_macros::Display)]
 #[repr(u8)]
 pub enum Suit {
     Spades,
@@ -39,7 +75,7 @@ pub enum Suit {
     Diamonds,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, EnumIter, EnumCount)]
+#[derive(Debug, Copy, Clone, PartialEq, EnumIter, EnumCount, strum_macros::Display)]
 #[repr(u8)]
 pub enum Edition {
     None,
@@ -63,7 +99,7 @@ impl Edition {
 
 /// Represents an enhancement on a card. Importantly The order of the enums is the same as
 /// the order of the tarots applying this enhancement, allowing for optimization.
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, strum_macros::Display)]
 #[repr(u8)]
 pub enum Enhancement {
     None,
@@ -77,7 +113,7 @@ pub enum Enhancement {
     Lucky,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, strum_macros::Display)]
 #[repr(u8)]
 pub enum Seal {
     None,
@@ -88,6 +124,10 @@ pub enum Seal {
 }
 
 pub fn create_card(rank: Rank, suit: Suit) -> Card {
+    create_card_with_id(rank, suit, 0)
+}
+
+pub fn create_card_with_id(rank: Rank, suit: Suit, id: u16) -> Card {
     let meta = (rank as u16) << 12
         | (suit as u16) << 10
         | (Edition::None as u16) << 7
@@ -110,5 +150,10 @@ pub fn create_card(rank: Rank, suit: Suit) -> Card {
         Rank::Ace => 11,
     };
 
-    Card { meta, chips }
+    Card {
+        meta,
+        chips,
+        id,
+        flags: Flags::new(),
+    }
 }

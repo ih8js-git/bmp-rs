@@ -1,0 +1,16 @@
+name: Discord PR Ping
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Discord
+        env:
+          WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          curl -H "Content-Type: application/json" \
+               -d '{"content": "@everyone A PR review was requested! 🚀\n'"${{ github.server_url }}/${{ github.repository }}/pull/${{ github.event.pull_request.number }}"'"}' \
+               $WEBHOOK_URL

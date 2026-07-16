@@ -2,6 +2,7 @@ use crate::card::core::{Card, Edition, Enhancement, Seal};
 use crate::card::operations::get_card_seal;
 use crate::card::{get_card_edition, get_card_enhancement};
 use crate::joker::JokerState;
+use crate::joker::fn_arrays::card_score::CARD_SCORE_FNS;
 use crate::levels::{Hand, hand_base_chips_and_mult};
 use crate::score::core::count_retrigger_jokers;
 
@@ -52,9 +53,9 @@ pub fn score_played_cards(
 
             for joker in jokers {
                 let id = joker.id() as usize;
-                let def = crate::joker::jokers::JOKER_DEFS[id];
-                if def.trigger_time() == crate::joker::jokers::TriggerTime::CardScored {
-                    let card_score_fn = crate::score::jokers::CARD_SCORE_FNS[id];
+                let def = crate::joker::core::JOKER_DEFS[id];
+                if def.trigger_time == crate::joker::core::ScoringTriggerTime::CardScored {
+                    let card_score_fn = CARD_SCORE_FNS[id];
                     card_score_fn(joker, card, &mut chips, &mut mult).unwrap();
                 }
             }
@@ -70,7 +71,7 @@ mod tests {
     use crate::card::core::{Rank, Suit, create_card};
     use crate::card::operations::{set_card_edition, set_card_enhancement, set_card_seal};
     use crate::decks::Deck;
-    use crate::game::create_game_state;
+    use crate::game::state::create_game_state;
     use crate::score::core::get_score;
 
     fn setup_card(enhancement: Enhancement, edition: Edition, seal: Seal) -> Card {

@@ -1,8 +1,8 @@
-use crate::card::core::create_card;
-use crate::card::{Card, Rank, Suit};
+use crate::card::{Card, Rank, Suit, create_card_with_id};
 use strum::IntoEnumIterator;
+use strum_macros::{EnumIter, EnumString};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, EnumString)]
 #[repr(u8)]
 pub enum Deck {
     Red,
@@ -24,9 +24,11 @@ pub enum Deck {
 
 pub fn create_default_deck() -> Vec<Card> {
     let mut cards: Vec<Card> = Vec::with_capacity(52);
+    let mut i = 0;
     for suit in Suit::iter() {
         for rank in Rank::iter() {
-            cards.push(create_card(rank, suit));
+            cards.push(create_card_with_id(rank, suit, i));
+            i += 1;
         }
     }
     return cards;
@@ -34,10 +36,12 @@ pub fn create_default_deck() -> Vec<Card> {
 
 pub fn create_abandoned_deck() -> Vec<Card> {
     let mut cards: Vec<Card> = Vec::with_capacity(52);
+    let mut i = 0;
     for suit in Suit::iter() {
         for rank in Rank::iter() {
             if rank != Rank::Jack && rank != Rank::Queen && rank != Rank::King {
-                cards.push(create_card(rank, suit));
+                cards.push(create_card_with_id(rank, suit, i));
+                i += 1;
             }
         }
     }
@@ -46,6 +50,7 @@ pub fn create_abandoned_deck() -> Vec<Card> {
 
 pub fn create_checkered_deck() -> Vec<Card> {
     let mut cards: Vec<Card> = Vec::with_capacity(52);
+    let mut i = 0;
     for suit in Suit::iter() {
         for rank in Rank::iter() {
             let mut current_suit = suit;
@@ -54,7 +59,8 @@ pub fn create_checkered_deck() -> Vec<Card> {
             } else if current_suit == Suit::Diamonds {
                 current_suit = Suit::Hearts;
             }
-            cards.push(create_card(rank, current_suit));
+            cards.push(create_card_with_id(rank, current_suit, i));
+            i += 1;
         }
     }
     return cards;
@@ -65,16 +71,16 @@ mod tests {
     use super::*;
     use crate::Voucher;
     use crate::consumable::{Spectral, Tarot, create_spectral_consumable, create_tarot_consumable};
-    use crate::game::create_game_state;
+    use crate::game::state::create_game_state;
     use crate::has_voucher;
 
     #[test]
     fn test_base_deck_properties() {
         // Erratic deck falls back to the base case
         let state = create_game_state(Deck::Plasma);
-        assert_eq!(state.deck.len(), 52);
-        assert_eq!(state.discards, 3);
-        assert_eq!(state.hands, 4);
+        assert_eq!(state.cards.len(), 52);
+        assert_eq!(state.base_discards, 3);
+        assert_eq!(state.base_hands, 4);
         assert_eq!(state.balance, 4);
         assert_eq!(state.joker_slots, 5);
         assert_eq!(state.consumable_slots, 2);
@@ -86,15 +92,15 @@ mod tests {
     #[test]
     fn test_red_deck() {
         let state = create_game_state(Deck::Red);
-        assert_eq!(state.discards, 4); // base 3 + 1
-        assert_eq!(state.hands, 4);
+        assert_eq!(state.base_discards, 4); // base 3 + 1
+        assert_eq!(state.base_hands, 4);
     }
 
     #[test]
     fn test_blue_deck() {
         let state = create_game_state(Deck::Blue);
-        assert_eq!(state.hands, 5); // base 4 + 1
-        assert_eq!(state.discards, 3);
+        assert_eq!(state.base_hands, 5); // base 4 + 1
+        assert_eq!(state.base_discards, 3);
     }
 
     #[test]
@@ -107,7 +113,7 @@ mod tests {
     fn test_black_deck() {
         let state = create_game_state(Deck::Black);
         assert_eq!(state.joker_slots, 6); // base 5 + 1
-        assert_eq!(state.hands, 3); // base 4 - 1
+        assert_eq!(state.base_hands, 3); // base 4 - 1
     }
 
     #[test]
@@ -139,9 +145,9 @@ mod tests {
     fn test_abandoned_deck() {
         use crate::card::Rank;
         let state = create_game_state(Deck::Abandoned);
-        assert_eq!(state.deck.len(), 40);
+        assert_eq!(state.cards.len(), 40);
 
-        let has_face_cards = state.deck.iter().any(|card| {
+        let has_face_cards = state.cards.iter().any(|card| {
             let rank = (card.meta >> 12) & 0xF;
             rank == Rank::Jack as u16 || rank == Rank::Queen as u16 || rank == Rank::King as u16
         });
@@ -152,11 +158,11 @@ mod tests {
     fn test_checkered_deck() {
         use crate::card::Suit;
         let state = create_game_state(Deck::Checkered);
-        assert_eq!(state.deck.len(), 52);
+        assert_eq!(state.cards.len(), 52);
 
         let mut spades = 0;
         let mut hearts = 0;
-        for card in state.deck.iter() {
+        for card in state.cards.iter() {
             let suit = (card.meta >> 10) & 0x3;
             if suit == Suit::Spades as u16 {
                 spades += 1;
