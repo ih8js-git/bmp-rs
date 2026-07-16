@@ -1,6 +1,9 @@
+use crate::consumable::simple_consumable_action_to_deltas;
 use crate::game::delta::GameDelta;
 use crate::game::state::GameState;
+use strum_macros::EnumCount;
 
+#[derive(Debug, EnumCount, PartialEq)]
 pub enum GameAction {
     // Global
     MoveJoker {
@@ -13,7 +16,7 @@ pub enum GameAction {
     SellConsumable {
         idx: u16,
     },
-    UseSimpleConsumable {
+    UsePlanet {
         idx: u16,
     },
     UseConsumableWithTargets {
@@ -67,12 +70,39 @@ pub enum GameAction {
 }
 
 impl GameAction {
-    pub fn to_deltas(&self, gs: &GameState) -> Vec<&GameDelta> {
+    #[inline(always)]
+    pub const fn index(&self) -> usize {
+        match self {
+            GameAction::MoveJoker { .. } => 0,
+            GameAction::SellJoker { .. } => 1,
+            GameAction::SellConsumable { .. } => 2,
+            GameAction::UsePlanet { .. } => 3,
+            GameAction::UseConsumableWithTargets { .. } => 4,
+            GameAction::SkipBlind => 5,
+            GameAction::PlayBlind => 6,
+            GameAction::PlayHand { .. } => 7,
+            GameAction::DiscardHand { .. } => 8,
+            GameAction::MoveCard { .. } => 9,
+            GameAction::Cashout => 10,
+            GameAction::BuyVoucher { .. } => 11,
+            GameAction::BuyBoosterPack { .. } => 12,
+            GameAction::BuyFromShop { .. } => 13,
+            GameAction::BuyAndUse { .. } => 14,
+            GameAction::Reroll => 15,
+            GameAction::GoNext => 16,
+            GameAction::SkipPack => 17,
+            GameAction::SelectFromPack { .. } => 18,
+        }
+    }
+}
+
+impl GameAction {
+    pub fn to_deltas(self, gs: &GameState) -> Vec<GameDelta> {
         match self {
             GameAction::MoveJoker { .. } => Vec::new(),
             GameAction::SellJoker { .. } => Vec::new(),
             GameAction::SellConsumable { .. } => Vec::new(),
-            GameAction::UseSimpleConsumable { .. } => Vec::new(),
+            GameAction::UsePlanet { idx } => simple_consumable_action_to_deltas(idx, gs),
             GameAction::UseConsumableWithTargets { .. } => Vec::new(),
             GameAction::SkipBlind => Vec::new(),
             GameAction::PlayBlind => Vec::new(),

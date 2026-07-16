@@ -19,7 +19,7 @@ pub fn init_joker_base_cost_table() {
         let mut temp_tables =
             [[[0u8; Edition::COUNT]; DISCOUNT_VOUCHER_MULTIPLIER.len()]; JOKER_AMOUNT];
 
-        for (joker, base_cost) in JOKER_DEFS.iter().map(|def| def.base_price()).enumerate() {
+        for (joker, base_cost) in JOKER_DEFS.iter().map(|def| def.base_price).enumerate() {
             for (discount_index, discount_multiplier) in
                 DISCOUNT_VOUCHER_MULTIPLIER.iter().enumerate()
             {

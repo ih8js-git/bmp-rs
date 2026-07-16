@@ -1,3 +1,4 @@
+use crate::joker::fn_arrays::planet::PLANET_FN_IDX;
 use modular_bitfield::prelude::*;
 use strum_macros::Display;
 
@@ -14,7 +15,7 @@ pub enum Rarity {
 #[bits = 3]
 // TODO: update this later with other values like Shop
 // right now I need this for scoring logic
-pub enum TriggerTime {
+pub enum ScoringTriggerTime {
     PreHand = 0,
     CardScored = 1,
     CardHeld = 2,
@@ -22,24 +23,8 @@ pub enum TriggerTime {
     Other = 4,
 }
 
-// TODO: This doesn't really store what the joker actually *does*
-// but I'm unsure of how to store that information right now,
-// but given that we have 22 bits left over, we should have plenty of room
 #[bitfield]
-#[derive(Debug, Copy, Clone)]
-pub struct JokerDef {
-    pub blueprint_compat: bool,
-    pub perishable_compat: bool,
-    pub eternal_compat: bool,
-    pub rarity: Rarity,
-    pub base_price: B5,
-    pub trigger_time: TriggerTime,
-    #[skip]
-    __: B19,
-}
-
-#[bitfield]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct JokerState {
     pub id: B8,               // 8 bits for Joker ID Enum value
     pub edition: B3,          // 3 bits for Edition Enum value
@@ -51,326 +36,1534 @@ pub struct JokerState {
     pub scale: B12,           // 12 bits for scale
 }
 
-/// A clean helper function to initialize JokerDef in a const context.
-const fn create_def(
-    blueprint: bool,
-    perishable: bool,
-    eternal: bool,
-    rarity: Rarity,
-    base_price: u8,
-    trigger_time: TriggerTime,
-) -> JokerDef {
-    let raw: u32 = (blueprint as u32)
-        | ((perishable as u32) << 1)
-        | ((eternal as u32) << 2)
-        | ((rarity as u32 & 0b11) << 3)
-        | ((base_price as u32 & 0b11111) << 5)
-        | ((trigger_time as u32 & 0b111) << 10);
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub struct JokerDef {
+    pub blueprint: bool,
+    pub perishable: bool,
+    pub eternal: bool,
+    pub rarity: Rarity,
+    pub base_price: u8,
+    pub trigger_time: ScoringTriggerTime,
+    pub subscribed_to_actions_mask: u64,
+}
 
-    // modular-bitfield maps bitfields directly to memory arrays
-    JokerDef::from_bytes(raw.to_le_bytes())
+impl JokerDef {
+    const fn new() -> Self {
+        JokerDef {
+            blueprint: false,
+            perishable: false,
+            eternal: false,
+            rarity: Rarity::Common,
+            base_price: 0,
+            trigger_time: ScoringTriggerTime::Other,
+            subscribed_to_actions_mask: 0u64,
+        }
+    }
 }
 
 pub const JOKER_DEFS: [JokerDef; 150] = {
     let mut defs = [JokerDef::new(); 150];
-    defs[Joker::Joker as usize] =
-        create_def(true, true, true, Rarity::Common, 2, TriggerTime::PostHand);
-    defs[Joker::GreedyJoker as usize] =
-        create_def(true, true, true, Rarity::Common, 5, TriggerTime::CardScored);
-    defs[Joker::LustyJoker as usize] =
-        create_def(true, true, true, Rarity::Common, 5, TriggerTime::CardScored);
-    defs[Joker::WrathfulJoker as usize] =
-        create_def(true, true, true, Rarity::Common, 5, TriggerTime::Other);
-    defs[Joker::GluttonousJoker as usize] =
-        create_def(true, true, true, Rarity::Common, 5, TriggerTime::Other);
-    defs[Joker::JollyJoker as usize] =
-        create_def(true, true, true, Rarity::Common, 3, TriggerTime::PostHand);
-    defs[Joker::ZanyJoker as usize] =
-        create_def(true, true, true, Rarity::Common, 4, TriggerTime::Other);
-    defs[Joker::MadJoker as usize] =
-        create_def(true, true, true, Rarity::Common, 4, TriggerTime::Other);
-    defs[Joker::CrazyJoker as usize] =
-        create_def(true, true, true, Rarity::Common, 4, TriggerTime::PostHand);
-    defs[Joker::DrollJoker as usize] =
-        create_def(true, true, true, Rarity::Common, 4, TriggerTime::Other);
-    defs[Joker::SlyJoker as usize] =
-        create_def(true, true, true, Rarity::Common, 3, TriggerTime::Other);
-    defs[Joker::WilyJoker as usize] =
-        create_def(true, true, true, Rarity::Common, 4, TriggerTime::Other);
-    defs[Joker::CleverJoker as usize] =
-        create_def(true, true, true, Rarity::Common, 4, TriggerTime::Other);
-    defs[Joker::DeviousJoker as usize] =
-        create_def(true, true, true, Rarity::Common, 4, TriggerTime::PostHand);
-    defs[Joker::CraftyJoker as usize] =
-        create_def(true, true, true, Rarity::Common, 4, TriggerTime::Other);
-    defs[Joker::HalfJoker as usize] =
-        create_def(true, true, true, Rarity::Common, 5, TriggerTime::Other);
-    defs[Joker::JokerStencil as usize] =
-        create_def(true, true, true, Rarity::Uncommon, 8, TriggerTime::Other);
-    defs[Joker::FourFingers as usize] =
-        create_def(false, true, true, Rarity::Uncommon, 7, TriggerTime::Other);
-    defs[Joker::Mime as usize] =
-        create_def(true, true, true, Rarity::Uncommon, 5, TriggerTime::Other);
-    defs[Joker::CreditCard as usize] =
-        create_def(false, true, true, Rarity::Common, 1, TriggerTime::Other);
-    defs[Joker::CeremonialDagger as usize] =
-        create_def(true, false, true, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::Banner as usize] =
-        create_def(true, true, true, Rarity::Common, 5, TriggerTime::Other);
-    defs[Joker::MysticSummit as usize] =
-        create_def(true, true, true, Rarity::Common, 5, TriggerTime::Other);
-    defs[Joker::MarbleJoker as usize] =
-        create_def(true, true, true, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::LoyaltyCard as usize] =
-        create_def(true, true, true, Rarity::Uncommon, 5, TriggerTime::Other);
-    defs[Joker::_8Ball as usize] =
-        create_def(true, true, true, Rarity::Common, 5, TriggerTime::Other);
-    defs[Joker::Misprint as usize] =
-        create_def(true, true, true, Rarity::Common, 4, TriggerTime::Other);
-    defs[Joker::Dusk as usize] =
-        create_def(true, true, true, Rarity::Uncommon, 5, TriggerTime::Other);
-    defs[Joker::RaisedFist as usize] =
-        create_def(true, true, true, Rarity::Common, 5, TriggerTime::Other);
-    defs[Joker::ChaosTheClown as usize] =
-        create_def(false, true, true, Rarity::Common, 4, TriggerTime::Other);
-    defs[Joker::Fibonacci as usize] =
-        create_def(true, true, true, Rarity::Uncommon, 8, TriggerTime::Other);
-    defs[Joker::SteelJoker as usize] =
-        create_def(true, true, true, Rarity::Uncommon, 7, TriggerTime::Other);
-    defs[Joker::ScaryFace as usize] =
-        create_def(true, true, true, Rarity::Common, 4, TriggerTime::Other);
-    defs[Joker::AbstractJoker as usize] =
-        create_def(true, true, true, Rarity::Common, 4, TriggerTime::Other);
-    defs[Joker::DelayedGratification as usize] =
-        create_def(false, true, true, Rarity::Common, 4, TriggerTime::Other);
-    defs[Joker::Hack as usize] =
-        create_def(true, true, true, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::Pareidolia as usize] =
-        create_def(false, true, true, Rarity::Uncommon, 5, TriggerTime::Other);
-    defs[Joker::GrosMichel as usize] =
-        create_def(true, true, false, Rarity::Common, 5, TriggerTime::Other);
-    defs[Joker::EvenSteven as usize] =
-        create_def(true, true, true, Rarity::Common, 4, TriggerTime::Other);
-    defs[Joker::OddTodd as usize] =
-        create_def(true, true, true, Rarity::Common, 4, TriggerTime::Other);
-    defs[Joker::Scholar as usize] =
-        create_def(true, true, true, Rarity::Common, 4, TriggerTime::Other);
-    defs[Joker::BusinessCard as usize] =
-        create_def(true, true, true, Rarity::Common, 4, TriggerTime::Other);
-    defs[Joker::Supernova as usize] =
-        create_def(true, true, true, Rarity::Common, 5, TriggerTime::Other);
-    defs[Joker::RideTheBus as usize] =
-        create_def(true, false, true, Rarity::Common, 6, TriggerTime::Other);
-    defs[Joker::SpaceJoker as usize] =
-        create_def(true, true, true, Rarity::Uncommon, 5, TriggerTime::Other);
-    defs[Joker::Egg as usize] =
-        create_def(false, true, true, Rarity::Common, 4, TriggerTime::Other);
-    defs[Joker::Burglar as usize] =
-        create_def(true, true, true, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::Blackboard as usize] =
-        create_def(true, true, true, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::Runner as usize] =
-        create_def(true, false, true, Rarity::Common, 5, TriggerTime::Other);
-    defs[Joker::IceCream as usize] =
-        create_def(true, true, false, Rarity::Common, 5, TriggerTime::Other);
-    defs[Joker::Dna as usize] = create_def(true, true, true, Rarity::Rare, 8, TriggerTime::Other);
-    defs[Joker::Splash as usize] =
-        create_def(false, true, true, Rarity::Common, 3, TriggerTime::Other);
-    defs[Joker::BlueJoker as usize] =
-        create_def(true, true, true, Rarity::Common, 5, TriggerTime::Other);
-    defs[Joker::SixthSense as usize] =
-        create_def(false, true, true, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::Constellation as usize] =
-        create_def(true, false, true, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::Hiker as usize] =
-        create_def(true, true, true, Rarity::Uncommon, 5, TriggerTime::Other);
-    defs[Joker::FacelessJoker as usize] =
-        create_def(true, true, true, Rarity::Common, 4, TriggerTime::Other);
-    defs[Joker::GreenJoker as usize] =
-        create_def(true, false, true, Rarity::Common, 4, TriggerTime::Other);
-    defs[Joker::Superposition as usize] =
-        create_def(true, true, true, Rarity::Common, 4, TriggerTime::Other);
-    defs[Joker::ToDoList as usize] =
-        create_def(true, true, true, Rarity::Common, 4, TriggerTime::Other);
-    defs[Joker::Cavendish as usize] =
-        create_def(true, true, false, Rarity::Common, 4, TriggerTime::Other);
-    defs[Joker::CardSharp as usize] =
-        create_def(true, true, true, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::RedCard as usize] =
-        create_def(true, false, true, Rarity::Common, 5, TriggerTime::Other);
-    defs[Joker::Madness as usize] =
-        create_def(true, false, true, Rarity::Uncommon, 7, TriggerTime::Other);
-    defs[Joker::SquareJoker as usize] =
-        create_def(true, false, true, Rarity::Common, 4, TriggerTime::Other);
-    defs[Joker::Seance as usize] =
-        create_def(true, true, true, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::RiffRaff as usize] =
-        create_def(true, true, true, Rarity::Common, 6, TriggerTime::Other);
-    defs[Joker::Vampire as usize] =
-        create_def(true, false, true, Rarity::Uncommon, 7, TriggerTime::Other);
-    defs[Joker::Shortcut as usize] =
-        create_def(false, true, true, Rarity::Uncommon, 7, TriggerTime::Other);
-    defs[Joker::Hologram as usize] =
-        create_def(true, false, true, Rarity::Uncommon, 7, TriggerTime::Other);
-    defs[Joker::Vagabond as usize] =
-        create_def(true, true, true, Rarity::Rare, 8, TriggerTime::Other);
-    defs[Joker::Baron as usize] = create_def(true, true, true, Rarity::Rare, 8, TriggerTime::Other);
-    defs[Joker::Cloud9 as usize] =
-        create_def(false, true, true, Rarity::Uncommon, 7, TriggerTime::Other);
-    defs[Joker::Rocket as usize] =
-        create_def(false, false, true, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::Obelisk as usize] =
-        create_def(true, false, true, Rarity::Rare, 8, TriggerTime::Other);
-    defs[Joker::MidasMask as usize] =
-        create_def(false, true, true, Rarity::Uncommon, 7, TriggerTime::Other);
-    defs[Joker::Luchador as usize] =
-        create_def(true, true, false, Rarity::Uncommon, 5, TriggerTime::Other);
-    defs[Joker::Photograph as usize] =
-        create_def(true, true, true, Rarity::Common, 5, TriggerTime::Other);
-    defs[Joker::GiftCard as usize] =
-        create_def(false, true, true, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::TurtleBean as usize] =
-        create_def(false, true, false, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::Erosion as usize] =
-        create_def(true, true, true, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::ReservedParking as usize] =
-        create_def(true, true, true, Rarity::Common, 6, TriggerTime::Other);
-    defs[Joker::MailInRebate as usize] =
-        create_def(true, true, true, Rarity::Common, 4, TriggerTime::Other);
-    defs[Joker::ToTheMoon as usize] =
-        create_def(false, true, true, Rarity::Uncommon, 5, TriggerTime::Other);
-    defs[Joker::Hallucination as usize] =
-        create_def(true, true, true, Rarity::Common, 4, TriggerTime::Other);
-    defs[Joker::FortuneTeller as usize] =
-        create_def(true, true, true, Rarity::Common, 6, TriggerTime::Other);
-    defs[Joker::Juggler as usize] =
-        create_def(false, true, true, Rarity::Common, 4, TriggerTime::Other);
-    defs[Joker::Drunkard as usize] =
-        create_def(false, true, true, Rarity::Common, 4, TriggerTime::Other);
-    defs[Joker::StoneJoker as usize] =
-        create_def(true, true, true, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::GoldenJoker as usize] =
-        create_def(false, true, true, Rarity::Common, 6, TriggerTime::Other);
-    defs[Joker::LuckyCat as usize] =
-        create_def(true, false, true, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::BaseballCard as usize] =
-        create_def(true, true, true, Rarity::Rare, 8, TriggerTime::Other);
-    defs[Joker::Bull as usize] =
-        create_def(true, true, true, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::DietCola as usize] =
-        create_def(true, true, false, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::TradingCard as usize] =
-        create_def(false, true, true, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::FlashCard as usize] =
-        create_def(true, false, true, Rarity::Uncommon, 5, TriggerTime::Other);
-    defs[Joker::Popcorn as usize] =
-        create_def(true, true, false, Rarity::Common, 5, TriggerTime::Other);
-    defs[Joker::SpareTrousers as usize] =
-        create_def(true, false, true, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::AncientJoker as usize] =
-        create_def(true, true, true, Rarity::Rare, 8, TriggerTime::Other);
-    defs[Joker::Ramen as usize] =
-        create_def(true, true, false, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::WalkieTalkie as usize] =
-        create_def(true, true, true, Rarity::Common, 4, TriggerTime::Other);
-    defs[Joker::Seltzer as usize] =
-        create_def(true, true, false, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::Castle as usize] =
-        create_def(true, false, true, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::SmileyFace as usize] =
-        create_def(true, true, true, Rarity::Common, 4, TriggerTime::Other);
-    defs[Joker::Campfire as usize] =
-        create_def(true, true, true, Rarity::Rare, 9, TriggerTime::Other);
-    defs[Joker::GoldenTicket as usize] =
-        create_def(true, true, true, Rarity::Common, 5, TriggerTime::Other);
-    defs[Joker::MrBones as usize] =
-        create_def(false, true, false, Rarity::Uncommon, 5, TriggerTime::Other);
-    defs[Joker::Acrobat as usize] =
-        create_def(true, true, true, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::SockAndBuskin as usize] =
-        create_def(true, true, true, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::Swashbuckler as usize] =
-        create_def(true, true, true, Rarity::Common, 4, TriggerTime::Other);
-    defs[Joker::Troubadour as usize] =
-        create_def(false, true, true, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::Certificate as usize] =
-        create_def(true, true, true, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::SmearedJoker as usize] =
-        create_def(false, true, true, Rarity::Uncommon, 7, TriggerTime::Other);
-    defs[Joker::Throwback as usize] =
-        create_def(true, true, true, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::HangingChad as usize] =
-        create_def(true, true, true, Rarity::Common, 4, TriggerTime::Other);
-    defs[Joker::RoughGem as usize] =
-        create_def(true, true, true, Rarity::Uncommon, 7, TriggerTime::Other);
-    defs[Joker::Bloodstone as usize] =
-        create_def(true, true, true, Rarity::Uncommon, 7, TriggerTime::Other);
-    defs[Joker::Arrowhead as usize] =
-        create_def(true, true, true, Rarity::Uncommon, 7, TriggerTime::Other);
-    defs[Joker::OnyxAgate as usize] =
-        create_def(true, true, true, Rarity::Uncommon, 7, TriggerTime::Other);
-    defs[Joker::GlassJoker as usize] =
-        create_def(true, false, true, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::Showman as usize] =
-        create_def(false, true, true, Rarity::Uncommon, 5, TriggerTime::Other);
-    defs[Joker::FlowerPot as usize] =
-        create_def(true, true, true, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::Blueprint as usize] =
-        create_def(true, true, true, Rarity::Rare, 10, TriggerTime::Other);
-    defs[Joker::WeeJoker as usize] =
-        create_def(true, false, true, Rarity::Rare, 8, TriggerTime::Other);
-    defs[Joker::MerryAndy as usize] =
-        create_def(false, true, true, Rarity::Uncommon, 7, TriggerTime::Other);
-    defs[Joker::OopsAll6s as usize] =
-        create_def(false, true, true, Rarity::Uncommon, 4, TriggerTime::Other);
-    defs[Joker::TheIdol as usize] =
-        create_def(true, true, true, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::SeeingDouble as usize] =
-        create_def(true, true, true, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::Matador as usize] =
-        create_def(true, true, true, Rarity::Uncommon, 7, TriggerTime::Other);
-    defs[Joker::HitTheRoad as usize] =
-        create_def(true, true, true, Rarity::Rare, 8, TriggerTime::Other);
-    defs[Joker::TheDuo as usize] =
-        create_def(true, true, true, Rarity::Rare, 8, TriggerTime::Other);
-    defs[Joker::TheTrio as usize] =
-        create_def(true, true, true, Rarity::Rare, 8, TriggerTime::Other);
-    defs[Joker::TheFamily as usize] =
-        create_def(true, true, true, Rarity::Rare, 8, TriggerTime::Other);
-    defs[Joker::TheOrder as usize] =
-        create_def(true, true, true, Rarity::Rare, 8, TriggerTime::Other);
-    defs[Joker::TheTribe as usize] =
-        create_def(true, true, true, Rarity::Rare, 8, TriggerTime::Other);
-    defs[Joker::Stuntman as usize] =
-        create_def(true, true, true, Rarity::Rare, 7, TriggerTime::Other);
-    defs[Joker::InvisibleJoker as usize] =
-        create_def(false, true, false, Rarity::Rare, 8, TriggerTime::Other);
-    defs[Joker::Brainstorm as usize] =
-        create_def(true, true, true, Rarity::Rare, 10, TriggerTime::Other);
-    defs[Joker::Satellite as usize] =
-        create_def(false, true, true, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::ShootTheMoon as usize] =
-        create_def(true, true, true, Rarity::Common, 5, TriggerTime::Other);
-    defs[Joker::DriversLicense as usize] =
-        create_def(true, true, true, Rarity::Rare, 7, TriggerTime::Other);
-    defs[Joker::Cartomancer as usize] =
-        create_def(true, true, true, Rarity::Uncommon, 6, TriggerTime::Other);
-    defs[Joker::Astronomer as usize] =
-        create_def(false, true, true, Rarity::Uncommon, 8, TriggerTime::Other);
-    defs[Joker::BurntJoker as usize] =
-        create_def(true, true, true, Rarity::Rare, 8, TriggerTime::Other);
-    defs[Joker::Bootstraps as usize] =
-        create_def(true, true, true, Rarity::Uncommon, 7, TriggerTime::Other);
-    defs[Joker::Canio as usize] =
-        create_def(true, true, true, Rarity::Legendary, 20, TriggerTime::Other);
-    defs[Joker::Triboulet as usize] =
-        create_def(true, true, true, Rarity::Legendary, 20, TriggerTime::Other);
-    defs[Joker::Yorick as usize] =
-        create_def(true, true, true, Rarity::Legendary, 20, TriggerTime::Other);
-    defs[Joker::Chicot as usize] =
-        create_def(false, true, true, Rarity::Legendary, 20, TriggerTime::Other);
-    defs[Joker::Perkeo as usize] =
-        create_def(true, true, true, Rarity::Legendary, 20, TriggerTime::Other);
+
+    defs[Joker::Joker as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 2,
+        trigger_time: ScoringTriggerTime::PostHand,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::GreedyJoker as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 5,
+        trigger_time: ScoringTriggerTime::CardScored,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::LustyJoker as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 5,
+        trigger_time: ScoringTriggerTime::CardScored,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::WrathfulJoker as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 5,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::GluttonousJoker as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 5,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::JollyJoker as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 3,
+        trigger_time: ScoringTriggerTime::PostHand,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::ZanyJoker as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::MadJoker as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::CrazyJoker as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::PostHand,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::DrollJoker as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::SlyJoker as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 3,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::WilyJoker as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::CleverJoker as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::DeviousJoker as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::PostHand,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::CraftyJoker as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::HalfJoker as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 5,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::JokerStencil as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 8,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::FourFingers as usize] = JokerDef {
+        blueprint: false,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 7,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Mime as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 5,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::CreditCard as usize] = JokerDef {
+        blueprint: false,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 1,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::CeremonialDagger as usize] = JokerDef {
+        blueprint: true,
+        perishable: false,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Banner as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 5,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::MysticSummit as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 5,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::MarbleJoker as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::LoyaltyCard as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 5,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::_8Ball as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 5,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Misprint as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Dusk as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 5,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::RaisedFist as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 5,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::ChaosTheClown as usize] = JokerDef {
+        blueprint: false,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Fibonacci as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 8,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::SteelJoker as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 7,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::ScaryFace as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::AbstractJoker as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::DelayedGratification as usize] = JokerDef {
+        blueprint: false,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Hack as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Pareidolia as usize] = JokerDef {
+        blueprint: false,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 5,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::GrosMichel as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: false,
+        rarity: Rarity::Common,
+        base_price: 5,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::EvenSteven as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::OddTodd as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Scholar as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::BusinessCard as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Supernova as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 5,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::RideTheBus as usize] = JokerDef {
+        blueprint: true,
+        perishable: false,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::SpaceJoker as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 5,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Egg as usize] = JokerDef {
+        blueprint: false,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Burglar as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Blackboard as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Runner as usize] = JokerDef {
+        blueprint: true,
+        perishable: false,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 5,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::IceCream as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: false,
+        rarity: Rarity::Common,
+        base_price: 5,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Dna as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Rare,
+        base_price: 8,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Splash as usize] = JokerDef {
+        blueprint: false,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 3,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::BlueJoker as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 5,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::SixthSense as usize] = JokerDef {
+        blueprint: false,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Constellation as usize] = JokerDef {
+        blueprint: true,
+        perishable: false,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 1u64 << PLANET_FN_IDX,
+    };
+
+    defs[Joker::Hiker as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 5,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::FacelessJoker as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::GreenJoker as usize] = JokerDef {
+        blueprint: true,
+        perishable: false,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Superposition as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::ToDoList as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Cavendish as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: false,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::CardSharp as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::RedCard as usize] = JokerDef {
+        blueprint: true,
+        perishable: false,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 5,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Madness as usize] = JokerDef {
+        blueprint: true,
+        perishable: false,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 7,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::SquareJoker as usize] = JokerDef {
+        blueprint: true,
+        perishable: false,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Seance as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::RiffRaff as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Vampire as usize] = JokerDef {
+        blueprint: true,
+        perishable: false,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 7,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Shortcut as usize] = JokerDef {
+        blueprint: false,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 7,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Hologram as usize] = JokerDef {
+        blueprint: true,
+        perishable: false,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 7,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Vagabond as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Rare,
+        base_price: 8,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Baron as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Rare,
+        base_price: 8,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Cloud9 as usize] = JokerDef {
+        blueprint: false,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 7,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Rocket as usize] = JokerDef {
+        blueprint: false,
+        perishable: false,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Obelisk as usize] = JokerDef {
+        blueprint: true,
+        perishable: false,
+        eternal: true,
+        rarity: Rarity::Rare,
+        base_price: 8,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::MidasMask as usize] = JokerDef {
+        blueprint: false,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 7,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Luchador as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: false,
+        rarity: Rarity::Uncommon,
+        base_price: 5,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Photograph as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 5,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::GiftCard as usize] = JokerDef {
+        blueprint: false,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::TurtleBean as usize] = JokerDef {
+        blueprint: false,
+        perishable: true,
+        eternal: false,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Erosion as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::ReservedParking as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::MailInRebate as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::ToTheMoon as usize] = JokerDef {
+        blueprint: false,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 5,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Hallucination as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::FortuneTeller as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Juggler as usize] = JokerDef {
+        blueprint: false,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Drunkard as usize] = JokerDef {
+        blueprint: false,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::StoneJoker as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::GoldenJoker as usize] = JokerDef {
+        blueprint: false,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::LuckyCat as usize] = JokerDef {
+        blueprint: true,
+        perishable: false,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::BaseballCard as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Rare,
+        base_price: 8,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Bull as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::DietCola as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: false,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::TradingCard as usize] = JokerDef {
+        blueprint: false,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::FlashCard as usize] = JokerDef {
+        blueprint: true,
+        perishable: false,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 5,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Popcorn as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: false,
+        rarity: Rarity::Common,
+        base_price: 5,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::SpareTrousers as usize] = JokerDef {
+        blueprint: true,
+        perishable: false,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::AncientJoker as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Rare,
+        base_price: 8,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Ramen as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: false,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::WalkieTalkie as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Seltzer as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: false,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Castle as usize] = JokerDef {
+        blueprint: true,
+        perishable: false,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::SmileyFace as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Campfire as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Rare,
+        base_price: 9,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::GoldenTicket as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 5,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::MrBones as usize] = JokerDef {
+        blueprint: false,
+        perishable: true,
+        eternal: false,
+        rarity: Rarity::Uncommon,
+        base_price: 5,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Acrobat as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::SockAndBuskin as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Swashbuckler as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Troubadour as usize] = JokerDef {
+        blueprint: false,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Certificate as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::SmearedJoker as usize] = JokerDef {
+        blueprint: false,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 7,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Throwback as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::HangingChad as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::RoughGem as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 7,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Bloodstone as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 7,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Arrowhead as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 7,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::OnyxAgate as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 7,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::GlassJoker as usize] = JokerDef {
+        blueprint: true,
+        perishable: false,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Showman as usize] = JokerDef {
+        blueprint: false,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 5,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::FlowerPot as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Blueprint as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Rare,
+        base_price: 10,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::WeeJoker as usize] = JokerDef {
+        blueprint: true,
+        perishable: false,
+        eternal: true,
+        rarity: Rarity::Rare,
+        base_price: 8,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::MerryAndy as usize] = JokerDef {
+        blueprint: false,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 7,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::OopsAll6s as usize] = JokerDef {
+        blueprint: false,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 4,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::TheIdol as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::SeeingDouble as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Matador as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 7,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::HitTheRoad as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Rare,
+        base_price: 8,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::TheDuo as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Rare,
+        base_price: 8,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::TheTrio as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Rare,
+        base_price: 8,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::TheFamily as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Rare,
+        base_price: 8,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::TheOrder as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Rare,
+        base_price: 8,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::TheTribe as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Rare,
+        base_price: 8,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Stuntman as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Rare,
+        base_price: 7,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::InvisibleJoker as usize] = JokerDef {
+        blueprint: false,
+        perishable: true,
+        eternal: false,
+        rarity: Rarity::Rare,
+        base_price: 8,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Brainstorm as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Rare,
+        base_price: 10,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Satellite as usize] = JokerDef {
+        blueprint: false,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::ShootTheMoon as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Common,
+        base_price: 5,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::DriversLicense as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Rare,
+        base_price: 7,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Cartomancer as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 6,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Astronomer as usize] = JokerDef {
+        blueprint: false,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 8,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::BurntJoker as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Rare,
+        base_price: 8,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Bootstraps as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Uncommon,
+        base_price: 7,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Canio as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Legendary,
+        base_price: 20,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Triboulet as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Legendary,
+        base_price: 20,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Yorick as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Legendary,
+        base_price: 20,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Chicot as usize] = JokerDef {
+        blueprint: false,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Legendary,
+        base_price: 20,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
+    defs[Joker::Perkeo as usize] = JokerDef {
+        blueprint: true,
+        perishable: true,
+        eternal: true,
+        rarity: Rarity::Legendary,
+        base_price: 20,
+        trigger_time: ScoringTriggerTime::Other,
+        subscribed_to_actions_mask: 0u64,
+    };
+
     defs
 };
 

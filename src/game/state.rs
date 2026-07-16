@@ -15,10 +15,10 @@ use crate::{Voucher, add_voucher};
 use smallvec::SmallVec;
 use strum::EnumCount;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct GameState {
     // Interactive
-    pub balance: u32,
+    pub balance: i32,
 
     // Card related
     pub hand_size: u8,
@@ -30,6 +30,10 @@ pub struct GameState {
     pub joker_slots: u8,
     pub consumables: Vec<ConsumableState>,
     pub consumable_slots: u8,
+
+    // keeps track of how many joker care about each event.
+    // updated when a joker is added/removed
+    pub action_subscribed_amount: [u8; GameAction::COUNT],
 
     // History
     pub last_used: Consumable,
@@ -66,7 +70,8 @@ pub struct GameState {
 
 impl GameState {
     pub fn apply_action(&mut self, action: GameAction) {
-        for delta in action.to_deltas(self) {
+        let deltas = action.to_deltas(self);
+        for delta in &deltas {
             self.apply_delta(delta);
         }
     }
@@ -108,6 +113,7 @@ pub fn create_game_state(deck: Deck) -> GameState {
         joker_slots: 5,
         consumables: Vec::with_capacity(2),
         consumable_slots: 2,
+        action_subscribed_amount: [0; GameAction::COUNT],
         last_used: Consumable::Tarot(Tarot::Fool),
         tarots_used: 0,
         ecto_hand_size_reduction: 1,
